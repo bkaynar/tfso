@@ -1,0 +1,576 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TFSO API",
+        "description": "API for TFSO application",
+        "contact": {
+            "name": "Burak",
+            "url": "https://burakkaynar.com",
+            "email": "burak@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/access-logs": {
+            "get": {
+                "tags": [
+                    "Access Logs"
+                ],
+                "summary": "Get access logs",
+                "description": "Retrieve a list of access logs with optional filters",
+                "operationId": "a753df21a67beb42c17d4bc7e621351c",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Filter by user ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "content_type",
+                        "in": "query",
+                        "description": "Filter by content type (e.g., 'Post', 'Comment')",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of access logs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AccessLog"
+                                            }
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 75
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The user id field is required."
+                                                    }
+                                                },
+                                                "content_type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The content type field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/categories/bulk": {
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Toplu kategori ekleme işlemi",
+                "operationId": "9942246c1bc0e16e765b2d45e0b9dcb5",
+                "requestBody": {
+                    "description": "Eklenmek istenen kategorilerin listesi",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "categories": {
+                                        "description": "Kategori objelerinin listesi",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "description": "Kategori adı",
+                                                    "type": "string",
+                                                    "example": "Pop Müzik"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Kategoriler başarıyla eklendi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kategoriler başarıyla eklendi."
+                                        },
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Doğrulama hatası",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doğrulama hatası"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "categories.0.name": [
+                                                    "The categories.0.name field is required."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Sunucu hatası",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kategoriler eklenirken bir hata oluştu."
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SQLSTATE[23000]: Integrity constraint violation..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/djs": {
+            "get": {
+                "tags": [
+                    "DJs"
+                ],
+                "summary": "Get all DJs",
+                "operationId": "5dc880d05a9254aa104d61a57a549747",
+                "responses": {
+                    "200": {
+                        "description": "A list of DJs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/djs/{id}": {
+            "get": {
+                "tags": [
+                    "DJs"
+                ],
+                "summary": "Get a specific DJ's details with recent sets and tracks",
+                "operationId": "140bd7a371f935db5cd37b764c3ba486",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the DJ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details of the specified DJ with recent sets and tracks",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "DJ Örnek"
+                                        },
+                                        "bio": {
+                                            "type": "string",
+                                            "example": "Enerjik setlerle dans pistini coşturuyorum!"
+                                        },
+                                        "profile_photo": {
+                                            "type": "string",
+                                            "example": "https://example.com/storage/users/photo.jpg"
+                                        },
+                                        "social_media": {
+                                            "properties": {
+                                                "instagram": {
+                                                    "type": "string",
+                                                    "example": "https://instagram.com/djornek"
+                                                },
+                                                "twitter": {
+                                                    "type": "string",
+                                                    "example": "https://twitter.com/dj_ornek"
+                                                },
+                                                "facebook": {
+                                                    "type": "string",
+                                                    "example": "https://facebook.com/djornek"
+                                                },
+                                                "tiktok": {
+                                                    "type": "string",
+                                                    "example": "https://tiktok.com/@djornek"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "sets": {
+                                            "description": "Last 3 sets of the DJ",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Summer Vibes Mix"
+                                                    },
+                                                    "cover_image": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/storage/sets/cover.jpg"
+                                                    },
+                                                    "audio_file": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/storage/sets/audio.mp3"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "tracks": {
+                                            "description": "Last 3 tracks of the DJ",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Epic Beat"
+                                                    },
+                                                    "audio_file": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/storage/tracks/audio.mp3"
+                                                    },
+                                                    "duration": {
+                                                        "type": "integer",
+                                                        "example": 180
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "DJ not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "DJ not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/sets": {
+            "get": {
+                "tags": [
+                    "Sets"
+                ],
+                "summary": "Get all sets",
+                "operationId": "34d6158535a7aed5c90a0c22bef7ae5d",
+                "responses": {
+                    "200": {
+                        "description": "A list of sets",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Set"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "title": "User",
+                "description": "Model representing a user in the system",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the user",
+                        "type": "integer",
+                        "format": "int64",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "description": "Name of the user",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "Email address of the user",
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "description": "Password for the user account",
+                        "type": "string",
+                        "format": "password"
+                    },
+                    "profile_photo": {
+                        "description": "URL of the user's profile photo",
+                        "type": "string"
+                    },
+                    "bio": {
+                        "description": "Short biography of the user",
+                        "type": "string"
+                    },
+                    "instagram": {
+                        "description": "Instagram handle of the user",
+                        "type": "string"
+                    },
+                    "twitter": {
+                        "description": "Twitter handle of the user",
+                        "type": "string"
+                    },
+                    "facebook": {
+                        "description": "Facebook profile URL of the user",
+                        "type": "string"
+                    },
+                    "tiktok": {
+                        "description": "TikTok handle of the user",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "AccessLog": {
+                "title": "AccessLog",
+                "description": "Erişim kayıtları modeli",
+                "properties": {
+                    "id": {
+                        "description": "Erişim kaydının benzersiz ID'si",
+                        "type": "integer",
+                        "format": "int64",
+                        "readOnly": true
+                    },
+                    "user_id": {
+                        "description": "Erişimi yapan kullanıcının ID'si",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "content_type": {
+                        "description": "Erişilen içeriğin türü (örn: 'Post', 'Comment')",
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "content_id": {
+                        "description": "Erişilen içeriğin ID'si",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "accessed_at": {
+                        "description": "Erişimin gerçekleştiği zaman damgası (ISO 8601 formatında)",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-10-27T10:00:00Z"
+                    },
+                    "created_at": {
+                        "description": "Kaydın oluşturulma zamanı",
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "description": "Kaydın son güncellenme zamanı",
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
+            "Set": {
+                "title": "Set",
+                "description": "Model representing a set of tracks",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the set",
+                        "type": "integer",
+                        "format": "int64",
+                        "readOnly": true
+                    },
+                    "user_id": {
+                        "description": "ID of the user who created the set",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Name of the set",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description of the set",
+                        "type": "string"
+                    },
+                    "cover_image": {
+                        "description": "URL of the cover image",
+                        "type": "string"
+                    },
+                    "audio_file": {
+                        "description": "Path to the audio file",
+                        "type": "string"
+                    },
+                    "is_premium": {
+                        "description": "Indicates if the set is premium",
+                        "type": "boolean"
+                    },
+                    "iap_product_id": {
+                        "description": "In-app purchase product ID for premium access",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp of the set",
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp of the set",
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Access Logs",
+            "description": "API Endpoints for managing access logs"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
+        {
+            "name": "DJs",
+            "description": "DJs"
+        },
+        {
+            "name": "Sets",
+            "description": "Sets"
+        }
+    ]
+}
