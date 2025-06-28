@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { PlusIcon, EyeIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { Radio } from 'lucide-vue-next'
@@ -9,12 +9,27 @@ const props = defineProps({
     tracks: Object
 });
 
+const page = usePage()
 const tracks = computed(() => props.tracks?.data ?? []);
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && userRoles.includes(role);
+};
+
+// Check if user can edit/delete a track
+const canEditTrack = (track: any) => {
+    if (hasRole('admin')) return true;
+    if (hasRole('dj') && track.user_id === page.props.auth.user?.id) return true;
+    return false;
+};
 
 const trackToDelete = ref<any>(null)
 const showDeleteModal = computed(() => trackToDelete.value !== null)
 
 const askDeleteTrack = (track: any) => {
+    if (!canEditTrack(track)) return;
     trackToDelete.value = track
 }
 
@@ -129,17 +144,22 @@ const cancelDeleteTrack = () => {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
+                                        <!-- View is always available -->
                                         <Link :href="route('tracks.edit', track.id)"
                                             class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
                                             title="View">
                                         <EyeIcon class="w-4 h-4" />
                                         </Link>
-                                        <Link :href="route('tracks.edit', track.id)"
+
+                                        <!-- Edit only if user can edit -->
+                                        <Link v-if="canEditTrack(track)" :href="route('tracks.edit', track.id)"
                                             class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 p-1 rounded-md hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors duration-200"
                                             title="Edit">
                                         <PencilIcon class="w-4 h-4" />
                                         </Link>
-                                        <button @click="askDeleteTrack(track)"
+
+                                        <!-- Delete only if user can edit -->
+                                        <button v-if="canEditTrack(track)" @click="askDeleteTrack(track)"
                                             class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                                             title="Delete">
                                             <TrashIcon class="w-4 h-4" />

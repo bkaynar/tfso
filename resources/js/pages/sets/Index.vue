@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, MusicalNoteIcon } from '@heroicons/vue/24/outline'
 
@@ -8,12 +8,33 @@ const props = defineProps({
     sets: Object
 });
 
+const page = usePage()
 const sets = computed(() => props.sets?.data ?? []);
+
+// Helper function to check if user has any of the specified roles
+const hasAnyRole = (roles: string[]) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && roles.some(role => userRoles.includes(role));
+};
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && userRoles.includes(role);
+};
+
+// Check if user can edit/delete a set
+const canEditSet = (set: any) => {
+    if (hasRole('admin')) return true;
+    if (hasRole('dj') && set.user_id === page.props.auth.user?.id) return true;
+    return false;
+};
 
 const setToDelete = ref<any>(null)
 const showDeleteModal = computed(() => setToDelete.value !== null)
 
 const askDeleteSet = (set: any) => {
+    if (!canEditSet(set)) return;
     setToDelete.value = set
 }
 
@@ -127,17 +148,22 @@ const cancelDeleteSet = () => {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
+                                        <!-- View is always available -->
                                         <Link :href="route('sets.edit', set.id)"
                                             class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
                                             title="View">
                                         <EyeIcon class="w-4 h-4" />
                                         </Link>
-                                        <Link :href="route('sets.edit', set.id)"
+
+                                        <!-- Edit only if user can edit -->
+                                        <Link v-if="canEditSet(set)" :href="route('sets.edit', set.id)"
                                             class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 p-1 rounded-md hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors duration-200"
                                             title="Edit">
                                         <PencilIcon class="w-4 h-4" />
                                         </Link>
-                                        <button @click="askDeleteSet(set)"
+
+                                        <!-- Delete only if user can edit -->
+                                        <button v-if="canEditSet(set)" @click="askDeleteSet(set)"
                                             class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                                             title="Delete">
                                             <TrashIcon class="w-4 h-4" />

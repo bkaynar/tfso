@@ -41,7 +41,7 @@
                     </div>
 
                     <!-- DJ Selection -->
-                    <div>
+                    <div v-if="!isDJOnly">
                         <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DJ
                             *</label>
                         <select v-model="form.user_id" id="user_id" required
@@ -50,6 +50,9 @@
                             <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
                         </select>
                     </div>
+
+                    <!-- Hidden input for DJ users -->
+                    <input v-if="isDJOnly" type="hidden" v-model="form.user_id" />
 
                     <!-- Description -->
                     <div>
@@ -178,8 +181,8 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
     set: {
@@ -195,6 +198,19 @@ const props = defineProps({
         default: () => []
     }
 })
+
+const page = usePage()
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && userRoles.includes(role);
+};
+
+// Check if current user is DJ (and not admin)
+const isDJOnly = computed(() => {
+    return hasRole('dj') && !hasRole('admin');
+});
 
 const form = ref({
     name: props.set.name || '',

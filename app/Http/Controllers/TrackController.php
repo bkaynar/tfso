@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class TrackController extends Controller
 {
@@ -16,9 +17,15 @@ class TrackController extends Controller
      */
     public function index()
     {
-        $tracks = Track::with(['user', 'category'])
-            ->latest()
-            ->paginate(10);
+        $query = Track::with(['user', 'category']);
+
+        // If user is DJ, only show their own tracks
+        $user = Auth::user();
+        if ($user && $user->hasRole('dj') && !$user->hasRole('admin')) {
+            $query->where('user_id', $user->id);
+        }
+
+        $tracks = $query->latest()->paginate(10);
 
         return Inertia::render('tracks/Index', [
             'tracks' => $tracks
@@ -31,7 +38,14 @@ class TrackController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $users = User::all();
+
+        // If user is DJ, only allow them to create tracks for themselves
+        $user = Auth::user();
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            $users = collect([$user]); // Only current user
+        } else {
+            $users = User::all(); // All users for admin
+        }
 
         return Inertia::render('tracks/Create', [
             'categories' => $categories,
@@ -58,6 +72,15 @@ class TrackController extends Controller
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
+
+        // Authorization check for DJ users
+        $user = Auth::user();
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            // DJ can only create tracks for themselves
+            if ($request->user_id != $user->id) {
+                abort(403, 'DJ users can only create tracks for themselves.');
+            }
+        }
 
         $data = $request->only(['title', 'description', 'category_id', 'user_id', 'duration', 'is_premium', 'iap_product_id']);
 
@@ -97,8 +120,20 @@ class TrackController extends Controller
      */
     public function edit(Track $track)
     {
+        // Authorization check
+        $user = Auth::user();
+        if (!$user->hasRole('admin') && (!$user->hasRole('dj') || $track->user_id !== $user->id)) {
+            abort(403, 'Unauthorized access to edit this track.');
+        }
+
         $categories = Category::all();
-        $users = User::all();
+
+        // If user is DJ, only allow them to select themselves
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            $users = collect([$user]); // Only current user
+        } else {
+            $users = User::all(); // All users for admin
+        }
 
         return Inertia::render('tracks/Edit', [
             'track' => $track,
@@ -112,6 +147,12 @@ class TrackController extends Controller
      */
     public function update(Request $request, Track $track)
     {
+        // Authorization check
+        $user = Auth::user();
+        if (!$user->hasRole('admin') && (!$user->hasRole('dj') || $track->user_id !== $user->id)) {
+            abort(403, 'Unauthorized access to update this track.');
+        }
+
         // Increase timeout for large file uploads
         set_time_limit(300); // 5 minutes
 
@@ -126,6 +167,14 @@ class TrackController extends Controller
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
+
+        // Additional authorization check for DJ users
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            // DJ can only update tracks for themselves
+            if ($request->user_id != $user->id) {
+                abort(403, 'DJ users can only update tracks for themselves.');
+            }
+        }
 
         $data = $request->only(['title', 'description', 'category_id', 'user_id', 'duration', 'is_premium', 'iap_product_id']);
 
@@ -163,6 +212,12 @@ class TrackController extends Controller
      */
     public function destroy(Track $track)
     {
+        // Authorization check
+        $user = Auth::user();
+        if (!$user->hasRole('admin') && (!$user->hasRole('dj') || $track->user_id !== $user->id)) {
+            abort(403, 'Unauthorized access to delete this track.');
+        }
+
         // Delete associated files
         if ($track->audio_file) {
             Storage::disk('public')->delete($track->audio_file);

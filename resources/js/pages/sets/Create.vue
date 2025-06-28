@@ -41,7 +41,7 @@
                     </div>
 
                     <!-- DJ Selection -->
-                    <div>
+                    <div v-if="!isDJOnly">
                         <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DJ
                             *</label>
                         <select v-model="form.user_id" id="user_id" required
@@ -50,6 +50,9 @@
                             <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
                         </select>
                     </div>
+
+                    <!-- Hidden input for DJ users -->
+                    <input v-if="isDJOnly" type="hidden" v-model="form.user_id" />
 
                     <!-- Description -->
                     <div>
@@ -102,7 +105,7 @@
                                             d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                     </svg>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ form.audio_file.name
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Click to change audio
                                         file</span>
                                 </template>
@@ -157,8 +160,8 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
     categories: {
@@ -171,6 +174,19 @@ const props = defineProps({
     }
 })
 
+const page = usePage()
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && userRoles.includes(role);
+};
+
+// Check if current user is DJ (and not admin)
+const isDJOnly = computed(() => {
+    return hasRole('dj') && !hasRole('admin');
+});
+
 const form = ref({
     name: '',
     description: '',
@@ -181,6 +197,13 @@ const form = ref({
     is_premium: false,
     iap_product_id: ''
 })
+
+// Auto-set user_id for DJ
+onMounted(() => {
+    if (isDJOnly.value && page.props.auth.user?.id) {
+        form.value.user_id = page.props.auth.user.id.toString();
+    }
+});
 
 const coverImagePreview = ref<string | null>(null)
 

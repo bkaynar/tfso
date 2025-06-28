@@ -16,10 +16,17 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('categories', CategoryController::class)->except(['show']);
-    Route::resource('sets', SetController::class);
-    Route::resource('tracks', TrackController::class);
-    Route::resource('users', UserController::class);
+    // Categories - only admin and dj can access
+    Route::resource('categories', CategoryController::class)->except(['show'])->middleware('role:admin,dj');
+
+    // Sets - admin, dj can access
+    Route::resource('sets', SetController::class)->middleware('role:admin,dj');
+
+    // Tracks - admin, dj can access
+    Route::resource('tracks', TrackController::class)->middleware('role:admin,dj');
+
+    // Users - only admin can access
+    Route::resource('users', UserController::class)->middleware('role:admin');
 });
 
 require __DIR__ . '/settings.php';

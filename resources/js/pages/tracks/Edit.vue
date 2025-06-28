@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, useForm, Link } from '@inertiajs/vue3'
+import { Head, useForm, Link, usePage } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import { Radio, Upload, Music, Clock, Star, DollarSign } from 'lucide-vue-next'
 
@@ -31,6 +31,19 @@ const props = defineProps<{
     categories: Category[]
     users: User[]
 }>();
+
+const page = usePage()
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && userRoles.includes(role);
+};
+
+// Check if current user is DJ (and not admin)
+const isDJOnly = computed(() => {
+    return hasRole('dj') && !hasRole('admin');
+});
 
 const form = useForm({
     title: props.track.title,
@@ -190,7 +203,7 @@ const currentImageUrl = computed(() => {
                             </div>
 
                             <!-- DJ/User Selection -->
-                            <div>
+                            <div v-if="!isDJOnly">
                                 <label for="user"
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     DJ/Artist
@@ -203,8 +216,11 @@ const currentImageUrl = computed(() => {
                                     </option>
                                 </select>
                                 <div v-if="form.errors.user_id" class="mt-1 text-sm text-red-600">{{ form.errors.user_id
-                                }}</div>
+                                    }}</div>
                             </div>
+
+                            <!-- Hidden input for DJ users -->
+                            <input v-if="isDJOnly" type="hidden" v-model="form.user_id" />
                         </div>
 
                         <!-- Right Column -->

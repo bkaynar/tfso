@@ -28,7 +28,7 @@ const page = usePage();
     </SidebarGroup>
 
     <!-- User Management Group -->
-    <SidebarGroup v-if="userItems" class="px-2 py-0">
+    <SidebarGroup v-if="userItems && userItems.length > 0" class="px-2 py-0">
         <SidebarGroupLabel>User Management</SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in userItems" :key="item.title">

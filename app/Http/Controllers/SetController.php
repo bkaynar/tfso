@@ -16,9 +16,15 @@ class SetController extends Controller
      */
     public function index()
     {
-        $sets = Set::with(['user', 'category'])
-            ->latest()
-            ->paginate(10);
+        $query = Set::with(['user', 'category']);
+
+        // If user is DJ, only show their own sets
+        $user = Auth::user();
+        if ($user && $user->hasRole('dj') && !$user->hasRole('admin')) {
+            $query->where('user_id', $user->id);
+        }
+
+        $sets = $query->latest()->paginate(10);
 
         return Inertia::render('sets/Index', [
             'sets' => $sets
@@ -31,7 +37,14 @@ class SetController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $users = \App\Models\User::all();
+
+        // If user is DJ, only allow them to create sets for themselves
+        $user = Auth::user();
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            $users = collect([$user]); // Only current user
+        } else {
+            $users = \App\Models\User::all(); // All users for admin
+        }
 
         return Inertia::render('sets/Create', [
             'categories' => $categories,
@@ -57,6 +70,15 @@ class SetController extends Controller
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
+
+        // Authorization check for DJ users
+        $user = Auth::user();
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            // DJ can only create sets for themselves
+            if ($request->user_id != $user->id) {
+                abort(403, 'DJ users can only create sets for themselves.');
+            }
+        }
 
         $data = $request->only(['name', 'description', 'category_id', 'user_id', 'is_premium', 'iap_product_id']);
 
@@ -96,8 +118,20 @@ class SetController extends Controller
      */
     public function edit(Set $set)
     {
+        // Authorization check
+        $user = Auth::user();
+        if (!$user->hasRole('admin') && (!$user->hasRole('dj') || $set->user_id !== $user->id)) {
+            abort(403, 'Unauthorized access to edit this set.');
+        }
+
         $categories = Category::all();
-        $users = \App\Models\User::all();
+
+        // If user is DJ, only allow them to select themselves
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            $users = collect([$user]); // Only current user
+        } else {
+            $users = \App\Models\User::all(); // All users for admin
+        }
 
         return Inertia::render('sets/Edit', [
             'set' => $set,
@@ -111,6 +145,12 @@ class SetController extends Controller
      */
     public function update(Request $request, Set $set)
     {
+        // Authorization check
+        $user = Auth::user();
+        if (!$user->hasRole('admin') && (!$user->hasRole('dj') || $set->user_id !== $user->id)) {
+            abort(403, 'Unauthorized access to update this set.');
+        }
+
         // Increase timeout for large file uploads
         set_time_limit(300); // 5 minutes
 
@@ -124,6 +164,14 @@ class SetController extends Controller
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
+
+        // Additional authorization check for DJ users
+        if ($user->hasRole('dj') && !$user->hasRole('admin')) {
+            // DJ can only update sets for themselves
+            if ($request->user_id != $user->id) {
+                abort(403, 'DJ users can only update sets for themselves.');
+            }
+        }
 
         $data = $request->only(['name', 'description', 'category_id', 'user_id', 'is_premium', 'iap_product_id']);
 
@@ -163,6 +211,12 @@ class SetController extends Controller
      */
     public function destroy(Set $set)
     {
+        // Authorization check
+        $user = Auth::user();
+        if (!$user->hasRole('admin') && (!$user->hasRole('dj') || $set->user_id !== $user->id)) {
+            abort(403, 'Unauthorized access to delete this set.');
+        }
+
         // Delete associated files
         if ($set->cover_image) {
             $coverImagePath = str_replace('/storage/', '', $set->cover_image);
