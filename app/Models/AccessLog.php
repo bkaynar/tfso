@@ -25,6 +25,12 @@ use Illuminate\Database\Eloquent\Model;
  * description="Erişimi yapan kullanıcının ID'si"
  * ),
  * @OA\Property(
+ * property="ip_address",
+ * type="string",
+ * description="Erişimi yapan kullanıcının IP adresi",
+ * example="192.168.1.1"
+ * ),
+ * @OA\Property(
  * property="content_type",
  * type="string",
  * description="Erişilen içeriğin türü (örn: 'Post', 'Comment')",
@@ -65,6 +71,7 @@ class AccessLog extends Model
 
     protected $fillable = [
         'user_id',
+        'ip_address',
         'content_type',
         'content_id',
         'accessed_at',

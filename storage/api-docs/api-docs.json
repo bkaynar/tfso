@@ -110,6 +110,277 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Access Logs"
+                ],
+                "summary": "Create a new access log entry",
+                "operationId": "426bda7bbbaa4bac386b256fd06e3185",
+                "requestBody": {
+                    "description": "Data for the new access log",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "content_type",
+                                    "content_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "content_type": {
+                                        "type": "string",
+                                        "example": "track"
+                                    },
+                                    "content_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Access log created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccessLog"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Kullanıcı kaydı oluşturur",
+                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "requestBody": {
+                    "description": "Kullanıcı kayıt bilgileri",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Test User"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "test@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Kayıt başarılı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Doğrulama hatası"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Kullanıcı girişi yapar",
+                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "requestBody": {
+                    "description": "Kullanıcı giriş bilgileri",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "test@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Giriş başarılı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Test User"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "test@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Geçersiz giriş bilgileri"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Kullanıcı çıkışı yapar",
+                "operationId": "79854151e609bd20032aa5aa4d5a35c0",
+                "responses": {
+                    "200": {
+                        "description": "Başarıyla çıkış yapıldı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Tüm kategorileri listeler",
+                "operationId": "8e17a9627dbed245cf032f867569cf11",
+                "responses": {
+                    "200": {
+                        "description": "Kategorilerin listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Category"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Sunucu hatası",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kategoriler getirilirken bir hata oluştu."
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/categories/bulk": {
@@ -214,6 +485,114 @@
                 }
             }
         },
+        "/api/categories/{id}/tracks": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Bir kategoriye ait tüm şarkıları listeler",
+                "operationId": "7607f5d38c720a8439fd49f8f639b8ca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Kategori ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Şarkıların listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Track"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kategori bulunamadı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kategori bulunamadı."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Sunucu hatası"
+                    }
+                }
+            }
+        },
+        "/api/categories/{id}/sets": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Bir kategoriye ait tüm setleri listeler",
+                "operationId": "51bd8bd09378912d0e5e34426c563fc8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Kategori ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Setlerin listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Set"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kategori bulunamadı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kategori bulunamadı."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Sunucu hatası"
+                    }
+                }
+            }
+        },
         "/api/djs": {
             "get": {
                 "tags": [
@@ -236,6 +615,89 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "DJs"
+                ],
+                "summary": "Create a new DJ",
+                "operationId": "3da087d8b355291ba7bef0217dbc0ba5",
+                "requestBody": {
+                    "description": "Data for the new DJ",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Yeni DJ"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "yeni.dj@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "profile_photo": {
+                                        "type": "string",
+                                        "example": "path/to/photo.jpg"
+                                    },
+                                    "bio": {
+                                        "type": "string",
+                                        "example": "Yeni DJ'in biyografisi."
+                                    },
+                                    "instagram": {
+                                        "type": "string",
+                                        "example": "yenidj"
+                                    },
+                                    "twitter": {
+                                        "type": "string",
+                                        "example": "yenidj"
+                                    },
+                                    "facebook": {
+                                        "type": "string",
+                                        "example": "https://facebook.com/yenidj"
+                                    },
+                                    "tiktok": {
+                                        "type": "string",
+                                        "example": "yenidj"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "DJ created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/djs/{id}": {
@@ -373,6 +835,451 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "DJs"
+                ],
+                "summary": "Update a DJ's information",
+                "operationId": "c68b383165fa6447b92bf5de94f0d362",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the DJ to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Data to update for the DJ. Use multipart/form-data for file uploads.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Güncel DJ Adı"
+                                    },
+                                    "bio": {
+                                        "type": "string",
+                                        "example": "Güncel biyografi."
+                                    },
+                                    "profile_photo": {
+                                        "description": "DJ's new profile photo",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "instagram": {
+                                        "type": "string",
+                                        "example": "gunceldj"
+                                    },
+                                    "twitter": {
+                                        "type": "string",
+                                        "example": "gunceldj"
+                                    },
+                                    "facebook": {
+                                        "type": "string",
+                                        "example": "https://facebook.com/gunceldj"
+                                    },
+                                    "tiktok": {
+                                        "type": "string",
+                                        "example": "gunceldj"
+                                    },
+                                    "_method": {
+                                        "description": "Must be PUT for this endpoint.",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "DJ updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "DJ not found"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "DJs"
+                ],
+                "summary": "Delete a DJ",
+                "operationId": "874a88d4f9a8176bec1bd2b866a514f0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the DJ to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "DJ deleted successfully"
+                    },
+                    "404": {
+                        "description": "DJ not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favorites": {
+            "get": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Giriş yapmış kullanıcının tüm favorilerini listeler",
+                "operationId": "933a74d1899fde8e6df8d9fd0b9d318e",
+                "responses": {
+                    "200": {
+                        "description": "Favorilerin listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "tracks": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Track"
+                                            }
+                                        },
+                                        "sets": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Set"
+                                            }
+                                        },
+                                        "radios": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Radio"
+                                            }
+                                        },
+                                        "djs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/User"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favorites/tracks": {
+            "get": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Giriş yapmış kullanıcının favori şarkılarını listeler",
+                "operationId": "d9bd32426e483299af3f596b33be84b2",
+                "responses": {
+                    "200": {
+                        "description": "Favori şarkıların listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Track"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favorites/sets": {
+            "get": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Giriş yapmış kullanıcının favori setlerini listeler",
+                "operationId": "8c660ad7e9f1e3b83eda2165b309f124",
+                "responses": {
+                    "200": {
+                        "description": "Favori setlerin listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Set"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favorites/radios": {
+            "get": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Giriş yapmış kullanıcının favori radyolarını listeler",
+                "operationId": "5b2602d58755fea60c0a0b681716f007",
+                "responses": {
+                    "200": {
+                        "description": "Favori radyoların listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Radio"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favorites/djs": {
+            "get": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Giriş yapmış kullanıcının favori DJ'lerini listeler",
+                "operationId": "4369a2ac271b847a70a28ff7d8eafbb6",
+                "responses": {
+                    "200": {
+                        "description": "Favori DJ'lerin listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tracks/{track}/toggle-favorite": {
+            "post": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Bir şarkıyı favorilere ekler veya çıkarır",
+                "operationId": "3dea4709cbc0348799b0fce8bc2445c8",
+                "parameters": [
+                    {
+                        "name": "track",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Favori durumu güncellendi"
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    },
+                    "404": {
+                        "description": "Şarkı bulunamadı"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sets/{set}/toggle-favorite": {
+            "post": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Bir seti favorilere ekler veya çıkarır",
+                "operationId": "5feae6898b8ef58614fafa67c6194cff",
+                "parameters": [
+                    {
+                        "name": "set",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Favori durumu güncellendi"
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    },
+                    "404": {
+                        "description": "Set bulunamadı"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/radios/{radio}/toggle-favorite": {
+            "post": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Bir radyoyu favorilere ekler veya çıkarır",
+                "operationId": "ec6383dae6b792fec06af5fcfbbebaf5",
+                "parameters": [
+                    {
+                        "name": "radio",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Favori durumu güncellendi"
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    },
+                    "404": {
+                        "description": "Radyo bulunamadı"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/djs/{dj}/toggle-favorite": {
+            "post": {
+                "tags": [
+                    "Favorites"
+                ],
+                "summary": "Bir DJ'i favorilere ekler veya çıkarır",
+                "operationId": "a44bc7ac773bd8d4d043699990a1e2f3",
+                "parameters": [
+                    {
+                        "name": "dj",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Favori durumu güncellendi"
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    },
+                    "404": {
+                        "description": "DJ bulunamadı"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/sets": {
@@ -397,6 +1304,262 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/tracks": {
+            "get": {
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Tüm şarkıları listeler",
+                "operationId": "a73400d1e2ec7667296ffa66ff67761d",
+                "responses": {
+                    "200": {
+                        "description": "Şarkıların listesi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Track"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Sunucu hatası"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Yeni bir şarkı oluşturur",
+                "operationId": "3b575ef9cd32174c62b9ce92c31a6c37",
+                "requestBody": {
+                    "description": "Şarkı bilgileri",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "audio_file",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Harika Şarkı"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Bu şarkı çok güzel."
+                                    },
+                                    "audio_file": {
+                                        "description": "Ses dosyası (mp3, wav vb.)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "image_file": {
+                                        "description": "Kapak resmi (jpg, png vb.)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_premium": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "iap_product_id": {
+                                        "type": "string",
+                                        "example": "premium_track_01"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Şarkı başarıyla oluşturuldu",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Track"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Doğrulama hatası"
+                    },
+                    "401": {
+                        "description": "Yetkisiz"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tracks/{id}": {
+            "get": {
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Belirli bir şarkının detaylarını getirir",
+                "operationId": "5b68bb9f6d22bdc9d39e8e8437cac3af",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Şarkı ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Şarkı detayları",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Track"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Şarkı bulunamadı"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Bir şarkıyı günceller",
+                "operationId": "4be5b91751eca9a515a6bd8430a57a0d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Güncellenecek şarkının ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Güncellenecek şarkı bilgileri",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "audio_file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "image_file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_premium": {
+                                        "type": "boolean"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "_method": {
+                                        "description": "Form-data ile PUT isteği göndermek için gereklidir.",
+                                        "type": "string",
+                                        "example": "PUT"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Şarkı başarıyla güncellendi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Track"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Şarkı bulunamadı"
+                    },
+                    "422": {
+                        "description": "Doğrulama hatası"
+                    },
+                    "403": {
+                        "description": "Yetkisiz işlem"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "Bir şarkıyı siler",
+                "operationId": "613a044835d3eef38f4e536aafa377aa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Silinecek şarkının ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Şarkı başarıyla silindi"
+                    },
+                    "404": {
+                        "description": "Şarkı bulunamadı"
+                    },
+                    "403": {
+                        "description": "Yetkisiz işlem"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -453,6 +1616,42 @@
                 },
                 "type": "object"
             },
+            "Category": {
+                "title": "Category",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": "true",
+                        "example": "1"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Pop"
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "categories/pop.jpg",
+                        "nullable": true
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "readOnly": "true",
+                        "example": "http://localhost/storage/categories/pop.jpg",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": "true"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": "true"
+                    }
+                },
+                "type": "object"
+            },
             "AccessLog": {
                 "title": "AccessLog",
                 "description": "Erişim kayıtları modeli",
@@ -467,6 +1666,11 @@
                         "description": "Erişimi yapan kullanıcının ID'si",
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "ip_address": {
+                        "description": "Erişimi yapan kullanıcının IP adresi",
+                        "type": "string",
+                        "example": "192.168.1.1"
                     },
                     "content_type": {
                         "description": "Erişilen içeriğin türü (örn: 'Post', 'Comment')",
@@ -495,6 +1699,46 @@
                         "type": "string",
                         "format": "date-time",
                         "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
+            "Radio": {
+                "title": "Radio",
+                "description": "Radio station model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": "true"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "stream_url": {
+                        "type": "string"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "logo_url": {
+                        "type": "string",
+                        "readOnly": "true",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": "true"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": "true"
                     }
                 },
                 "type": "object"
@@ -552,6 +1796,63 @@
                     }
                 },
                 "type": "object"
+            },
+            "Track": {
+                "title": "Track",
+                "description": "Track model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": "true"
+                    },
+                    "user_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "audio_file": {
+                        "type": "string"
+                    },
+                    "image_file": {
+                        "type": "string"
+                    },
+                    "is_premium": {
+                        "type": "boolean"
+                    },
+                    "iap_product_id": {
+                        "type": "string"
+                    },
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "audio_url": {
+                        "type": "string",
+                        "readOnly": "true"
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "readOnly": "true"
+                    },
+                    "audio_file_name": {
+                        "type": "string",
+                        "readOnly": "true"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": "true"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": "true"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -559,6 +1860,10 @@
         {
             "name": "Access Logs",
             "description": "API Endpoints for managing access logs"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
         },
         {
             "name": "Categories",
@@ -569,8 +1874,16 @@
             "description": "DJs"
         },
         {
+            "name": "Favorites",
+            "description": "Favorites"
+        },
+        {
             "name": "Sets",
             "description": "Sets"
+        },
+        {
+            "name": "Tracks",
+            "description": "Tracks"
         }
     ]
 }

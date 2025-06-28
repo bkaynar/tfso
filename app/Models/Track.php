@@ -6,6 +6,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * @OA\Schema(
+ *     schema="Track",
+ *     title="Track",
+ *     description="Track model",
+ *     @OA\Property(property="id", type="integer", readOnly="true"),
+ *     @OA\Property(property="user_id", type="integer"),
+ *     @OA\Property(property="title", type="string"),
+ *     @OA\Property(property="description", type="string"),
+ *     @OA\Property(property="audio_file", type="string"),
+ *     @OA\Property(property="image_file", type="string"),
+ *     @OA\Property(property="is_premium", type="boolean"),
+ *     @OA\Property(property="iap_product_id", type="string"),
+ *     @OA\Property(property="category_id", type="integer"),
+ *     @OA\Property(property="audio_url", type="string", readOnly="true"),
+ *     @OA\Property(property="image_url", type="string", readOnly="true"),
+ *     @OA\Property(property="audio_file_name", type="string", readOnly="true"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", readOnly="true"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", readOnly="true")
+ * )
+ */
 class Track extends Model
 {
     use HasFactory, HasTranslations;

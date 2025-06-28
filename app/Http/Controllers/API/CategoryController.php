@@ -8,8 +8,59 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @OA\Schema(
+ *     schema="Category",
+ *     type="object",
+ *     title="Category",
+ *     properties={
+ *         @OA\Property(property="id", type="integer", readOnly="true", example="1"),
+ *         @OA\Property(property="name", type="string", example="Pop"),
+ *         @OA\Property(property="image", type="string", nullable=true, example="categories/pop.jpg"),
+ *         @OA\Property(property="image_url", type="string", readOnly="true", nullable=true, example="http://localhost/storage/categories/pop.jpg"),
+ *         @OA\Property(property="created_at", type="string", format="date-time", readOnly="true"),
+ *         @OA\Property(property="updated_at", type="string", format="date-time", readOnly="true")
+ *     }
+ * )
+ */
 class CategoryController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/categories",
+     *     summary="Tüm kategorileri listeler",
+     *     tags={"Categories"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Kategorilerin listesi",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Category")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Sunucu hatası",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Kategoriler getirilirken bir hata oluştu."),
+     *              @OA\Property(property="error", type="string")
+     *          )
+     *     )
+     * )
+     */
+    public function index()
+    {
+        try {
+            $categories = Category::all();
+            return response()->json($categories);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Kategoriler getirilirken bir hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * @OA\Post(
      * path="/api/categories/bulk",
@@ -101,6 +152,104 @@ class CategoryController extends Controller
                 'message' => 'Kategoriler eklenirken bir hata oluştu.',
                 'error' => $e->getMessage()
             ], 500); // HTTP 500 Internal Server Error
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/categories/{id}/tracks",
+     *     summary="Bir kategoriye ait tüm şarkıları listeler",
+     *     tags={"Categories"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Kategori ID'si",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Şarkıların listesi",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Track")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Kategori bulunamadı",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Kategori bulunamadı.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Sunucu hatası"
+     *     )
+     * )
+     */
+    public function getTracksByCategory($id)
+    {
+        try {
+            $category = Category::with('tracks')->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Kategori bulunamadı.'], 404);
+            }
+            return response()->json($category->tracks);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Şarkılar getirilirken bir hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/categories/{id}/sets",
+     *     summary="Bir kategoriye ait tüm setleri listeler",
+     *     tags={"Categories"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Kategori ID'si",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Setlerin listesi",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Set")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Kategori bulunamadı",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Kategori bulunamadı.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Sunucu hatası"
+     *     )
+     * )
+     */
+    public function getSetsByCategory($id)
+    {
+        try {
+            $category = Category::with('sets')->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Kategori bulunamadı.'], 404);
+            }
+            return response()->json($category->sets);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Setler getirilirken bir hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

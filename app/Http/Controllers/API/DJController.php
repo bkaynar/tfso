@@ -53,6 +53,7 @@ class DJController extends Controller
         // Her DJ için gerekli alanları içeren bir dizi oluştur
         $response = $djs->map(function ($dj) {
             return [
+                'id' => $dj->id, // DJ ID'sini yanıta ekle
                 'name' => $dj->name,
                 'bio' => $dj->bio,
                 'profile_photo' => $dj->profile_photo ? url($dj->profile_photo) : null,
@@ -63,8 +64,39 @@ class DJController extends Controller
     }
 
 
-
-
+    /**
+     * @OA\Post(
+     *     path="/api/djs",
+     *     summary="Create a new DJ",
+     *     tags={"DJs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data for the new DJ",
+     *         @OA\JsonContent(
+     *             required={"name", "email", "password"},
+     *             @OA\Property(property="name", type="string", example="Yeni DJ"),
+     *             @OA\Property(property="email", type="string", format="email", example="yeni.dj@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="profile_photo", type="string", example="path/to/photo.jpg"),
+     *             @OA\Property(property="bio", type="string", example="Yeni DJ'in biyografisi."),
+     *             @OA\Property(property="instagram", type="string", example="yenidj"),
+     *             @OA\Property(property="twitter", type="string", example="yenidj"),
+     *             @OA\Property(property="facebook", type="string", example="https://facebook.com/yenidj"),
+     *             @OA\Property(property="tiktok", type="string", example="yenidj")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="DJ created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
 
@@ -163,17 +195,8 @@ class DJController extends Controller
      */
     public function show($id)
     {
-        // Sadece 'dj' rolüne sahip kullanıcıyı, son 3 set ve parça ile birlikte çek
-        $dj = User::role('dj')
-            ->with([
-                'sets' => function ($query) {
-                    $query->latest()->take(3);
-                },
-                'tracks' => function ($query) {
-                    $query->latest()->take(3);
-                }
-            ])
-            ->find($id);
+        // DJ rolüne sahip kullanıcıyı bul
+        $dj = User::role('dj')->find($id);
 
         if (!$dj) {
             return response()->json(['message' => 'DJ not found'], 404);
@@ -189,37 +212,147 @@ class DJController extends Controller
                 'instagram' => $dj->instagram ? "https://instagram.com/{$dj->instagram}" : null,
                 'twitter' => $dj->twitter ? "https://twitter.com/{$dj->twitter}" : null,
                 'facebook' => $dj->facebook ? $dj->facebook : null,
-                'tiktok' => $dj->tiktok ? "https://tiktok.com/@{$dj->tiktok}" : null,
+                'tiktok' => $dj->tiktok ? "https://tiktok.com/@{$dj->tiktok}" : null
             ],
             'sets' => $dj->sets->map(function ($set) {
                 return [
                     'id' => $set->id,
                     'name' => $set->name,
                     'cover_image' => $set->cover_image ? url($set->cover_image) : null,
-                    'audio_file' => $set->audio_file ? url($set->audio_file) : null,
                 ];
-            })->toArray(),
-            'tracks' => $dj->tracks->map(function ($track) {
-                return [
-                    'id' => $track->id,
-                    'name' => $track->name,
-                    'audio_file' => $track->audio_file ? url($track->audio_file) : null,
-                    'duration' => $track->duration,
-                ];
-            })->toArray(),
+            })
         ];
 
         return response()->json($response);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/djs/{id}",
+     *     summary="Update a DJ's information",
+     *     tags={"DJs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the DJ to update",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data to update for the DJ. Use multipart/form-data for file uploads.",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string", example="Güncel DJ Adı"),
+     *                 @OA\Property(property="bio", type="string", example="Güncel biyografi."),
+     *                 @OA\Property(property="profile_photo", type="string", format="binary", description="DJ's new profile photo"),
+     *                 @OA\Property(property="instagram", type="string", example="gunceldj"),
+     *                 @OA\Property(property="twitter", type="string", example="gunceldj"),
+     *                 @OA\Property(property="facebook", type="string", example="https://facebook.com/gunceldj"),
+     *                 @OA\Property(property="tiktok", type="string", example="gunceldj"),
+     *                 @OA\Property(property="_method", type="string", example="PUT", description="Must be PUT for this endpoint.")
+
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="DJ updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="DJ not found"
+     *     ),
+     *      @OA\Response(
+     *         response=403,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
+     */
+
+    public function update(Request $request, $id)
+    {
+        // Güncellenecek DJ'i bul
+        $dj = User::role('dj')->find($id);
+
+        if (!$dj) {
+            return response()->json(['message' => 'DJ not found'], 404);
+        }
+
+        // Sadece admin veya DJ'in kendisi profili güncelleyebilir
+        if (!auth()->user()->hasRole(['admin']) && auth()->user()->id !== $dj->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'bio' => 'nullable|string',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'instagram' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'facebook' => 'nullable|string|max:255',
+            'tiktok' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Verileri güncelle
+        $dj->fill($request->only(['name', 'bio', 'instagram', 'twitter', 'facebook', 'tiktok']));
+
+        // Profil fotoğrafını güncelle
+        if ($request->hasFile('profile_photo')) {
+            // Eski fotoğrafı sil (isteğe bağlı)
+            if ($dj->profile_photo && Storage::exists($dj->profile_photo)) {
+                Storage::delete($dj->profile_photo);
+            }
+            $path = $request->file('profile_photo')->store('djs/profile_photos', 'public');
+            $dj->profile_photo = $path;
+        }
+
+        $dj->save();
+
+        return response()->json($dj, 200);
+    }
 
 
+    /**
+     * @OA\Delete(
+     *     path="/api/djs/{id}",
+     *     summary="Delete a DJ",
+     *     tags={"DJs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the DJ to delete",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="DJ deleted successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="DJ not found"
+     *     )
+     * )
+     */
     public function destroy($id)
     {
         // Yalnızca belirli rollere sahip kullanıcıların DJ silmesine izin ver
-        // if (!auth()->user()->hasRole('admin')) {
-        //     return response()->json(['message' => 'Unauthorized'], 403);
-        // }
+        if (!auth()->user()->hasRole(['admin'])) { // Örnek: Sadece admin silebilir
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
         $dj = User::role('dj')->find($id);
 

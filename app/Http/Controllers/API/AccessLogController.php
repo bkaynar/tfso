@@ -82,10 +82,36 @@ class AccessLogController extends Controller
     }
 
 
+    /**
+     * @OA\Post(
+     *     path="/api/access-logs",
+     *     summary="Create a new access log entry",
+     *     tags={"Access Logs"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data for the new access log",
+     *         @OA\JsonContent(
+     *             required={"user_id", "content_type", "content_id"},
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="content_type", type="string", example="track"),
+     *             @OA\Property(property="content_id", type="integer", example=101)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Access log created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/AccessLog")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|integer|exists:users,id', // 'users' tablosu ve 'id' sütunu varsayılmıştır
+            'user_id' => 'nullable|integer|exists:users,id', // Kullanıcı giriş yapmamış olabilir
             'content_type' => 'required|string|max:255',
             'content_id' => 'required|integer',
         ]);
@@ -96,9 +122,10 @@ class AccessLogController extends Controller
 
         $accessLog = AccessLog::create([
             'user_id' => $request->user_id,
+            'ip_address' => $request->ip(), // IP adresini request'ten al
             'content_type' => $request->content_type,
             'content_id' => $request->content_id,
-            'accessed_at' => Carbon::now(), // Erişim anını otomatik olarak kaydet
+            'accessed_at' => Carbon::now(),
         ]);
 
         return response()->json($accessLog, 201);
