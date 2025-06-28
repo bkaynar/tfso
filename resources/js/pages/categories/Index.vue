@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, HomeIcon } from '@heroicons/vue/24/outline'
 
@@ -8,7 +8,17 @@ const props = defineProps({
     categories: Object
 });
 
+const page = usePage()
 const categories = computed(() => props.categories?.data ?? []);
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+    const userRoles = page.props.auth.roles as string[];
+    return userRoles && userRoles.includes(role);
+};
+
+// Check if user is admin
+const isAdmin = computed(() => hasRole('admin'));
 
 const categoryToDelete = ref<any>(null)
 const showDeleteModal = computed(() => categoryToDelete.value !== null)
@@ -20,11 +30,12 @@ const deleteCategory = (category: any) => {
 }
 
 const askDeleteCategory = (category: any) => {
+    if (!isAdmin.value) return; // Only admin can delete
     categoryToDelete.value = category
 }
 
 const confirmDeleteCategory = () => {
-    if (categoryToDelete.value) {
+    if (categoryToDelete.value && isAdmin.value) {
         router.delete(route('categories.destroy', categoryToDelete.value.id))
         categoryToDelete.value = null
     }
@@ -56,12 +67,19 @@ const cancelDeleteCategory = () => {
                         </div>
                     </div>
                     <div class="mt-4 sm:mt-0 flex space-x-3">
-
-                        <Link :href="route('categories.create')"
+                        <!-- Only admin can create new categories -->
+                        <Link v-if="isAdmin" :href="route('categories.create')"
                             class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                         <PlusIcon class="w-4 h-4 mr-2" />
                         New Category
                         </Link>
+
+                        <!-- DJ sees read-only notice -->
+                        <div v-else
+                            class="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg">
+                            <EyeIcon class="w-4 h-4 mr-2" />
+                            View Only
+                        </div>
                     </div>
                 </div>
             </div>
@@ -80,7 +98,7 @@ const cancelDeleteCategory = () => {
                                     Category Name
                                 </th>
 
-                                <th
+                                <th v-if="isAdmin"
                                     class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     İşlemler
                                 </th>
@@ -114,17 +132,22 @@ const cancelDeleteCategory = () => {
 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <Link :href="route('categories.edit', category.id)"
+                                        <!-- View is always available -->
+                                        <Link v-if="isAdmin" :href="route('categories.edit', category.id)"
                                             class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
                                             title="Görüntüle">
                                         <EyeIcon class="w-4 h-4" />
                                         </Link>
-                                        <Link :href="route('categories.edit', category.id)"
+
+                                        <!-- Edit only for admin -->
+                                        <Link v-if="isAdmin" :href="route('categories.edit', category.id)"
                                             class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 p-1 rounded-md hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors duration-200"
                                             title="Düzenle">
                                         <PencilIcon class="w-4 h-4" />
                                         </Link>
-                                        <button @click="askDeleteCategory(category)"
+
+                                        <!-- Delete only for admin -->
+                                        <button v-if="isAdmin" @click="askDeleteCategory(category)"
                                             class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                                             title="Sil">
                                             <TrashIcon class="w-4 h-4" />

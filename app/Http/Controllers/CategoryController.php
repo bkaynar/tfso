@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
@@ -19,11 +20,23 @@ class CategoryController extends Controller
 
     public function create()
     {
+        // Only admin can create categories
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Only administrators can create categories.');
+        }
+
         return Inertia::render('categories/Create');
     }
 
     public function store(Request $request)
     {
+        // Only admin can store categories
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Only administrators can create categories.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
@@ -45,6 +58,12 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
+        // Only admin can edit categories
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Only administrators can edit categories.');
+        }
+
         return Inertia::render('categories/Edit', [
             'category' => $category
         ]);
@@ -52,6 +71,12 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
+        // Only admin can update categories
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Only administrators can update categories.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
@@ -78,6 +103,12 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        // Only admin can delete categories
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Only administrators can delete categories.');
+        }
+
         // Delete associated image if exists
         if ($category->image) {
             Storage::disk('public')->delete($category->image);

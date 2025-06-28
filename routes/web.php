@@ -16,8 +16,14 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Categories - only admin and dj can access
-    Route::resource('categories', CategoryController::class)->except(['show'])->middleware('role:admin,dj');
+    // Categories - DJ can only view (index), Admin can do everything
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index')->middleware('role:admin,dj');
+    Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create')->middleware('role:admin');
+    Route::post('categories', [CategoryController::class, 'store'])->name('categories.store')->middleware('role:admin');
+    Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit')->middleware('role:admin');
+    Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update')->middleware('role:admin');
+    Route::patch('categories/{category}', [CategoryController::class, 'update'])->name('categories.update')->middleware('role:admin');
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy')->middleware('role:admin');
 
     // Sets - admin, dj can access
     Route::resource('sets', SetController::class)->middleware('role:admin,dj');

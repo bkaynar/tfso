@@ -135,7 +135,7 @@ const welcomeMessage = computed(() => {
                     <div class="space-y-2">
                         <h4 class="font-medium text-sidebar-foreground">Genel</h4>
                         <div class="space-y-1">
-                            <a href="/profile"
+                            <a href="/settings/profile"
                                 class="block rounded-lg bg-primary/10 p-3 text-sm text-primary hover:bg-primary/20 transition-colors">
                                 👤 Profil Ayarları
                             </a>
