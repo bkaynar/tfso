@@ -47,7 +47,11 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('users/Create');
+        $roles = \Spatie\Permission\Models\Role::all();
+        
+        return Inertia::render('users/Create', [
+            'roles' => $roles
+        ]);
     }
 
     /**
@@ -68,6 +72,8 @@ class UserController extends Controller
             'soundcloud' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'iap_product_id' => 'nullable|string|max:255',
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,name',
         ]);
 
         $data = $request->only([
@@ -98,7 +104,12 @@ class UserController extends Controller
             $data['cover_image'] = $coverImagePath;
         }
 
-        User::create($data);
+        $user = User::create($data);
+
+        // Assign roles to the user
+        if ($request->has('roles') && is_array($request->roles)) {
+            $user->assignRole($request->roles);
+        }
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -113,17 +124,17 @@ class UserController extends Controller
         return Inertia::render('users/Show', [
             'user' => $user
         ]);
-    }
-
-    /**
+    }    /**
      * Show the form for editing the specified resource.
      */
     public function edit(User $user)
     {
         $user->load('roles');
-
+        $roles = \Spatie\Permission\Models\Role::all();
+        
         return Inertia::render('users/Edit', [
-            'user' => $user
+            'user' => $user,
+            'roles' => $roles
         ]);
     }
 
@@ -145,6 +156,8 @@ class UserController extends Controller
             'soundcloud' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'iap_product_id' => 'nullable|string|max:255',
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,name',
         ]);
 
         $data = $request->only([
@@ -189,6 +202,11 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
+        // Update roles
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles ?? []);
+        }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
