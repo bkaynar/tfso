@@ -16,7 +16,6 @@ class Track extends Model
         'description',
         'audio_file',
         'image_file',
-        'duration',
         'is_premium',
         'iap_product_id',
         'category_id',

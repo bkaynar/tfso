@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, useForm, Link, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
-import { Radio, Upload, Music, Clock, Star, DollarSign } from 'lucide-vue-next'
+import { Radio, Upload, Music, Star, DollarSign } from 'lucide-vue-next'
 
 interface Category {
     id: number
@@ -37,7 +37,6 @@ const form = useForm({
     description: '',
     audio_file: null as File | null,
     image_file: null as File | null,
-    duration: '',
     category_id: '',
     user_id: '',
     is_premium: false,
@@ -169,22 +168,6 @@ const users = computed(() => props.users ?? [])
                                     form.errors.description }}</div>
                             </div>
 
-                            <!-- Duration Field -->
-                            <div>
-                                <label for="duration"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    <Clock class="w-4 h-4 inline mr-1" />
-                                    Duration (mm:ss)
-                                </label>
-                                <input id="duration" v-model="form.duration" type="text"
-                                    pattern="^([0-5]?\d):([0-5]\d)$"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                    placeholder="e.g., 3:45" />
-                                <div v-if="form.errors.duration" class="mt-1 text-sm text-red-600">{{
-                                    form.errors.duration }}</div>
-                                <p class="mt-1 text-xs text-gray-500">Format: minutes:seconds (e.g., 3:45)</p>
-                            </div>
-
                             <!-- Category Selection -->
                             <div>
                                 <label for="category"
@@ -216,7 +199,7 @@ const users = computed(() => props.users ?? [])
                                     </option>
                                 </select>
                                 <div v-if="form.errors.user_id" class="mt-1 text-sm text-red-600">{{ form.errors.user_id
-                                }}</div>
+                                    }}</div>
                             </div>
 
                             <!-- Hidden input for DJ users -->

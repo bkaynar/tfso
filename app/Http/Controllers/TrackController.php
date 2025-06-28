@@ -68,7 +68,6 @@ class TrackController extends Controller
             'user_id' => 'nullable|exists:users,id',
             'audio_file' => 'required|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
-            'duration' => 'nullable|string|max:10',
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
@@ -82,7 +81,7 @@ class TrackController extends Controller
             }
         }
 
-        $data = $request->only(['title', 'description', 'category_id', 'user_id', 'duration', 'is_premium', 'iap_product_id']);
+        $data = $request->only(['title', 'description', 'category_id', 'user_id', 'is_premium', 'iap_product_id']);
 
         // Handle audio file upload
         if ($request->hasFile('audio_file')) {
@@ -163,7 +162,6 @@ class TrackController extends Controller
             'user_id' => 'nullable|exists:users,id',
             'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
-            'duration' => 'nullable|string|max:10',
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
@@ -176,7 +174,7 @@ class TrackController extends Controller
             }
         }
 
-        $data = $request->only(['title', 'description', 'category_id', 'user_id', 'duration', 'is_premium', 'iap_product_id']);
+        $data = $request->only(['title', 'description', 'category_id', 'user_id', 'is_premium', 'iap_product_id']);
 
         // Handle audio file upload
         if ($request->hasFile('audio_file')) {
