@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -28,6 +28,14 @@ const mainNavItems: NavItem[] = [
         title: 'Tracks',
         href: '/tracks',
         icon: Radio,
+    },
+];
+
+const userNavItems: NavItem[] = [
+    {
+        title: 'Users',
+        href: '/users',
+        icon: Users,
     },
 ];
 
@@ -60,7 +68,7 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="mainNavItems" :user-items="userNavItems" />
         </SidebarContent>
 
         <SidebarFooter>

@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SetController;
 use App\Http\Controllers\TrackController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -18,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('sets', SetController::class);
     Route::resource('tracks', TrackController::class);
+    Route::resource('users', UserController::class);
 });
 
 require __DIR__ . '/settings.php';

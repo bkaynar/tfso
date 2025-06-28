@@ -20,7 +20,6 @@ interface Track {
     description: string | null
     audio_file: string | null
     image_file: string | null
-    duration: string | null
     category_id: number | null
     user_id: number | null
     is_premium: boolean
@@ -38,7 +37,6 @@ const form = useForm({
     description: props.track.description || '',
     audio_file: null as File | null,
     image_file: null as File | null,
-    duration: props.track.duration || '',
     category_id: props.track.category_id?.toString() || '',
     user_id: props.track.user_id?.toString() || '',
     is_premium: props.track.is_premium,
@@ -172,22 +170,6 @@ const currentImageUrl = computed(() => {
                                     placeholder="Enter track description"></textarea>
                                 <div v-if="form.errors.description" class="mt-1 text-sm text-red-600">{{
                                     form.errors.description }}</div>
-                            </div>
-
-                            <!-- Duration Field -->
-                            <div>
-                                <label for="duration"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    <Clock class="w-4 h-4 inline mr-1" />
-                                    Duration (mm:ss)
-                                </label>
-                                <input id="duration" v-model="form.duration" type="text"
-                                    pattern="^([0-5]?\d):([0-5]\d)$"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                    placeholder="e.g., 3:45" />
-                                <div v-if="form.errors.duration" class="mt-1 text-sm text-red-600">{{
-                                    form.errors.duration }}</div>
-                                <p class="mt-1 text-xs text-gray-500">Format: minutes:seconds (e.g., 3:45)</p>
                             </div>
 
                             <!-- Category Selection -->
