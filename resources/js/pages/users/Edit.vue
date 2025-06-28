@@ -220,22 +220,20 @@
                                 placeholder="In-app purchase product ID"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
-                        
+
                         <!-- Roles -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Roles</label>
                             <div class="space-y-2">
                                 <label v-for="role in props.roles" :key="role.id" class="flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        :value="role.name" 
-                                        v-model="form.roles"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                    >
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 capitalize">{{ role.name }}</span>
+                                    <input type="checkbox" :value="role.name" v-model="form.roles"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 capitalize">{{ role.name
+                                    }}</span>
                                 </label>
                             </div>
-                            <div v-if="form.errors.roles" class="mt-1 text-sm text-red-600">{{ form.errors.roles }}</div>
+                            <div v-if="form.errors.roles" class="mt-1 text-sm text-red-600">{{ form.errors.roles }}
+                            </div>
                         </div>
                     </div>
 

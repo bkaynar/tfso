@@ -49,7 +49,7 @@
                             <input v-model="form.password" id="password" type="password" required
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             <div v-if="form.errors.password" class="mt-1 text-sm text-red-600">{{ form.errors.password
-                                }}</div>
+                            }}</div>
                         </div>
                         <div>
                             <label for="password_confirmation"
@@ -126,7 +126,7 @@
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ form.profile_photo.name
-                                        }}</span>
+                                    }}</span>
                                 </template>
                                 <template v-else>
                                     <svg class="w-12 h-12 text-blue-400 dark:text-blue-600 mb-2" fill="none"
@@ -158,7 +158,7 @@
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ form.cover_image.name
-                                        }}</span>
+                                    }}</span>
                                 </template>
                                 <template v-else>
                                     <svg class="w-12 h-12 text-purple-400 dark:text-purple-600 mb-2" fill="none"
@@ -187,22 +187,20 @@
                                 placeholder="In-app purchase product ID"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
-                        
+
                         <!-- Roles -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Roles</label>
                             <div class="space-y-2">
                                 <label v-for="role in props.roles" :key="role.id" class="flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        :value="role.name" 
-                                        v-model="form.roles"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                    >
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 capitalize">{{ role.name }}</span>
+                                    <input type="checkbox" :value="role.name" v-model="form.roles"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 capitalize">{{ role.name
+                                        }}</span>
                                 </label>
                             </div>
-                            <div v-if="form.errors.roles" class="mt-1 text-sm text-red-600">{{ form.errors.roles }}</div>
+                            <div v-if="form.errors.roles" class="mt-1 text-sm text-red-600">{{ form.errors.roles }}
+                            </div>
                         </div>
                     </div>
 

@@ -48,7 +48,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = \Spatie\Permission\Models\Role::all();
-        
+
         return Inertia::render('users/Create', [
             'roles' => $roles
         ]);
@@ -124,14 +124,15 @@ class UserController extends Controller
         return Inertia::render('users/Show', [
             'user' => $user
         ]);
-    }    /**
+    }
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(User $user)
     {
         $user->load('roles');
         $roles = \Spatie\Permission\Models\Role::all();
-        
+
         return Inertia::render('users/Edit', [
             'user' => $user,
             'roles' => $roles
