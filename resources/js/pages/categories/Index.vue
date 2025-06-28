@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, HomeIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -10,18 +10,28 @@ const props = defineProps({
 
 const categories = computed(() => props.categories?.data ?? []);
 
+const categoryToDelete = ref<any>(null)
+const showDeleteModal = computed(() => categoryToDelete.value !== null)
 
-
-
-const deleteRoom = (room: any) => {
+const deleteCategory = (category: any) => {
     if (confirm('Silmek istediğinize emin misiniz?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/categories/${room.id}`;
-        form.innerHTML = '<input type="hidden" name="_method" value="DELETE">';
-        document.body.appendChild(form);
-        form.submit();
+        router.delete(route('categories.destroy', category.id));
     }
+}
+
+const askDeleteCategory = (category: any) => {
+    categoryToDelete.value = category
+}
+
+const confirmDeleteCategory = () => {
+    if (categoryToDelete.value) {
+        router.delete(route('categories.destroy', categoryToDelete.value.id))
+        categoryToDelete.value = null
+    }
+}
+
+const cancelDeleteCategory = () => {
+    categoryToDelete.value = null
 }
 </script>
 
@@ -46,7 +56,7 @@ const deleteRoom = (room: any) => {
                         </div>
                     </div>
                     <div class="mt-4 sm:mt-0 flex space-x-3">
-                        
+
                         <Link :href="route('categories.create')"
                             class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                         <PlusIcon class="w-4 h-4 mr-2" />
@@ -69,7 +79,7 @@ const deleteRoom = (room: any) => {
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Category Name
                                 </th>
-                               
+
                                 <th
                                     class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     İşlemler
@@ -96,7 +106,7 @@ const deleteRoom = (room: any) => {
                                         </span>
                                     </div>
                                 </td>
-                                
+
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
                                         <Link :href="route('categories.edit', category.id)"
@@ -109,7 +119,7 @@ const deleteRoom = (room: any) => {
                                             title="Düzenle">
                                         <PencilIcon class="w-4 h-4" />
                                         </Link>
-                                        <button @click="deleteRoom(category)"
+                                        <button @click="askDeleteCategory(category)"
                                             class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                                             title="Sil">
                                             <TrashIcon class="w-4 h-4" />
@@ -183,6 +193,20 @@ const deleteRoom = (room: any) => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-sm w-full">
+                <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">Silme Onayı</h2>
+                <p class="mb-6 text-gray-700 dark:text-gray-300">Bu kategoriyi silmek istediğinize emin misiniz?</p>
+                <div class="flex justify-end space-x-3">
+                    <button @click="cancelDeleteCategory"
+                        class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Vazgeç</button>
+                    <button @click="confirmDeleteCategory"
+                        class="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white">Evet, Sil</button>
                 </div>
             </div>
         </div>
