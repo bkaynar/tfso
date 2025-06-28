@@ -13,7 +13,10 @@ class TrackController extends Controller
     /**
      * @OA\Get(
      *     path="/api/tracks",
-     *     summary="Tüm şarkıları listeler",
+     *     summary="Tüm şarkıları lis                        'release_date' => $track->created_at->toISOString(),
+                        'days_since_release' => $track->created_at->diffInDays(now())
+                    ];
+                });r",
      *     tags={"Tracks"},
      *     @OA\Response(
      *         response=200,
@@ -272,5 +275,98 @@ class TrackController extends Controller
         $track->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/tracks/new-releases",
+     *     summary="🔥 Yeni çıkan parçaları getirir (Son 30 gün)",
+     *     description="En son eklenen parçaları created_at tarihine göre sıralar. Son 30 günde eklenen parçaları önceliklendirir.",
+     *     tags={"Tracks"},
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Kaç parça getirileceği (varsayılan: 20, maksimum: 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=50, default=20)
+     *     ),
+     *     @OA\Parameter(
+     *         name="days",
+     *         in="query",
+     *         description="Kaç gün öncesine kadar bakılacağı (varsayılan: 30)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=365, default=30)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="🎵 Yeni çıkan parçalar başarıyla getirildi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="🔥 Yeni çıkan parçalar getirildi!"),
+     *             @OA\Property(property="total_count", type="integer", example=25),
+     *             @OA\Property(property="period", type="string", example="Son 30 gün"),
+     *             @OA\Property(
+     *                 property="tracks",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=123),
+     *                     @OA\Property(property="title", type="string", example="Epic Beat 2024"),
+     *                     @OA\Property(property="artist_name", type="string", example="DJ Awesome"),
+     *                     @OA\Property(property="category_name", type="string", example="Electronic"),
+     *                     @OA\Property(property="audio_file", type="string", example="https://api.example.com/storage/tracks/epic-beat.mp3"),
+     *                     @OA\Property(property="image_file", type="string", example="https://api.example.com/storage/tracks/epic-beat-cover.jpg"),
+     *                     @OA\Property(property="release_date", type="string", format="date-time", example="2024-06-28T15:30:00Z"),
+     *                     @OA\Property(property="days_since_release", type="integer", example=2)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Sunucu hatası"
+     *     )
+     * )
+     */
+    public function newReleases(Request $request)
+    {
+        try {
+            // Parametreleri al ve varsayılan değerleri belirle
+            $limit = min((int)$request->get('limit', 20), 50); // Maksimum 50
+            $days = min((int)$request->get('days', 30), 365);   // Maksimum 365 gün
+
+            // Son X gün içinde eklenen parçaları getir
+            $cutoffDate = now()->subDays($days);
+
+            $tracks = Track::with(['category', 'user'])
+                ->where('created_at', '>=', $cutoffDate)
+                ->latest('created_at') // En yeni olanlar önce
+                ->limit($limit)
+                ->get()
+                ->map(function ($track) {
+                    return [
+                        'id' => $track->id,
+                        'title' => $track->title,
+                        'artist_name' => $track->user ? $track->user->name : 'Bilinmeyen Sanatçı',
+                        'category_name' => $track->category ? $track->category->name : 'Kategori Yok',
+                        'audio_file' => $track->audio_file ? url($track->audio_file) : null,
+                        'image_file' => $track->image_file ? url($track->image_file) : null,
+                        'release_date' => $track->created_at->toISOString(),
+                        'days_since_release' => $track->created_at->diffInDays(now())
+                    ];
+                });
+
+            return response()->json([
+                'message' => '🔥 Yeni çıkan parçalar getirildi!',
+                'total_count' => $tracks->count(),
+                'period' => "Son {$days} gün",
+                'tracks' => $tracks
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => '😞 Yeni parçalar getirilirken bir hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

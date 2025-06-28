@@ -48,6 +48,9 @@ Route::get('/categories/{id}/sets', [CategoryController::class, 'getSetsByCatego
 Route::get('/djs', [DJController::class, 'index']);
 Route::get('/djs/{id}', [DJController::class, 'show']);
 
+// 🔥 Yeni Çıkanlar Endpoint'i (Public)
+Route::get('/tracks/new-releases', [TrackController::class, 'newReleases']);
+
 Route::apiResource('tracks', TrackController::class);
 Route::apiResource('access-logs', AccessLogController::class)->only([
     'index',
