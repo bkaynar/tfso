@@ -26,8 +26,27 @@ class Track extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    // Audio URL accessor
+    public function getAudioUrlAttribute()
+    {
+        return $this->audio_file ? asset('storage/' . $this->audio_file) : null;
+    }
+
+    // Image URL accessor
+    public function getImageUrlAttribute()
+    {
+        return $this->image_file ? asset('storage/' . $this->image_file) : null;
+    }
+
+    // Audio file name accessor
+    public function getAudioFileNameAttribute()
+    {
+        return $this->audio_file ? basename($this->audio_file) : null;
     }
 }

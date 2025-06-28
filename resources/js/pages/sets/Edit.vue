@@ -93,19 +93,37 @@
                             <label for="audio_file"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-center">Audio
                                 File</label>
+
+                            <!-- Current Audio Player -->
+                            <div v-if="set.audio_file && !form.audio_file"
+                                class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Current
+                                        Audio</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ set.audio_file_name ||
+                                        'Audio file' }}</span>
+                                </div>
+                                <audio controls preload="metadata" class="w-full h-10" style="max-height: 40px;">
+                                    <source :src="set.audio_url" type="audio/mpeg">
+                                    <source :src="set.audio_url" type="audio/wav">
+                                    <source :src="set.audio_url" type="audio/ogg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+
                             <label for="audio_file"
                                 class="flex flex-col items-center justify-center border-2 border-dashed border-purple-400 dark:border-purple-600 rounded-lg p-6 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 transition">
-                                <template v-if="form.audio_file || set.audio_file">
+                                <template v-if="form.audio_file">
                                     <svg class="w-12 h-12 text-green-500 mb-2" fill="none" stroke="currentColor"
                                         stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                     </svg>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ form.audio_file ? form.audio_file.name : 'Current audio file' }}
+                                        {{ form.audio_file.name }}
                                     </span>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">Click to change audio
-                                        file</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">New audio file
+                                        selected</span>
                                 </template>
                                 <template v-else>
                                     <svg class="w-12 h-12 text-purple-400 dark:text-purple-600 mb-2" fill="none"
@@ -113,8 +131,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                     </svg>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">Click to select audio
-                                        file</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ set.audio_file ? 'Click to change audio file' : 'Click to select audio file'
+                                        }}
+                                    </span>
                                 </template>
                                 <input id="audio_file" type="file" accept="audio/*" @change="handleAudioFileChange"
                                     class="hidden" />

@@ -203,7 +203,7 @@ const currentImageUrl = computed(() => {
                                     </option>
                                 </select>
                                 <div v-if="form.errors.user_id" class="mt-1 text-sm text-red-600">{{ form.errors.user_id
-                                    }}</div>
+                                }}</div>
                             </div>
                         </div>
 

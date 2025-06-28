@@ -52,4 +52,16 @@ class Set extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    // Audio URL accessor
+    public function getAudioUrlAttribute()
+    {
+        return $this->audio_file ? asset('storage/' . $this->audio_file) : null;
+    }
+
+    // Audio file name accessor
+    public function getAudioFileNameAttribute()
+    {
+        return $this->audio_file ? basename($this->audio_file) : null;
+    }
 }
