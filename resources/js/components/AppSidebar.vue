@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FolderOpen } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -18,6 +18,16 @@ const mainNavItems: NavItem[] = [
         title: 'Kategoriler',
         href: '/categories',
         icon: FolderOpen,
+    },
+    {
+        title: 'Sets',
+        href: '/sets',
+        icon: Music,
+    },
+    {
+        title: 'Tracks',
+        href: '/tracks',
+        icon: Radio,
     },
 ];
 
@@ -42,7 +52,7 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
                         <Link :href="route('dashboard')">
-                            <AppLogo />
+                        <AppLogo />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

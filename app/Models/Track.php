@@ -12,9 +12,10 @@ class Track extends Model
 
     protected $fillable = [
         'user_id',
-        'name',
+        'title',
         'description',
         'audio_file',
+        'image_file',
         'duration',
         'is_premium',
         'iap_product_id',
