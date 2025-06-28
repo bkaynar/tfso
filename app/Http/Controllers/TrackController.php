@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TrackController extends Controller
 {
@@ -154,6 +155,10 @@ class TrackController extends Controller
 
         // Increase timeout for large file uploads
         set_time_limit(300); // 5 minutes
+
+        // Debug: Log request data
+        Log::info('Track Update Request Data:', $request->all());
+        Log::info('Files:', $request->allFiles());
 
         $request->validate([
             'title' => 'required|string|max:255',

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, useForm, Link, usePage } from '@inertiajs/vue3'
+import { Head, useForm, Link, usePage, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import { Radio, Upload, Music, Clock, Star, DollarSign } from 'lucide-vue-next'
 
@@ -110,8 +110,56 @@ const removeImageFile = () => {
 }
 
 const submitForm = () => {
-    form.patch(route('tracks.update', props.track.id), {
-        forceFormData: true
+    // Debug: Log form data before submission
+    console.log('Form data before submission:', {
+        title: form.title,
+        description: form.description,
+        category_id: form.category_id,
+        user_id: form.user_id,
+        is_premium: form.is_premium,
+        iap_product_id: form.iap_product_id,
+        audio_file: form.audio_file,
+        image_file: form.image_file
+    })
+
+    // Create FormData manually to ensure all fields are properly sent
+    const formData = new FormData()
+
+    // Add text fields
+    formData.append('title', form.title)
+    formData.append('description', form.description || '')
+    formData.append('category_id', form.category_id || '')
+    formData.append('user_id', form.user_id || '')
+    formData.append('is_premium', form.is_premium ? '1' : '0')
+    formData.append('iap_product_id', form.iap_product_id || '')
+
+    // Add files if they exist
+    if (form.audio_file) {
+        formData.append('audio_file', form.audio_file)
+    }
+    if (form.image_file) {
+        formData.append('image_file', form.image_file)
+    }
+
+    // Add method override for PATCH
+    formData.append('_method', 'PATCH')
+
+    // Debug: Log FormData contents
+    console.log('FormData contents:')
+    for (const [key, value] of formData.entries()) {
+        console.log(key, value)
+    }
+
+    // Use Inertia router for manual FormData submission
+    router.post(route('tracks.update', props.track.id), formData, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Optional: Reset file inputs on success
+            if (audioFileInput.value) audioFileInput.value.value = ''
+            if (imageFileInput.value) imageFileInput.value.value = ''
+            audioPreview.value = ''
+            imagePreview.value = ''
+        }
     })
 }
 
@@ -216,7 +264,7 @@ const currentImageUrl = computed(() => {
                                     </option>
                                 </select>
                                 <div v-if="form.errors.user_id" class="mt-1 text-sm text-red-600">{{ form.errors.user_id
-                                    }}</div>
+                                }}</div>
                             </div>
 
                             <!-- Hidden input for DJ users -->

@@ -193,8 +193,8 @@ class SetController extends Controller
             // Delete old audio file
             if ($set->audio_file) {
                 // If it's already a raw path, use it directly, otherwise clean the URL
-                $oldAudioPath = str_contains($set->audio_file, '/storage/') 
-                    ? str_replace('/storage/', '', $set->audio_file) 
+                $oldAudioPath = str_contains($set->audio_file, '/storage/')
+                    ? str_replace('/storage/', '', $set->audio_file)
                     : $set->audio_file;
                 Storage::disk('public')->delete($oldAudioPath);
             }
@@ -228,8 +228,8 @@ class SetController extends Controller
 
         if ($set->audio_file) {
             // If it's already a raw path, use it directly, otherwise clean the URL
-            $audioFilePath = str_contains($set->audio_file, '/storage/') 
-                ? str_replace('/storage/', '', $set->audio_file) 
+            $audioFilePath = str_contains($set->audio_file, '/storage/')
+                ? str_replace('/storage/', '', $set->audio_file)
                 : $set->audio_file;
             Storage::disk('public')->delete($audioFilePath);
         }

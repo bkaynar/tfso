@@ -101,8 +101,10 @@
                             <div v-if="set.audio_file && !form.audio_file"
                                 class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Current Audio</span>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ set.audio_file_name || 'Audio file' }}</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Current
+                                        Audio</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ set.audio_file_name ||
+                                        'Audio file' }}</span>
                                 </div>
                                 <audio controls preload="metadata" class="w-full h-10" style="max-height: 40px;">
                                     <source :src="'/storage/' + set.audio_file" type="audio/mpeg">

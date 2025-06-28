@@ -116,7 +116,7 @@ const cancelDeleteTrack = () => {
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ track.name }}
+                                                {{ track.title }}
                                             </div>
                                             <div v-if="track.description"
                                                 class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
