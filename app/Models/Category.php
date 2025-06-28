@@ -14,6 +14,13 @@ class Category extends Model
         'image',
     ];
 
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
+
     public function tracks()
     {
         return $this->hasMany(Track::class);

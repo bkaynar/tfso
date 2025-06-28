@@ -92,7 +92,12 @@ const cancelDeleteCategory = () => {
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <div
+                                            <div v-if="category.image_url"
+                                                class="h-10 w-10 rounded-full overflow-hidden">
+                                                <img :src="category.image_url" :alt="category.name"
+                                                    class="w-full h-full object-cover" />
+                                            </div>
+                                            <div v-else
                                                 class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
                                                 <HomeIcon class="w-5 h-5 text-white" />
                                             </div>

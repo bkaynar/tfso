@@ -44,12 +44,15 @@ class TrackController extends Controller
      */
     public function store(Request $request)
     {
+        // Increase timeout for large file uploads
+        set_time_limit(300); // 5 minutes
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
             'user_id' => 'nullable|exists:users,id',
-            'audio_file' => 'required|mimes:mp3,wav,ogg,m4a|max:20480', // 20MB max
+            'audio_file' => 'required|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'duration' => 'nullable|string|max:10',
             'is_premium' => 'boolean',
@@ -109,12 +112,15 @@ class TrackController extends Controller
      */
     public function update(Request $request, Track $track)
     {
+        // Increase timeout for large file uploads
+        set_time_limit(300); // 5 minutes
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
             'user_id' => 'nullable|exists:users,id',
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:20480', // 20MB max
+            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
             'duration' => 'nullable|string|max:10',
             'is_premium' => 'boolean',

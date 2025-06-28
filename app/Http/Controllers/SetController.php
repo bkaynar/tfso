@@ -44,13 +44,16 @@ class SetController extends Controller
      */
     public function store(Request $request)
     {
+        // Increase timeout for large file uploads
+        set_time_limit(300); // 5 minutes
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:20480', // 20MB max
+            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
@@ -108,13 +111,16 @@ class SetController extends Controller
      */
     public function update(Request $request, Set $set)
     {
+        // Increase timeout for large file uploads
+        set_time_limit(300); // 5 minutes
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:20480', // 20MB max
+            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
