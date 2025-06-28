@@ -1,54 +1,17 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
-import { MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon, HomeIcon } from '@heroicons/vue/24/outline'
-import { CurrencyDollarIcon, CalendarDaysIcon, UserGroupIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid'
+import { Head, Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, HomeIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     categories: Object
 });
 
-const categories = computed(() => props.categories.data);
-
-const isCreatingDemo = ref(false)
+const categories = computed(() => props.categories?.data ?? []);
 
 
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('tr-TR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
-}
 
-const formatPercentage = (ratio) => {
-    return Math.round(ratio * 100) + '%'
-}
-
-const getStatusBadge = (isActive) => {
-    return isActive
-        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-}
-
-const getStatusText = (isActive) => {
-    return isActive ? 'Aktif' : 'Pasif'
-}
-
-const createDemoRooms = () => {
-    if (isCreatingDemo.value) return
-
-    if (confirm('5 demo oda oluşturmak istediğinizden emin misiniz?')) {
-        isCreatingDemo.value = true
-
-        router.post(route(''), {}, {
-            onFinish: () => {
-                isCreatingDemo.value = false
-            }
-        })
-    }
-}
 
 const deleteRoom = (room: any) => {
     if (confirm('Silmek istediğinize emin misiniz?')) {
@@ -159,7 +122,7 @@ const deleteRoom = (room: any) => {
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="props.categories.total > props.categories.per_page"
+                <div v-if="props.categories && props.categories.total > props.categories.per_page"
                     class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
                     <div class="flex items-center justify-between">
                         <div class="flex-1 flex justify-between sm:hidden">
