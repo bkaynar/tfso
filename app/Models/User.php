@@ -46,6 +46,9 @@ class User extends Authenticatable
         'twitter',
         'facebook',
         'tiktok',
+        'soundcloud',
+        'cover_image',
+        'iap_product_id',
     ];
     protected $hidden = [
         'password',
@@ -87,6 +90,17 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'favorite_djs', 'user_id', 'favorited_user_id')->withTimestamps();
     }
 
+    // Profile photo URL accessor
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo ? asset('storage/' . $this->profile_photo) : null;
+    }
+
+    // Cover image URL accessor
+    public function getCoverImageUrlAttribute()
+    {
+        return $this->cover_image ? asset('storage/' . $this->cover_image) : null;
+    }
 
     public function canAccessPanel(Panel $panel): bool
     {
