@@ -6,8 +6,8 @@
         { title: 'Sets', href: '/sets' },
         { title: 'Edit Set', href: '' }
     ]">
-        <div class="max-w-4xl mx-auto py-10">
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-8">
+        <div class="max-w-7xl w-full mx-auto py-10">
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-8 w-full max-w-3xl mx-auto">
                 <h1
                     class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center justify-center text-center">
                     <span class="inline-block bg-purple-500 p-2 rounded-lg mr-3">

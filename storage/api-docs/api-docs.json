@@ -1561,6 +1561,112 @@
                     }
                 ]
             }
+        },
+        "/api/tracks/new-releases": {
+            "get": {
+                "tags": [
+                    "Tracks"
+                ],
+                "summary": "🔥 Yeni çıkan parçaları getirir (Son 30 gün)",
+                "description": "En son eklenen parçaları created_at tarihine göre sıralar. Son 30 günde eklenen parçaları önceliklendirir.",
+                "operationId": "00baa114edef79ea0e8b68ba42e28b57",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Kaç parça getirileceği (varsayılan: 20, maksimum: 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "description": "Kaç gün öncesine kadar bakılacağı (varsayılan: 30)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 30,
+                            "maximum": 365,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "🎵 Yeni çıkan parçalar başarıyla getirildi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "🔥 Yeni çıkan parçalar getirildi!"
+                                        },
+                                        "total_count": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "period": {
+                                            "type": "string",
+                                            "example": "Son 30 gün"
+                                        },
+                                        "tracks": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 123
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Epic Beat 2024"
+                                                    },
+                                                    "artist_name": {
+                                                        "type": "string",
+                                                        "example": "DJ Awesome"
+                                                    },
+                                                    "category_name": {
+                                                        "type": "string",
+                                                        "example": "Electronic"
+                                                    },
+                                                    "audio_file": {
+                                                        "type": "string",
+                                                        "example": "https://api.example.com/storage/tracks/epic-beat.mp3"
+                                                    },
+                                                    "image_file": {
+                                                        "type": "string",
+                                                        "example": "https://api.example.com/storage/tracks/epic-beat-cover.jpg"
+                                                    },
+                                                    "release_date": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-06-28T15:30:00Z"
+                                                    },
+                                                    "days_since_release": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Sunucu hatası"
+                    }
+                }
+            }
         }
     },
     "components": {

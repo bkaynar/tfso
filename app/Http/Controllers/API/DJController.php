@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User; // User modelini kullanacağımız için import ediyoruz
+use App\Models\User;
+
+// User modelini kullanacağımız için import ediyoruz
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule; // Rule::unique kullanmak için
+use Illuminate\Validation\Rule;
+
+// Rule::unique kullanmak için
 
 /**
  * @OA\Components(
@@ -132,6 +136,7 @@ class DJController extends Controller
 
         return response()->json($dj, 201);
     }
+
     /**
      * @OA\Get(
      *     path="/api/djs/{id}",
@@ -220,7 +225,15 @@ class DJController extends Controller
                     'name' => $set->name,
                     'cover_image' => $set->cover_image ? url($set->cover_image) : null,
                 ];
-            })
+            }),
+            'tracks' => $dj->tracks->map(function ($track) {
+                return [
+                    'id' => $track->id,
+                    'title' => $track->title,
+                    'audio_url' => $track->audio_url,
+                    'image_url' => $track->image_url,
+                ];
+            }),
         ];
 
         return response()->json($response);
@@ -253,7 +266,6 @@ class DJController extends Controller
      *                 @OA\Property(property="facebook", type="string", example="https://facebook.com/gunceldj"),
      *                 @OA\Property(property="tiktok", type="string", example="gunceldj"),
      *                 @OA\Property(property="_method", type="string", example="PUT", description="Must be PUT for this endpoint.")
-
      *             )
      *         )
      *     ),
