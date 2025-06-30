@@ -13,10 +13,7 @@ class TrackController extends Controller
     /**
      * @OA\Get(
      *     path="/api/tracks",
-     *     summary="Tüm şarkıları lis                        'release_date' => $track->created_at->toISOString(),
-                        'days_since_release' => $track->created_at->diffInDays(now())
-                    ];
-                });r",
+     *     summary="Tüm şarkıları listeler",
      *     tags={"Tracks"},
      *     @OA\Response(
      *         response=200,
