@@ -350,7 +350,7 @@ class TrackController extends Controller
                         'image_file' => $track->image_file ? '/storage/' . $track->image_file : null,
                         'release_date' => $track->created_at->toISOString(),
                         'days_since_release' => $track->created_at->diffInDays(now())
-                    };
+                    ];
                 });
 
             return response()->json([
