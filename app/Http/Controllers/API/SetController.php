@@ -33,7 +33,7 @@ class SetController extends Controller
             ->when($request->has('is_premium'), function ($query) use ($request) {
                 return $query->where('is_premium', $request->input('is_premium'));
             })
-            ->with(['user', 'tracks'])
+            ->with(['user'])
             ->paginate(10);
 
         return response()->json($sets);
@@ -63,7 +63,7 @@ class SetController extends Controller
             ->when($request->has('is_premium'), function ($query) use ($request) {
                 return $query->where('is_premium', $request->input('is_premium'));
             })
-            ->with(['user', 'tracks'])
+            ->with(['user'])
             ->orderByDesc('created_at')
             ->paginate(10);
 

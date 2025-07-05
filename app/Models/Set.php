@@ -43,11 +43,6 @@ class Set extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function tracks()
-    {
-        return $this->hasMany(Track::class);
-    }
-
     public function category()
     {
         return $this->belongsTo(Category::class);
