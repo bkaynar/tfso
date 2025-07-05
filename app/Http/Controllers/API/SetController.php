@@ -41,7 +41,7 @@ class SetController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/sets/latest",
+     *     path="/api/sets-latest",
      *     summary="Get sets ordered by creation date (latest first)",
      *     tags={"Sets"},
      *     @OA\Response(
