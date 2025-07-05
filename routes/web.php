@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Sets - admin, dj can access
     Route::resource('sets', SetController::class)->middleware('role:admin,dj');
+    Route::get('sets-latest', [SetController::class, 'latest'])->name('sets.latest')->middleware('role:admin,dj');
 
     // Tracks - admin, dj can access
     Route::resource('tracks', TrackController::class)->middleware('role:admin,dj');

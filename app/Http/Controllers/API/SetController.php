@@ -26,7 +26,7 @@ class SetController extends Controller
     public function index(Request $request)
     {
         // Fetch all sets with optional filters
-       $sets=Set::query()
+        $sets = Set::query()
             ->when($request->has('user_id'), function ($query) use ($request) {
                 return $query->where('user_id', $request->input('user_id'));
             })
@@ -34,6 +34,37 @@ class SetController extends Controller
                 return $query->where('is_premium', $request->input('is_premium'));
             })
             ->with(['user', 'tracks'])
+            ->paginate(10);
+
+        return response()->json($sets);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/sets/latest",
+     *     summary="Get sets ordered by creation date (latest first)",
+     *     tags={"Sets"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of sets ordered by created_at desc",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Set")
+     *         )
+     *     )
+     * )
+     */
+    public function latest(Request $request)
+    {
+        $sets = Set::query()
+            ->when($request->has('user_id'), function ($query) use ($request) {
+                return $query->where('user_id', $request->input('user_id'));
+            })
+            ->when($request->has('is_premium'), function ($query) use ($request) {
+                return $query->where('is_premium', $request->input('is_premium'));
+            })
+            ->with(['user', 'tracks'])
+            ->orderByDesc('created_at')
             ->paginate(10);
 
         return response()->json($sets);
