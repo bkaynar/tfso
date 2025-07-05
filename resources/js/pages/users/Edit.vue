@@ -26,14 +26,14 @@
                         <div>
                             <label for="name"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
-                            <input v-model="form.name" id="name" type="text" required
+                            <input v-model="form.name" id="name" type="text" @input="form.clearErrors('name')"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             <div v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</div>
                         </div>
                         <div>
                             <label for="email"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
-                            <input v-model="form.email" id="email" type="email" required
+                            <input v-model="form.email" id="email" type="email" @input="form.clearErrors('email')"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             <div v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}
                             </div>
@@ -257,6 +257,7 @@
 
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { onMounted } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const props = defineProps({
@@ -298,4 +299,8 @@ const handleCoverImageChange = (event: Event) => {
 const submit = () => {
     form.patch(route('users.update', props.user?.id))
 }
+
+onMounted(() => {
+    form.clearErrors()
+})
 </script>

@@ -145,8 +145,8 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'name' => 'string|max:255',
+            'email' => 'string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'bio' => 'nullable|string|max:5000', // Text alan için 5000 karakter limit
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
