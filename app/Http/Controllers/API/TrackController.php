@@ -98,7 +98,7 @@ class TrackController extends Controller
         }
 
         $data = $request->only(['title', 'description', 'is_premium', 'iap_product_id', 'category_id']);
-        $data['user_id'] = auth()->id();
+        $data['user_id'] = $request->user()->id;
 
         if ($request->hasFile('audio_file')) {
             $data['audio_file'] = $request->file('audio_file')->store('tracks/audio', 'public');
@@ -346,8 +346,8 @@ class TrackController extends Controller
                         'title' => $track->title,
                         'artist_name' => $track->user ? $track->user->name : 'Bilinmeyen Sanatçı',
                         'category_name' => $track->category ? $track->category->name : 'Kategori Yok',
-                        'audio_file' => $track->audio_file ? '/storage/' . $track->audio_file : null,
-                        'image_file' => $track->image_file ? '/storage/' . $track->image_file : null,
+                        'audio_file' => $track->audio_file ? url('/storage/' . $track->audio_file) : null,
+                        'image_file' => $track->image_file ? url('/storage/' . $track->image_file) : null,
                         'release_date' => $track->created_at->toISOString(),
                         'days_since_release' => $track->created_at->diffInDays(now())
                     ];
