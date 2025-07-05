@@ -68,8 +68,14 @@ class SetController extends Controller
             ->paginate(10);
 
         $sets->getCollection()->transform(function ($set) {
-            $set->cover_image = url('/storage/' . $set->cover_image);
-            $set->audio_file = url('/storage/' . $set->audio_file);
+            $set->cover_image = str_starts_with($set->cover_image, '/storage/')
+                ? url($set->cover_image)
+                : url('/storage/' . $set->cover_image);
+
+            $set->audio_file = str_starts_with($set->audio_file, '/storage/')
+                ? url($set->audio_file)
+                : url('/storage/' . $set->audio_file);
+
             return $set;
         });
 
