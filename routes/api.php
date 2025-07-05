@@ -51,7 +51,7 @@ Route::get('/djs/{id}', [DJController::class, 'show']);
 
 // 🔥 Yeni Çıkanlar Endpoint'i (Public)
 Route::get('/tracks/new-releases', [TrackController::class, 'newReleases']);
-Route::get('sets-latest', [SetController::class, 'latest'])->name('sets.latest')->middleware('role:admin,dj');
+Route::get('sets-latest', [SetController::class, 'latest']);
 
 
 Route::apiResource('tracks', TrackController::class);

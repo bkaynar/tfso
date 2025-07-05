@@ -1306,13 +1306,13 @@
                 }
             }
         },
-        "/api/sets/latest": {
+        "/api/sets-latest": {
             "get": {
                 "tags": [
                     "Sets"
                 ],
                 "summary": "Get sets ordered by creation date (latest first)",
-                "operationId": "7a5d8eed9b95a91ce7cdc75f3100f492",
+                "operationId": "65ad5f5fbd519792f4159212d32a028e",
                 "responses": {
                     "200": {
                         "description": "A list of sets ordered by created_at desc",
