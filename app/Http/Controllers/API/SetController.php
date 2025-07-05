@@ -67,6 +67,12 @@ class SetController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
+        $sets->getCollection()->transform(function ($set) {
+            $set->cover_image = url('/storage/' . $set->cover_image);
+            $set->audio_file = url('/storage/' . $set->audio_file);
+            return $set;
+        });
+
         return response()->json($sets);
     }
 }
