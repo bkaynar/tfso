@@ -266,6 +266,7 @@ const props = defineProps({
 })
 
 const form = useForm({
+    _method: 'patch',
     name: props.user?.name || '',
     email: props.user?.email || '',
     password: '',
@@ -297,7 +298,15 @@ const handleCoverImageChange = (event: Event) => {
 }
 
 const submit = () => {
-    form.patch(route('users.update', props.user?.id))
+    console.log('Form data before submit:', {
+        profile_photo: form.profile_photo,
+        cover_image: form.cover_image,
+        form_data: form.data()
+    })
+
+    form.post(route('users.update', props.user?.id), {
+        forceFormData: true
+    })
 }
 
 onMounted(() => {

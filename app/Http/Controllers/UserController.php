@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -144,6 +145,14 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        // Debug için log ekleyelim
+        Log::info('Update request files:', [
+            'has_profile_photo' => $request->hasFile('profile_photo'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'all_files' => $request->allFiles(),
+            'request_data' => $request->except(['password', 'password_confirmation'])
+        ]);
+
         $request->validate([
             'name' => 'string|max:255',
             'email' => 'string|email|max:255|unique:users,email,' . $user->id,

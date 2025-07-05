@@ -36,6 +36,15 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, HasTranslations;
 
+    /**
+     * Accessors to append to the model's array form.
+     * @var array
+     */
+    protected $appends = [
+        'profile_photo_url',
+        'cover_image_url',
+    ];
+
     protected $fillable = [
         'name',
         'email',

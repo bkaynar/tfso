@@ -190,12 +190,18 @@ const getRoleBadgeColor = (role: string) => {
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <div
-                                                class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                                                    {{ user.name?.charAt(0).toUpperCase() }}
-                                                </span>
-                                            </div>
+                                            <template v-if="user.profile_photo_url">
+                                                <img :src="user.profile_photo_url" :alt="user.name"
+                                                    class="h-10 w-10 rounded-full object-cover" />
+                                            </template>
+                                            <template v-else>
+                                                <div
+                                                    class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                        {{ user.name?.charAt(0).toUpperCase() }}
+                                                    </span>
+                                                </div>
+                                            </template>
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-white">
@@ -280,10 +286,13 @@ const getRoleBadgeColor = (role: string) => {
                                             :class="{
                                                 'bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300': link.active,
                                                 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600': !link.active
-                                            }" v-html="link.label" />
+                                            }">
+                                        <span v-html="link.label"></span>
+                                        </Link>
                                         <span v-else
-                                            class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 cursor-default dark:bg-gray-700 dark:border-gray-600 dark:text-gray-600"
-                                            v-html="link.label" />
+                                            class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-300 cursor-default dark:bg-gray-700 dark:border-gray-600 dark:text-gray-600">
+                                            <span v-html="link.label"></span>
+                                        </span>
                                     </template>
                                 </nav>
                             </div>
