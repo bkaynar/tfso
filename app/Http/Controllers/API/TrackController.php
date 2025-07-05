@@ -346,11 +346,11 @@ class TrackController extends Controller
                         'title' => $track->title,
                         'artist_name' => $track->user ? $track->user->name : 'Bilinmeyen Sanatçı',
                         'category_name' => $track->category ? $track->category->name : 'Kategori Yok',
-                        'audio_file' => $track->audio_file ? url($track->audio_file) : null,
-                        'image_file' => $track->image_file ? url($track->image_file) : null,
+                        'audio_file' => $track->audio_file ? '/storage/' . $track->audio_file : null,
+                        'image_file' => $track->image_file ? '/storage/' . $track->image_file : null,
                         'release_date' => $track->created_at->toISOString(),
                         'days_since_release' => $track->created_at->diffInDays(now())
-                    ];
+                    };
                 });
 
             return response()->json([
@@ -358,7 +358,7 @@ class TrackController extends Controller
                 'total_count' => $tracks->count(),
                 'period' => "Son {$days} gün",
                 'tracks' => $tracks
-            ], 200);
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => '😞 Yeni parçalar getirilirken bir hata oluştu.',
