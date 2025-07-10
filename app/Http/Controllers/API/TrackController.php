@@ -349,7 +349,8 @@ class TrackController extends Controller
                         'audio_file' => $track->audio_file ? url('/storage/' . $track->audio_file) : null,
                         'image_file' => $track->image_file ? url('/storage/' . $track->image_file) : null,
                         'release_date' => $track->created_at->toISOString(),
-                        'days_since_release' => $track->created_at->diffInDays(now())
+                        'days_since_release' => $track->created_at->diffInDays(now()),
+                        'is_premium' => $track->is_premium,
                     ];
                 });
 
