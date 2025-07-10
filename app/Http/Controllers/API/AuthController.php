@@ -12,7 +12,7 @@ class AuthController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/register",
+     *     path="/api/mobile-register",
      *     summary="Kullanıcı kaydı oluşturur",
      *     tags={"Auth"},
      *     @OA\RequestBody(
@@ -64,7 +64,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/login",
+     *     path="/api/mobile-login",
      *     summary="Kullanıcı girişi yapar",
      *     tags={"Auth"},
      *     @OA\RequestBody(

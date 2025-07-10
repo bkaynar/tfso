@@ -10,8 +10,8 @@ use App\Http\Controllers\API\TrackController;
 use App\Http\Controllers\API\DJController;
 use App\Http\Controllers\API\SetController;
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/mobile-register', [AuthController::class, 'register']);
+Route::post('/mobile-login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
