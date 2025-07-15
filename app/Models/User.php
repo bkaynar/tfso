@@ -58,6 +58,7 @@ class User extends Authenticatable
         'soundcloud',
         'cover_image',
         'iap_product_id',
+        'premium'
     ];
     protected $hidden = [
         'password',
