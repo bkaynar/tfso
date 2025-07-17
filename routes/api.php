@@ -43,6 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
         'store'
     ]);
+    // Global Access Logs (Authenticated)
+    Route::get('/access-logs/global', [AccessLogController::class, 'globalIndex']);
 });
 
 

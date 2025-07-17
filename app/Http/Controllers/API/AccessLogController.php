@@ -132,6 +132,33 @@ class AccessLogController extends Controller
         return response()->json($accessLog, 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/access-logs/global",
+     *     summary="Get all access logs",
+     *     description="Retrieve all access logs regardless of user or content type",
+     *     tags={"Access Logs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of all access logs",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/AccessLog")),
+     *             @OA\Property(property="last_page", type="integer", example=5),
+     *             @OA\Property(property="per_page", type="integer", example=15),
+     *             @OA\Property(property="total", type="integer", example=75)
+     *         )
+     *     )
+     * )
+     */
+    public function globalIndex(Request $request)
+    {
+        $accessLogs = AccessLog::latest()->paginate(15);
+        return response()->json($accessLogs);
+    }
+
 
     public function show(AccessLog $accessLog)
     {
