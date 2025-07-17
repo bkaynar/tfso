@@ -53,18 +53,41 @@ class DJController extends Controller
      */
     public function index(Request $request)
     {
-        // Sadece id, name ve profile_photo alanlarını getir
+        // DJ'leri setleri ve parçalarıyla birlikte getir
         $djs = User::role('dj')
+            ->with(['sets', 'tracks'])
             ->latest()
-            ->get(['id', 'name', 'profile_photo']);
+            ->get();
 
-        // profile_photo_url ve cover_image_url alanlarını ekleyelim
+        // Yanıtı formatla
         $result = $djs->map(function ($dj) {
             return [
                 'id' => $dj->id,
                 'name' => $dj->name,
-                
-                'profile_photo_url' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
+                'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
+                'bio' => $dj->bio,
+                'social_media' => [
+                    'instagram' => $dj->instagram ? "https://instagram.com/{$dj->instagram}" : null,
+                    'twitter' => $dj->twitter ? "https://twitter.com/{$dj->twitter}" : null,
+                    'facebook' => $dj->facebook ? $dj->facebook : null,
+                    'tiktok' => $dj->tiktok ? "https://tiktok.com/@{$dj->tiktok}" : null
+                ],
+                'sets' => $dj->sets->map(function ($set) {
+                    return [
+                        'id' => $set->id,
+                        'name' => $set->name,
+                        'cover_image' => $set->cover_image ? url($set->cover_image) : null,
+                        'audio_file' => $set->audio_file ? url($set->audio_file) : null,
+                    ];
+                }),
+                'tracks' => $dj->tracks->map(function ($track) {
+                    return [
+                        'id' => $track->id,
+                        'title' => $track->title,
+                        'audio_url' => $track->audio_url,
+                        'image_url' => $track->image_url,
+                    ];
+                }),
             ];
         });
 
