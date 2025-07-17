@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\API\AccessLogController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\FavoriteController;
 use Illuminate\Http\Request;
@@ -9,6 +8,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\TrackController;
 use App\Http\Controllers\API\DJController;
 use App\Http\Controllers\API\SetController;
+use App\Http\Controllers\API\AccessLogController;
 
 Route::post('/mobile-register', [AuthController::class, 'register']);
 Route::post('/mobile-login', [AuthController::class, 'login']);
@@ -37,6 +37,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/djs', [DJController::class, 'store']);
     Route::post('/djs/{id}', [DJController::class, 'update']); // Use POST for multipart/form-data updates
     Route::delete('/djs/{id}', [DJController::class, 'destroy']);
+
+    // Access Logs (Authenticated)
+    Route::apiResource('access-logs', AccessLogController::class)->only([
+        'index',
+        'store'
+    ]);
 });
 
 
@@ -55,8 +61,3 @@ Route::get('sets-latest', [SetController::class, 'latest']);
 
 
 Route::apiResource('tracks', TrackController::class);
-Route::apiResource('access-logs', AccessLogController::class)->only([
-    'index',
-    'store',
-    'show'
-]);

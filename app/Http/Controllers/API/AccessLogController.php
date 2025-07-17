@@ -9,56 +9,54 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon; // accessed_at için Carbon kütüphanesini kullanacağız
 
 /**
+ * @OA\SecurityScheme(
+ *     securityScheme="bearerAuth",
+ *     type="http",
+ *     scheme="bearer",
+ *     bearerFormat="JWT"
+ * )
  * @OA\Tag(
- * name="Access Logs",
- * description="API Endpoints for managing access logs"
+ *     name="Access Logs",
+ *     description="API Endpoints for managing access logs"
  * )
  */
 class AccessLogController extends Controller
 {
-
     /**
      * @OA\Get(
-     *    path="/api/access-logs",
-     * summary="Get access logs",
-     * description="Retrieve a list of access logs with optional filters",
-     * tags={"Access Logs"},
-     * @OA\Parameter(
-     * name="content_type",
-     * in="query",
-     * description="Filter by content type (e.g., 'Post', 'Comment')",
-     * required=false,
-     * @OA\Schema(type="string")
-     * ),
-     * @OA\Response(
-     * response=200,
-     * description="A list of access logs",
-     * @OA\JsonContent(
-     * type="object",
-     * @OA\Property(property="current_page", type="integer", example=1),
-     * @OA\Property(property="data", type="array",
-     * @OA\Items(ref="#/components/schemas/AccessLog")
-     * ),
-     * @OA\Property(property="last_page", type="integer", example=5),
-     * @OA\Property(property="per_page", type="integer", example=15),
-     * @OA\Property(property="total", type="integer", example=75)
-     * )
-     * ),
-     * @OA\Response(
-     * response=422,
-     * description="Validation error",
-     * @OA\JsonContent(
-     * type="object",
-     * @OA\Property(property="errors", type="object",
-     * @OA\Property(property="user_id", type="array", @OA\Items(type="string", example="The user id field is required.")),
-     * @OA\Property(property="content_type", type="array", @OA\Items(type="string", example="The content type field is required."))
-     * )
-     * )
-     * )
+     *     path="/api/access-logs",
+     *     summary="Get access logs",
+     *     description="Retrieve a list of access logs for authenticated user with optional filters",
+     *     tags={"Access Logs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="content_type",
+     *         in="query",
+     *         description="Filter by content type (e.g., 'track', 'radio')",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of access logs",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/AccessLog")),
+     *             @OA\Property(property="last_page", type="integer", example=5),
+     *             @OA\Property(property="per_page", type="integer", example=15),
+     *             @OA\Property(property="total", type="integer", example=75)
+     *         )
+     *     )
      * )
      */
     public function index(Request $request)
     {
+        // Check if user is authenticated
+        if (!$request->user()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         // Always filter by authenticated user
         $query = AccessLog::where('user_id', $request->user()->id);
 
@@ -77,10 +75,12 @@ class AccessLogController extends Controller
      *     path="/api/access-logs",
      *     summary="Create a new access log entry",
      *     tags={"Access Logs"},
+     *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         description="Data for the new access log",
      *         @OA\JsonContent(
+     *             required={"content_type","content_id"},
      *             @OA\Property(property="content_type", type="string", example="track"),
      *             @OA\Property(property="content_id", type="integer", example=101)
      *         )
@@ -91,13 +91,26 @@ class AccessLogController extends Controller
      *         @OA\JsonContent(ref="#/components/schemas/AccessLog")
      *     ),
      *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
      *         response=422,
-     *         description="Validation error"
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="errors", type="object")
+     *         )
      *     )
      * )
      */
     public function store(Request $request)
     {
+        // Check if user is authenticated
+        if (!$request->user()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         // No need to validate user_id; user is authenticated via bearer token
         $validator = Validator::make($request->all(), [
             'content_type' => 'required|string|max:255',
