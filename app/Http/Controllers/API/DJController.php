@@ -53,13 +53,22 @@ class DJController extends Controller
      */
     public function index(Request $request)
     {
-        // Tüm "dj" rolüne sahip kullanıcıları ilişkileriyle birlikte getir
+        // Sadece id, name ve profile_photo alanlarını getir
         $djs = User::role('dj')
-            ->with(['sets', 'tracks'])
             ->latest()
-            ->get();
+            ->get(['id', 'name', 'profile_photo']);
 
-        return response()->json($djs, 200);
+        // profile_photo_url ve cover_image_url alanlarını ekleyelim
+        $result = $djs->map(function ($dj) {
+            return [
+                'id' => $dj->id,
+                'name' => $dj->name,
+                
+                'profile_photo_url' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
+            ];
+        });
+
+        return response()->json($result, 200);
     }
 
 
