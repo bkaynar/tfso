@@ -366,12 +366,15 @@ class TrackController extends Controller
             // Son X gün içinde eklenen parçaları getir
             $cutoffDate = now()->subDays($days);
 
+            // Auth olan kullanıcıyı al (opsiyonel)
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
+
             $tracks = Track::with(['category', 'user'])
                 ->where('created_at', '>=', $cutoffDate)
                 ->latest('created_at') // En yeni olanlar önce
                 ->limit($limit)
                 ->get()
-                ->map(function ($track) {
+                ->map(function ($track) use ($user) {
                     return [
                         'id' => $track->id,
                         'title' => $track->title,
@@ -382,6 +385,7 @@ class TrackController extends Controller
                         'release_date' => $track->created_at->toISOString(),
                         'days_since_release' => $track->created_at->diffInDays(now()),
                         'is_premium' => $track->is_premium,
+                        'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                     ];
                 });
 
