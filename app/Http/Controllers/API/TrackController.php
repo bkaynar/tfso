@@ -29,38 +29,38 @@ class TrackController extends Controller
      *     )
      * )
      */
-public function index(Request $request)
-{
-    try {
-        $perPage = 4;
-        $page = (int) $request->get('page', 1);
-        $paginator = Track::with(['category', 'user'])
-            ->latest()
-            ->paginate($perPage, ['*'], 'page', $page);
+    public function index(Request $request)
+    {
+        try {
+            $perPage = 4;
+            $page = (int) $request->get('page', 1);
+            $paginator = Track::with(['category', 'user'])
+                ->latest()
+                ->paginate($perPage, ['*'], 'page', $page);
 
-        // user null olabilir, sorun değil
-        $user = auth('sanctum')->user();
+            // user null olabilir, sorun değil
+            $user = auth('sanctum')->user();
 
-        $tracks = collect($paginator->items())->map(function ($track) use ($user) {
-            $trackData = $track->toArray();
-            $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
-            return $trackData;
-        });
+            $tracks = collect($paginator->items())->map(function ($track) use ($user) {
+                $trackData = $track->toArray();
+                $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+                return $trackData;
+            });
 
-        return response()->json([
-            'data' => $tracks,
-            'current_page' => $paginator->currentPage(),
-            'last_page' => $paginator->lastPage(),
-            'per_page' => $paginator->perPage(),
-            'total' => $paginator->total(),
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Şarkılar getirilirken bir hata oluştu.',
-            'error' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'data' => $tracks,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Şarkılar getirilirken bir hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
 
@@ -164,9 +164,12 @@ public function index(Request $request)
         try {
             $track = Track::with(['category', 'user'])->findOrFail($id);
 
-            $user = $request->user();
+            // Kullanıcı varsa getir, yoksa null
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
+
             $trackData = $track->toArray();
             $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+
             return response()->json($trackData);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['message' => 'Şarkı bulunamadı.'], 404);
@@ -177,6 +180,7 @@ public function index(Request $request)
             ], 500);
         }
     }
+
 
     /**
      * @OA\Post(
