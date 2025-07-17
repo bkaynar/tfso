@@ -40,9 +40,16 @@ class SetController extends Controller
                 ->latest();
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
+            $user = $request->user();
+            
+            $sets = collect($paginator->items())->map(function ($set) use ($user) {
+                $setData = $set->toArray();
+                $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
+                return $setData;
+            });
 
             return response()->json([
-                'data' => $paginator->items(),
+                'data' => $sets,
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
                 'per_page' => $paginator->perPage(),
@@ -84,7 +91,9 @@ class SetController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        $sets->getCollection()->transform(function ($set) {
+        $user = $request->user();
+        
+        $sets->getCollection()->transform(function ($set) use ($user) {
             $set->cover_image = str_starts_with($set->cover_image, '/storage/')
                 ? url($set->cover_image)
                 : url('/storage/' . $set->cover_image);
@@ -92,6 +101,8 @@ class SetController extends Controller
             $set->audio_file = str_starts_with($set->audio_file, '/storage/')
                 ? url($set->audio_file)
                 : url('/storage/' . $set->audio_file);
+
+            $set->isLiked = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
 
             return $set;
         });

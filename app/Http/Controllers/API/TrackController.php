@@ -38,8 +38,16 @@ class TrackController extends Controller
                 ->latest()
                 ->paginate($perPage, ['*'], 'page', $page);
 
+            $user = $request->user();
+            
+            $tracks = collect($paginator->items())->map(function ($track) use ($user) {
+                $trackData = $track->toArray();
+                $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+                return $trackData;
+            });
+
             return response()->json([
-                'data' => $paginator->items(),
+                'data' => $tracks,
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
                 'per_page' => $paginator->perPage(),
@@ -146,11 +154,16 @@ class TrackController extends Controller
      *     )
      * )
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
         try {
             $track = Track::with(['category', 'user'])->findOrFail($id);
-            return response()->json($track);
+            $user = $request->user();
+            
+            $trackData = $track->toArray();
+            $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+            
+            return response()->json($trackData);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['message' => 'Şarkı bulunamadı.'], 404);
         } catch (\Exception $e) {
@@ -344,13 +357,14 @@ class TrackController extends Controller
 
             // Son X gün içinde eklenen parçaları getir
             $cutoffDate = now()->subDays($days);
+            $user = $request->user();
 
             $tracks = Track::with(['category', 'user'])
                 ->where('created_at', '>=', $cutoffDate)
                 ->latest('created_at') // En yeni olanlar önce
                 ->limit($limit)
                 ->get()
-                ->map(function ($track) {
+                ->map(function ($track) use ($user) {
                     return [
                         'id' => $track->id,
                         'title' => $track->title,
@@ -361,6 +375,7 @@ class TrackController extends Controller
                         'release_date' => $track->created_at->toISOString(),
                         'days_since_release' => $track->created_at->diffInDays(now()),
                         'is_premium' => $track->is_premium,
+                        'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                     ];
                 });
 
