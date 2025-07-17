@@ -24,13 +24,6 @@ class AccessLogController extends Controller
      * description="Retrieve a list of access logs with optional filters",
      * tags={"Access Logs"},
      * @OA\Parameter(
-     * name="user_id",
-     * in="query",
-     * description="Filter by user ID",
-     * required=false,
-     * @OA\Schema(type="integer")
-     * ),
-     * @OA\Parameter(
      * name="content_type",
      * in="query",
      * description="Filter by content type (e.g., 'Post', 'Comment')",
@@ -66,11 +59,8 @@ class AccessLogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AccessLog::query();
-
-        if ($request->has('user_id')) {
-            $query->where('user_id', $request->input('user_id'));
-        }
+        // Always filter by authenticated user
+        $query = AccessLog::where('user_id', $request->user()->id);
 
         if ($request->has('content_type')) {
             $query->where('content_type', $request->input('content_type'));
@@ -91,8 +81,6 @@ class AccessLogController extends Controller
      *         required=true,
      *         description="Data for the new access log",
      *         @OA\JsonContent(
-     *             required={"user_id", "content_type", "content_id"},
-     *             @OA\Property(property="user_id", type="integer", example=1),
      *             @OA\Property(property="content_type", type="string", example="track"),
      *             @OA\Property(property="content_id", type="integer", example=101)
      *         )
@@ -110,8 +98,8 @@ class AccessLogController extends Controller
      */
     public function store(Request $request)
     {
+        // No need to validate user_id; user is authenticated via bearer token
         $validator = Validator::make($request->all(), [
-            'user_id' => 'nullable|integer|exists:users,id', // Kullanıcı giriş yapmamış olabilir
             'content_type' => 'required|string|max:255',
             'content_id' => 'required|integer',
         ]);
@@ -121,7 +109,7 @@ class AccessLogController extends Controller
         }
 
         $accessLog = AccessLog::create([
-            'user_id' => $request->user_id,
+            'user_id' => $request->user()->id,
             'ip_address' => $request->ip(), // IP adresini request'ten al
             'content_type' => $request->content_type,
             'content_id' => $request->content_id,
