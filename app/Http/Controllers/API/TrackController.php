@@ -38,12 +38,8 @@ class TrackController extends Controller
                 ->latest()
                 ->paginate($perPage, ['*'], 'page', $page);
 
-            $user = $request->user();
-            
-            $tracks = collect($paginator->items())->map(function ($track) use ($user) {
-                $trackData = $track->toArray();
-                $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
-                return $trackData;
+            $tracks = collect($paginator->items())->map(function ($track) {
+                return $track->toArray();
             });
 
             return response()->json([
@@ -158,12 +154,8 @@ class TrackController extends Controller
     {
         try {
             $track = Track::with(['category', 'user'])->findOrFail($id);
-            $user = $request->user();
-            
-            $trackData = $track->toArray();
-            $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
-            
-            return response()->json($trackData);
+
+            return response()->json($track->toArray());
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['message' => 'Şarkı bulunamadı.'], 404);
         } catch (\Exception $e) {
@@ -357,14 +349,13 @@ class TrackController extends Controller
 
             // Son X gün içinde eklenen parçaları getir
             $cutoffDate = now()->subDays($days);
-            $user = $request->user();
 
             $tracks = Track::with(['category', 'user'])
                 ->where('created_at', '>=', $cutoffDate)
                 ->latest('created_at') // En yeni olanlar önce
                 ->limit($limit)
                 ->get()
-                ->map(function ($track) use ($user) {
+                ->map(function ($track) {
                     return [
                         'id' => $track->id,
                         'title' => $track->title,
@@ -375,7 +366,6 @@ class TrackController extends Controller
                         'release_date' => $track->created_at->toISOString(),
                         'days_since_release' => $track->created_at->diffInDays(now()),
                         'is_premium' => $track->is_premium,
-                        'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                     ];
                 });
 
