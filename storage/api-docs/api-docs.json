@@ -164,13 +164,13 @@
                 }
             }
         },
-        "/api/register": {
+        "/api/mobile-register": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Kullanıcı kaydı oluşturur",
-                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "operationId": "fdd48a8caa4a29ae8fe88353d5ceae01",
                 "requestBody": {
                     "description": "Kullanıcı kayıt bilgileri",
                     "required": true,
@@ -235,13 +235,13 @@
                 }
             }
         },
-        "/api/login": {
+        "/api/mobile-login": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Kullanıcı girişi yapar",
-                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "operationId": "ecc8e5c691fc648b604df1aca9688591",
                 "requestBody": {
                     "description": "Kullanıcı giriş bilgileri",
                     "required": true,

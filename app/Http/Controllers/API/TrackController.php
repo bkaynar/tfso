@@ -29,12 +29,22 @@ class TrackController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Eager loading ile ilişkili modelleri de getiriyoruz.
-            $tracks = Track::with(['category', 'user'])->latest()->paginate(15);
-            return response()->json($tracks);
+            $perPage = 4; // Sayfa başına gösterilecek şarkı sayısı (Flutter infinite scroll için)
+            $page = (int) $request->get('page', 1);
+            $paginator = Track::with(['category', 'user'])
+                ->latest()
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'data' => $paginator->items(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Şarkılar getirilirken bir hata oluştu.',

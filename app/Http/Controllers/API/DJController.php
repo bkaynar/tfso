@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 // User modelini kullanacağımız için import ediyoruz
 use Illuminate\Http\Request;
@@ -51,20 +53,13 @@ class DJController extends Controller
      */
     public function index(Request $request)
     {
-        // Spatie Permission ile "dj" rolüne sahip kullanıcıları filtreleyelim
-        $djs = User::role('dj')->latest()->take(10)->get();
+        // Tüm "dj" rolüne sahip kullanıcıları ilişkileriyle birlikte getir
+        $djs = User::role('dj')
+            ->with(['sets', 'tracks'])
+            ->latest()
+            ->get();
 
-        // Her DJ için gerekli alanları içeren bir dizi oluştur
-        $response = $djs->map(function ($dj) {
-            return [
-                'id' => $dj->id, // DJ ID'sini yanıta ekle
-                'name' => $dj->name,
-                'bio' => $dj->bio,
-                'profile_photo' => $dj->profile_photo ? url($dj->profile_photo) : null,
-            ];
-        });
-
-        return response()->json($response, 200);
+        return response()->json($djs, 200);
     }
 
 
@@ -299,7 +294,9 @@ class DJController extends Controller
         }
 
         // Sadece admin veya DJ'in kendisi profili güncelleyebilir
-        if (!auth()->user()->hasRole(['admin']) && auth()->user()->id !== $dj->id) {
+        $current = Auth::user();
+        // Sadece admin veya DJ kendisi güncelleyebilir
+        if (!$current->roles->contains('name', 'admin') && $current->id !== $dj->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -362,7 +359,9 @@ class DJController extends Controller
     public function destroy($id)
     {
         // Yalnızca belirli rollere sahip kullanıcıların DJ silmesine izin ver
-        if (!auth()->user()->hasRole(['admin'])) { // Örnek: Sadece admin silebilir
+        $current = Auth::user();
+        // Sadece admin silebilir
+        if (!$current->roles->contains('name', 'admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

@@ -25,18 +25,35 @@ class SetController extends Controller
      */
     public function index(Request $request)
     {
-        // Fetch all sets with optional filters
-        $sets = Set::query()
-            ->when($request->has('user_id'), function ($query) use ($request) {
-                return $query->where('user_id', $request->input('user_id'));
-            })
-            ->when($request->has('is_premium'), function ($query) use ($request) {
-                return $query->where('is_premium', $request->input('is_premium'));
-            })
-            ->with(['user'])
-            ->paginate(10);
+        try {
+            $perPage = 8; // Sayfa başına gösterilecek set sayısı
+            $page = (int) $request->get('page', 1);
 
-        return response()->json($sets);
+            $query = Set::query()
+                ->when($request->has('user_id'), function ($query) use ($request) {
+                    return $query->where('user_id', $request->input('user_id'));
+                })
+                ->when($request->has('is_premium'), function ($query) use ($request) {
+                    return $query->where('is_premium', $request->input('is_premium'));
+                })
+                ->with(['user'])
+                ->latest();
+
+            $paginator = $query->paginate($perPage, array('*'), 'page', $page);
+
+            return response()->json([
+                'data' => $paginator->items(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Setler getirilirken bir hata oluştu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

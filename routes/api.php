@@ -33,28 +33,35 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/radios/{radio}/toggle-favorite', [FavoriteController::class, 'toggleRadio'])->name('radios.toggle-favorite');
     Route::post('/djs/{dj}/toggle-favorite', [FavoriteController::class, 'toggleDj'])->name('djs.toggle-favorite');
 
-    // DJ Routes (Authenticated)
-    Route::post('/djs', [DJController::class, 'store']);
-    Route::post('/djs/{id}', [DJController::class, 'update']); // Use POST for multipart/form-data updates
-    Route::delete('/djs/{id}', [DJController::class, 'destroy']);
 });
-
-
-Route::post('/categories/bulk', [CategoryController::class, 'storeBulk']);
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::post('/categories/bulk', [CategoryController::class, 'storeBulk']);
+Route::get('/categories/{id}', [CategoryController::class, 'show']);
 Route::get('/categories/{id}/tracks', [CategoryController::class, 'getTracksByCategory']);
 Route::get('/categories/{id}/sets', [CategoryController::class, 'getSetsByCategory']);
-
-// Public DJ Routes
-Route::get('/djs', [DJController::class, 'index']);
-Route::get('/djs/{id}', [DJController::class, 'show']);
 
 // 🔥 Yeni Çıkanlar Endpoint'i (Public)
 Route::get('/tracks/new-releases', [TrackController::class, 'newReleases']);
 Route::get('sets-latest', [SetController::class, 'latest']);
 
+Route::get('/tracks', [TrackController::class, 'index']);
+Route::post('/tracks', [TrackController::class, 'store'])->middleware('auth:sanctum');
+Route::get('/tracks/{id}', [TrackController::class, 'show']);
+Route::post('/tracks/{id}', [TrackController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/tracks/{id}', [TrackController::class, 'destroy'])->middleware('auth:sanctum');
 
-Route::apiResource('tracks', TrackController::class);
+Route::get('/sets', [SetController::class, 'index']);
+
+Route::get('/djs', [DJController::class, 'index']);
+Route::post('/djs', [DJController::class, 'store'])->middleware('auth:sanctum');
+Route::get('/djs/{id}', [DJController::class, 'show']);
+Route::post('/djs/{id}', [DJController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/djs/{id}', [DJController::class, 'destroy'])->middleware('auth:sanctum');
+
+
+
+
+
 Route::apiResource('access-logs', AccessLogController::class)->only([
     'index',
     'store',

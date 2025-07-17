@@ -252,4 +252,26 @@ class CategoryController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Display a category with its sets and tracks.
+     */
+    public function show($id)
+    {
+        try {
+            $category = Category::with(['sets', 'tracks.user'])->find($id);
+            if (!$category) {
+                return response()->json(['message' => 'Kategori bulunamadı.'], 404);
+            }
+            return response()->json([
+                'sets' => $category->sets,
+                'tracks' => $category->tracks,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Kategori getirilirken bir hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
