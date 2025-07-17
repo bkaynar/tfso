@@ -251,6 +251,7 @@ class DJController extends Controller
                     'id' => $set->id,
                     'name' => $set->name,
                     'cover_image' => $set->cover_image ? url($set->cover_image) : null,
+                    'audio_file' => $set->audio_file ? url('/storage/' . $set->audio_file) : null,
                 ];
             }),
             'tracks' => $dj->tracks->map(function ($track) {
