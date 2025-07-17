@@ -29,33 +29,42 @@ class TrackController extends Controller
      *     )
      * )
      */
-    public function index(Request $request)
-    {
-        try {
-            $perPage = 4; // Sayfa başına gösterilecek şarkı sayısı (Flutter infinite scroll için)
-            $page = (int) $request->get('page', 1);
-            $paginator = Track::with(['category', 'user'])
-                ->latest()
-                ->paginate($perPage, ['*'], 'page', $page);
+public function index(Request $request)
+{
+    try {
+        $perPage = 4;
+        $page = (int) $request->get('page', 1);
+        $paginator = Track::with(['category', 'user'])
+            ->latest()
+            ->paginate($perPage, ['*'], 'page', $page);
 
-            $tracks = collect($paginator->items())->map(function ($track) {
-                return $track->toArray();
-            });
+        // user null olabilir, sorun değil
+        $user = auth('sanctum')->user();
 
-            return response()->json([
-                'data' => $tracks,
-                'current_page' => $paginator->currentPage(),
-                'last_page' => $paginator->lastPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Şarkılar getirilirken bir hata oluştu.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $tracks = collect($paginator->items())->map(function ($track) use ($user) {
+            $trackData = $track->toArray();
+            $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+            return $trackData;
+        });
+
+        return response()->json([
+            'data' => $tracks,
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'per_page' => $paginator->perPage(),
+            'total' => $paginator->total(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Şarkılar getirilirken bir hata oluştu.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
+
+
+
 
     /**
      * @OA\Post(
@@ -155,7 +164,10 @@ class TrackController extends Controller
         try {
             $track = Track::with(['category', 'user'])->findOrFail($id);
 
-            return response()->json($track->toArray());
+            $user = $request->user();
+            $trackData = $track->toArray();
+            $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+            return response()->json($trackData);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['message' => 'Şarkı bulunamadı.'], 404);
         } catch (\Exception $e) {
