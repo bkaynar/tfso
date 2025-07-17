@@ -41,7 +41,7 @@ class SetController extends Controller
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
             $user = $request->user();
-            
+
             $sets = collect($paginator->items())->map(function ($set) use ($user) {
                 $setData = $set->toArray();
                 $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
@@ -91,17 +91,21 @@ class SetController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        $user = $request->user();
-        
+        // Token varsa kullanıcıyı al
+        $user = $request->bearerToken() ? auth('sanctum')->user() : null;
+
         $sets->getCollection()->transform(function ($set) use ($user) {
+            // Cover image URL'yi tam yap
             $set->cover_image = str_starts_with($set->cover_image, '/storage/')
                 ? url($set->cover_image)
                 : url('/storage/' . $set->cover_image);
 
+            // Audio file URL'yi tam yap
             $set->audio_file = str_starts_with($set->audio_file, '/storage/')
                 ? url($set->audio_file)
                 : url('/storage/' . $set->audio_file);
 
+            // isLiked kontrolü
             $set->isLiked = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
 
             return $set;
