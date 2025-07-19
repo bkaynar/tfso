@@ -74,11 +74,12 @@ class AccessLogController extends Controller
             
             // Content detaylarını ekle
             if ($log->content_type === 'track') {
-                $track = \App\Models\Track::find($log->content_id);
+                $track = \App\Models\Track::with('user')->find($log->content_id);
                 if ($track) {
                     $data['content'] = [
                         'id' => $track->id,
                         'title' => $track->title,
+                        'artist_name' => $track->user ? $track->user->name : null,
                         'audio_url' => $track->audio_url,
                         'image_url' => $track->image_url,
                         'duration' => $track->duration,
@@ -88,11 +89,12 @@ class AccessLogController extends Controller
                     $data['content'] = null;
                 }
             } elseif ($log->content_type === 'set') {
-                $set = \App\Models\Set::find($log->content_id);
+                $set = \App\Models\Set::with('user')->find($log->content_id);
                 if ($set) {
                     $data['content'] = [
                         'id' => $set->id,
                         'name' => $set->name,
+                        'artist_name' => $set->user ? $set->user->name : null,
                         'cover_image' => $set->cover_image ? 
                             (str_starts_with($set->cover_image, '/storage/') ? 
                                 url($set->cover_image) : 
@@ -213,11 +215,12 @@ class AccessLogController extends Controller
             
             // Content detaylarını ekle
             if ($log->content_type === 'track') {
-                $track = \App\Models\Track::find($log->content_id);
+                $track = \App\Models\Track::with('user')->find($log->content_id);
                 if ($track) {
                     $data['content'] = [
                         'id' => $track->id,
                         'title' => $track->title,
+                        'artist_name' => $track->user ? $track->user->name : null,
                         'audio_url' => $track->audio_url,
                         'image_url' => $track->image_url,
                         'duration' => $track->duration,
@@ -227,11 +230,12 @@ class AccessLogController extends Controller
                     $data['content'] = null;
                 }
             } elseif ($log->content_type === 'set') {
-                $set = \App\Models\Set::find($log->content_id);
+                $set = \App\Models\Set::with('user')->find($log->content_id);
                 if ($set) {
                     $data['content'] = [
                         'id' => $set->id,
                         'name' => $set->name,
+                        'artist_name' => $set->user ? $set->user->name : null,
                         'cover_image' => $set->cover_image ? 
                             (str_starts_with($set->cover_image, '/storage/') ? 
                                 url($set->cover_image) : 
