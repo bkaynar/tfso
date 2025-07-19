@@ -181,6 +181,109 @@ class DJController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/djs/search",
+     *     summary="Search DJs by name",
+     *     tags={"DJs"},
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         required=true,
+     *         description="Search query for DJ name",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Search results for DJs",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/User")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error - query parameter required"
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('query');
+            
+            if (empty($query)) {
+                return response()->json([
+                    'message' => 'Arama sorgusu gereklidir.',
+                ], 422);
+            }
+
+            $perPage = 6;
+            $page = (int) $request->get('page', 1);
+
+            $djQuery = User::role('dj')
+                ->with(['sets', 'tracks'])
+                ->where('name', 'LIKE', '%' . $query . '%')
+                ->orderBy('name', 'asc');
+
+            $paginator = $djQuery->paginate($perPage, array('*'), 'page', $page);
+
+            $djs = collect($paginator->items())->map(function ($dj) {
+                return [
+                    'id' => $dj->id,
+                    'name' => $dj->name,
+                    'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
+                    'bio' => $dj->bio,
+                    'social_media' => [
+                        'instagram' => $dj->instagram ? "https://instagram.com/{$dj->instagram}" : null,
+                        'twitter' => $dj->twitter ? "https://twitter.com/{$dj->twitter}" : null,
+                        'facebook' => $dj->facebook ? $dj->facebook : null,
+                        'tiktok' => $dj->tiktok ? "https://tiktok.com/@{$dj->tiktok}" : null
+                    ],
+                    'sets' => $dj->sets->map(function ($set) {
+                        return [
+                            'id' => $set->id,
+                            'name' => $set->name,
+                            'cover_image' => $set->cover_image ? url($set->cover_image) : null,
+                            'audio_file' => $set->audio_file ? url($set->audio_file) : null,
+                        ];
+                    }),
+                    'tracks' => $dj->tracks->map(function ($track) {
+                        return [
+                            'id' => $track->id,
+                            'title' => $track->title,
+                            'audio_url' => $track->audio_url,
+                            'image_url' => $track->image_url,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json([
+                'data' => $djs,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'query' => $query,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'DJ arama işleminde bir hata oluştu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/djs",
      *     summary="Create a new DJ",

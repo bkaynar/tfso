@@ -56,6 +56,7 @@ Route::get('/categories/{id}/sets', [CategoryController::class, 'getSetsByCatego
 // Public DJ Routes
 Route::get('/djs', [DJController::class, 'index']);
 Route::get('/djs-paginated', [DJController::class, 'paginatedIndex']);
+Route::get('/djs/search', [DJController::class, 'search']);
 Route::get('/djs/{id}', [DJController::class, 'show']);
 
 // 🔥 Yeni Çıkanlar Endpoint'i (Public)
