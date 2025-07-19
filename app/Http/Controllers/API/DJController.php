@@ -94,6 +94,87 @@ class DJController extends Controller
         return response()->json($result, 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/djs-paginated",
+     *     summary="Get paginated list of DJs ordered A-Z",
+     *     tags={"DJs"},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Paginated list of DJs ordered alphabetically",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/User")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function paginatedIndex(Request $request)
+    {
+        try {
+            $perPage = 6;
+            $page = (int) $request->get('page', 1);
+
+            $query = User::role('dj')
+                ->with(['sets', 'tracks'])
+                ->orderBy('name', 'asc');
+
+            $paginator = $query->paginate($perPage, array('*'), 'page', $page);
+
+            $djs = collect($paginator->items())->map(function ($dj) {
+                return [
+                    'id' => $dj->id,
+                    'name' => $dj->name,
+                    'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
+                    'bio' => $dj->bio,
+                    'social_media' => [
+                        'instagram' => $dj->instagram ? "https://instagram.com/{$dj->instagram}" : null,
+                        'twitter' => $dj->twitter ? "https://twitter.com/{$dj->twitter}" : null,
+                        'facebook' => $dj->facebook ? $dj->facebook : null,
+                        'tiktok' => $dj->tiktok ? "https://tiktok.com/@{$dj->tiktok}" : null
+                    ],
+                    'sets' => $dj->sets->map(function ($set) {
+                        return [
+                            'id' => $set->id,
+                            'name' => $set->name,
+                            'cover_image' => $set->cover_image ? url($set->cover_image) : null,
+                            'audio_file' => $set->audio_file ? url($set->audio_file) : null,
+                        ];
+                    }),
+                    'tracks' => $dj->tracks->map(function ($track) {
+                        return [
+                            'id' => $track->id,
+                            'title' => $track->title,
+                            'audio_url' => $track->audio_url,
+                            'image_url' => $track->image_url,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json([
+                'data' => $djs,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'DJ\'ler getirilirken bir hata oluştu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     /**
      * @OA\Post(
