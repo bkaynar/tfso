@@ -380,18 +380,116 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display a category with its sets and tracks.
+     * @OA\Get(
+     *     path="/api/categories/{id}",
+     *     summary="Get category with sets and/or tracks",
+     *     tags={"Categories"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         description="Content type filter",
+     *         @OA\Schema(type="string", enum={"sets", "tracks", "all"}, default="all")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category with filtered content",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="category", ref="#/components/schemas/Category"),
+     *             @OA\Property(
+     *                 property="content",
+     *                 type="array",
+     *                 description="Array of sets and/or tracks with type identifier",
+     *                 @OA\Items(
+     *                     @OA\Property(property="type", type="string", enum={"set", "track"}),
+     *                     @OA\Property(property="data", type="object", description="Set or Track object")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Category not found"
+     *     )
+     * )
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
         try {
-            $category = Category::with(['sets', 'tracks.user'])->find($id);
+            $category = Category::with(['sets.user', 'tracks.user'])->find($id);
             if (!$category) {
                 return response()->json(['message' => 'Kategori bulunamadı.'], 404);
             }
+
+            $type = $request->get('type', 'all'); // Default: all
+            $mixedContent = collect();
+
+            // Sets'leri ekle (eğer type 'sets' veya 'all' ise)
+            if ($type === 'sets' || $type === 'all') {
+                foreach ($category->sets as $set) {
+                    $mixedContent->push([
+                        'type' => 'set',
+                        'data' => [
+                            'id' => $set->id,
+                            'name' => $set->name,
+                            'cover_image' => $set->cover_image ? url($set->cover_image) : null,
+                            'audio_file' => $set->audio_file ? url($set->audio_file) : null,
+                            'is_premium' => $set->is_premium,
+                            'created_at' => $set->created_at,
+                            'user' => $set->user ? [
+                                'id' => $set->user->id,
+                                'name' => $set->user->name,
+                                'profile_photo' => $set->user->profile_photo ? url('/storage/' . $set->user->profile_photo) : null,
+                            ] : null
+                        ]
+                    ]);
+                }
+            }
+
+            // Tracks'leri ekle (eğer type 'tracks' veya 'all' ise)
+            if ($type === 'tracks' || $type === 'all') {
+                foreach ($category->tracks as $track) {
+                    $mixedContent->push([
+                        'type' => 'track',
+                        'data' => [
+                            'id' => $track->id,
+                            'title' => $track->title,
+                            'audio_url' => $track->audio_url,
+                            'image_url' => $track->image_url,
+                            'duration' => $track->duration,
+                            'created_at' => $track->created_at,
+                            'user' => $track->user ? [
+                                'id' => $track->user->id,
+                                'name' => $track->user->name,
+                                'profile_photo' => $track->user->profile_photo ? url('/storage/' . $track->user->profile_photo) : null,
+                            ] : null
+                        ]
+                    ]);
+                }
+            }
+
+            // Sıralama: type 'all' ise önce setler sonra trackler
+            if ($type === 'all') {
+                $mixedContent = $mixedContent->sortBy(function ($item) {
+                    return $item['type'] === 'set' ? 0 : 1;
+                })->values();
+            }
+
             return response()->json([
-                'sets' => $category->sets,
-                'tracks' => $category->tracks,
+                'category' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'image' => $category->image,
+                    'image_url' => $category->image ? url('/storage/' . $category->image) : null,
+                ],
+                'content' => $mixedContent,
+                'type' => $type,
             ]);
         } catch (\Exception $e) {
             return response()->json([
