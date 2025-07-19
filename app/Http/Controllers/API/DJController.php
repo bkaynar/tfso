@@ -53,11 +53,15 @@ class DJController extends Controller
      */
     public function index(Request $request)
     {
-        // DJ'leri setleri ve parçalarıyla birlikte getir
+        // DJ'leri setleri ve parçalarıyla birlikte getir ve en çok içeriğe sahip olanları önce sırala
         $djs = User::role('dj')
             ->with(['sets', 'tracks'])
-            ->latest()
-            ->get();
+            ->withCount(['sets', 'tracks'])
+            ->get()
+            ->sortByDesc(function ($dj) {
+                return $dj->sets_count + $dj->tracks_count;
+            })
+            ->values();
 
         // Yanıtı formatla
         $result = $djs->map(function ($dj) {
