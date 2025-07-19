@@ -427,6 +427,9 @@ class CategoryController extends Controller
                 return response()->json(['message' => 'Kategori bulunamadı.'], 404);
             }
 
+            // Token varsa kullanıcıyı al
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
+
             $type = $request->get('type', 'all'); // Default: all
             $mixedContent = collect();
 
@@ -442,6 +445,7 @@ class CategoryController extends Controller
                             'audio_file' => $set->audio_file ? url($set->audio_file) : null,
                             'is_premium' => $set->is_premium,
                             'created_at' => $set->created_at,
+                            'isLiked' => $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false,
                             'user' => $set->user ? [
                                 'id' => $set->user->id,
                                 'name' => $set->user->name,
