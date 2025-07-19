@@ -468,6 +468,7 @@ class CategoryController extends Controller
                             'image_url' => $track->image_url,
                             'duration' => $track->duration,
                             'created_at' => $track->created_at,
+                            'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                             'user' => $track->user ? [
                                 'id' => $track->user->id,
                                 'name' => $track->user->name,
