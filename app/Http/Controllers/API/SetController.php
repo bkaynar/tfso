@@ -44,6 +44,19 @@ class SetController extends Controller
 
             $sets = collect($paginator->items())->map(function ($set) use ($user) {
                 $setData = $set->toArray();
+                
+                // Cover image URL'yi tam yap
+                $setData['cover_image'] = $set->cover_image ? 
+                    (str_starts_with($set->cover_image, '/storage/') ? 
+                        url($set->cover_image) : 
+                        url('/storage/' . $set->cover_image)) : null;
+                
+                // Audio file URL'yi tam yap
+                $setData['audio_file'] = $set->audio_file ? 
+                    (str_starts_with($set->audio_file, '/storage/') ? 
+                        url($set->audio_file) : 
+                        url('/storage/' . $set->audio_file)) : null;
+                
                 $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
                 return $setData;
             });
@@ -179,6 +192,19 @@ class SetController extends Controller
 
             $sets = collect($paginator->items())->map(function ($set) use ($user) {
                 $setData = $set->toArray();
+                
+                // Cover image URL'yi tam yap
+                $setData['cover_image'] = $set->cover_image ? 
+                    (str_starts_with($set->cover_image, '/storage/') ? 
+                        url($set->cover_image) : 
+                        url('/storage/' . $set->cover_image)) : null;
+                
+                // Audio file URL'yi tam yap
+                $setData['audio_file'] = $set->audio_file ? 
+                    (str_starts_with($set->audio_file, '/storage/') ? 
+                        url($set->audio_file) : 
+                        url('/storage/' . $set->audio_file)) : null;
+                
                 $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
                 return $setData;
             });
