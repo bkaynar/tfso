@@ -66,6 +66,49 @@ class AccessLogController extends Controller
 
         $accessLogs = $query->latest()->paginate(15); // En son eklenenleri ve sayfalama
 
+        $accessLogs->getCollection()->transform(function ($log) {
+            $data = $log->toArray();
+            
+            // Content detaylarını ekle
+            if ($log->content_type === 'track') {
+                $track = \App\Models\Track::find($log->content_id);
+                if ($track) {
+                    $data['content'] = [
+                        'id' => $track->id,
+                        'title' => $track->title,
+                        'audio_url' => $track->audio_url,
+                        'image_url' => $track->image_url,
+                        'duration' => $track->duration,
+                    ];
+                } else {
+                    $data['content'] = null;
+                }
+            } elseif ($log->content_type === 'set') {
+                $set = \App\Models\Set::find($log->content_id);
+                if ($set) {
+                    $data['content'] = [
+                        'id' => $set->id,
+                        'name' => $set->name,
+                        'cover_image' => $set->cover_image ? 
+                            (str_starts_with($set->cover_image, '/storage/') ? 
+                                url($set->cover_image) : 
+                                url('/storage/' . $set->cover_image)) : null,
+                        'audio_file' => $set->audio_file ? 
+                            (str_starts_with($set->audio_file, '/storage/') ? 
+                                url($set->audio_file) : 
+                                url('/storage/' . $set->audio_file)) : null,
+                        'is_premium' => $set->is_premium,
+                    ];
+                } else {
+                    $data['content'] = null;
+                }
+            } else {
+                $data['content'] = null;
+            }
+            
+            return $data;
+        });
+
         return response()->json($accessLogs);
     }
 
