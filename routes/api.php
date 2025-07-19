@@ -65,5 +65,6 @@ Route::get('sets-latest', [SetController::class, 'latest']);
 
 //Tüm Setleri Pageable Listeler
 Route::get('/sets', [SetController::class, 'index']);
+Route::get('/sets/search', [SetController::class, 'search']);
 
 Route::apiResource('tracks', TrackController::class);

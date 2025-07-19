@@ -113,4 +113,89 @@ class SetController extends Controller
 
         return response()->json($sets);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/sets/search",
+     *     summary="Search sets by name",
+     *     tags={"Sets"},
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         required=true,
+     *         description="Search query for set name",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Search results for sets",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Set")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error - query parameter required"
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('query');
+            
+            if (empty($query)) {
+                return response()->json([
+                    'message' => 'Arama sorgusu gereklidir.',
+                ], 422);
+            }
+
+            $perPage = 8;
+            $page = (int) $request->get('page', 1);
+
+            $setQuery = Set::query()
+                ->when($request->has('user_id'), function ($query) use ($request) {
+                    return $query->where('user_id', $request->input('user_id'));
+                })
+                ->when($request->has('is_premium'), function ($query) use ($request) {
+                    return $query->where('is_premium', $request->input('is_premium'));
+                })
+                ->where('name', 'LIKE', '%' . $query . '%')
+                ->with(['user'])
+                ->orderBy('name', 'asc');
+
+            $paginator = $setQuery->paginate($perPage, array('*'), 'page', $page);
+            $user = $request->user();
+
+            $sets = collect($paginator->items())->map(function ($set) use ($user) {
+                $setData = $set->toArray();
+                $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
+                return $setData;
+            });
+
+            return response()->json([
+                'data' => $sets,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'query' => $query,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Set arama işleminde bir hata oluştu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
