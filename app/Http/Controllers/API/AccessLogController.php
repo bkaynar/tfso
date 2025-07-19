@@ -66,8 +66,11 @@ class AccessLogController extends Controller
 
         $accessLogs = $query->latest()->paginate(15); // En son eklenenleri ve sayfalama
 
-        $accessLogs->getCollection()->transform(function ($log) {
+        $accessLogs->getCollection()->transform(function ($log) use ($request) {
             $data = $log->toArray();
+            
+            // Token varsa kullanıcıyı al
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
             
             // Content detaylarını ekle
             if ($log->content_type === 'track') {
@@ -79,6 +82,7 @@ class AccessLogController extends Controller
                         'audio_url' => $track->audio_url,
                         'image_url' => $track->image_url,
                         'duration' => $track->duration,
+                        'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                     ];
                 } else {
                     $data['content'] = null;
@@ -98,6 +102,7 @@ class AccessLogController extends Controller
                                 url($set->audio_file) : 
                                 url('/storage/' . $set->audio_file)) : null,
                         'is_premium' => $set->is_premium,
+                        'isLiked' => $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false,
                     ];
                 } else {
                     $data['content'] = null;
@@ -200,8 +205,11 @@ class AccessLogController extends Controller
     {
         $accessLogs = AccessLog::latest()->paginate(15);
         
-        $accessLogs->getCollection()->transform(function ($log) {
+        $accessLogs->getCollection()->transform(function ($log) use ($request) {
             $data = $log->toArray();
+            
+            // Token varsa kullanıcıyı al
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
             
             // Content detaylarını ekle
             if ($log->content_type === 'track') {
@@ -213,6 +221,7 @@ class AccessLogController extends Controller
                         'audio_url' => $track->audio_url,
                         'image_url' => $track->image_url,
                         'duration' => $track->duration,
+                        'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                     ];
                 } else {
                     $data['content'] = null;
@@ -232,6 +241,7 @@ class AccessLogController extends Controller
                                 url($set->audio_file) : 
                                 url('/storage/' . $set->audio_file)) : null,
                         'is_premium' => $set->is_premium,
+                        'isLiked' => $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false,
                     ];
                 } else {
                     $data['content'] = null;
