@@ -402,4 +402,83 @@ class TrackController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/tracks/search",
+     *     summary="Search tracks by title",
+     *     tags={"Tracks"},
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         required=true,
+     *         description="Search query for track title",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Search results for tracks",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Track")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error - query parameter required"
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('query');
+            
+            if (empty($query)) {
+                return response()->json([
+                    'message' => 'Arama sorgusu gereklidir.',
+                ], 422);
+            }
+
+            $perPage = 10;
+            $page = (int) $request->get('page', 1);
+
+            $trackQuery = Track::query()
+                ->with(['user', 'category'])
+                ->where('title', 'LIKE', '%' . $query . '%')
+                ->orderBy('title', 'asc');
+
+            $paginator = $trackQuery->paginate($perPage, array('*'), 'page', $page);
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
+
+            $tracks = collect($paginator->items())->map(function ($track) use ($user) {
+                $trackData = $track->toArray();
+                $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+                return $trackData;
+            });
+
+            return response()->json([
+                'data' => $tracks,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'query' => $query,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Track arama işleminde bir hata oluştu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

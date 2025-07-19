@@ -69,4 +69,5 @@ Route::get('sets-latest', [SetController::class, 'latest']);
 Route::get('/sets', [SetController::class, 'index']);
 Route::get('/sets/search', [SetController::class, 'search']);
 
+Route::get('/tracks/search', [TrackController::class, 'search']);
 Route::apiResource('tracks', TrackController::class);
