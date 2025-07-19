@@ -35,8 +35,8 @@ class FavoriteController extends Controller
         $user = $request->user();
 
         $favorites = [
-            'tracks' => $user->favoriteTracks()->get(),
-            'sets' => $user->favoriteSets()->get(),
+            'tracks' => $user->favoriteTracks()->with('user')->get(),
+            'sets' => $user->favoriteSets()->with('user')->get(),
             'radios' => $user->favoriteRadios()->get(),
             'djs' => $user->favoriteDJs()->get(),
         ];
@@ -60,7 +60,7 @@ class FavoriteController extends Controller
      */
     public function tracks(Request $request)
     {
-        return response()->json($request->user()->favoriteTracks()->get());
+        return response()->json($request->user()->favoriteTracks()->with('user')->get());
     }
 
     /**
@@ -79,7 +79,7 @@ class FavoriteController extends Controller
      */
     public function sets(Request $request)
     {
-        return response()->json($request->user()->favoriteSets()->get());
+        return response()->json($request->user()->favoriteSets()->with('user')->get());
     }
 
     /**
