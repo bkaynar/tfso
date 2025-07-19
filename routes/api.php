@@ -61,5 +61,7 @@ Route::get('/djs/{id}', [DJController::class, 'show']);
 Route::get('/tracks/new-releases', [TrackController::class, 'newReleases']);
 Route::get('sets-latest', [SetController::class, 'latest']);
 
+//Tüm Setleri Pageable Listeler
+Route::get('/sets', [SetController::class, 'index']);
 
 Route::apiResource('tracks', TrackController::class);
