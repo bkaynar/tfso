@@ -51,12 +51,138 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            $categories = Category::all();
+            $categories = Category::withCount(['tracks', 'sets'])
+                ->get()
+                ->sortByDesc(function ($category) {
+                    return $category->tracks_count + $category->sets_count;
+                })
+                ->values();
             return response()->json($categories);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Kategoriler getirilirken bir hata oluştu.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/categories-paginated",
+     *     summary="Get paginated list of categories ordered by content count",
+     *     tags={"Categories"},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Paginated list of categories ordered by content count",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Category")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function paginatedIndex(Request $request)
+    {
+        try {
+            $perPage = 10;
+            $page = (int) $request->get('page', 1);
+
+            $query = Category::withCount(['tracks', 'sets'])
+                ->orderByRaw('(tracks_count + sets_count) DESC');
+
+            $paginator = $query->paginate($perPage, array('*'), 'page', $page);
+
+            return response()->json([
+                'data' => $paginator->items(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Kategoriler getirilirken bir hata oluştu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/categories/search",
+     *     summary="Search categories by name",
+     *     tags={"Categories"},
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         required=true,
+     *         description="Search query for category name",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Search results for categories",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Category")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error - query parameter required"
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('query');
+            
+            if (empty($query)) {
+                return response()->json([
+                    'message' => 'Arama sorgusu gereklidir.',
+                ], 422);
+            }
+
+            $perPage = 10;
+            $page = (int) $request->get('page', 1);
+
+            $categoryQuery = Category::withCount(['tracks', 'sets'])
+                ->where('name', 'LIKE', '%' . $query . '%')
+                ->orderBy('name', 'asc');
+
+            $paginator = $categoryQuery->paginate($perPage, array('*'), 'page', $page);
+
+            return response()->json([
+                'data' => $paginator->items(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'query' => $query,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Kategori arama işleminde bir hata oluştu.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

@@ -48,8 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::post('/categories/bulk', [CategoryController::class, 'storeBulk']);
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories-paginated', [CategoryController::class, 'paginatedIndex']);
+Route::get('/categories/search', [CategoryController::class, 'search']);
 Route::get('/categories/{id}/tracks', [CategoryController::class, 'getTracksByCategory']);
 Route::get('/categories/{id}/sets', [CategoryController::class, 'getSetsByCategory']);
 
