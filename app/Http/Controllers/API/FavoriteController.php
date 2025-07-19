@@ -34,9 +34,21 @@ class FavoriteController extends Controller
     {
         $user = $request->user();
 
+        $tracks = $user->favoriteTracks()->with('user')->get()->map(function ($track) {
+            $data = $track->toArray();
+            $data['artist_name'] = $track->user ? $track->user->name : null;
+            return $data;
+        });
+
+        $sets = $user->favoriteSets()->with('user')->get()->map(function ($set) {
+            $data = $set->toArray();
+            $data['artist_name'] = $set->user ? $set->user->name : null;
+            return $data;
+        });
+
         $favorites = [
-            'tracks' => $user->favoriteTracks()->with('user')->get(),
-            'sets' => $user->favoriteSets()->with('user')->get(),
+            'tracks' => $tracks,
+            'sets' => $sets,
             'radios' => $user->favoriteRadios()->get(),
             'djs' => $user->favoriteDJs()->get(),
         ];
@@ -60,7 +72,13 @@ class FavoriteController extends Controller
      */
     public function tracks(Request $request)
     {
-        return response()->json($request->user()->favoriteTracks()->with('user')->get());
+        $tracks = $request->user()->favoriteTracks()->with('user')->get()->map(function ($track) {
+            $data = $track->toArray();
+            $data['artist_name'] = $track->user ? $track->user->name : null;
+            return $data;
+        });
+
+        return response()->json($tracks);
     }
 
     /**
@@ -79,7 +97,13 @@ class FavoriteController extends Controller
      */
     public function sets(Request $request)
     {
-        return response()->json($request->user()->favoriteSets()->with('user')->get());
+        $sets = $request->user()->favoriteSets()->with('user')->get()->map(function ($set) {
+            $data = $set->toArray();
+            $data['artist_name'] = $set->user ? $set->user->name : null;
+            return $data;
+        });
+
+        return response()->json($sets);
     }
 
     /**
