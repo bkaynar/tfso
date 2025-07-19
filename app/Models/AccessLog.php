@@ -81,4 +81,14 @@ class AccessLog extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function track()
+    {
+        return $this->belongsTo(Track::class, 'content_id');
+    }
+
+    public function set()
+    {
+        return $this->belongsTo(Set::class, 'content_id');
+    }
 }
