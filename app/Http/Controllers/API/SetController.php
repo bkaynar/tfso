@@ -40,7 +40,9 @@ class SetController extends Controller
                 ->latest();
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
-            $user = $request->user();
+            
+            // Token varsa kullanıcıyı al
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
 
             $sets = collect($paginator->items())->map(function ($set) use ($user) {
                 $setData = $set->toArray();
@@ -188,7 +190,9 @@ class SetController extends Controller
                 ->orderBy('name', 'asc');
 
             $paginator = $setQuery->paginate($perPage, array('*'), 'page', $page);
-            $user = $request->user();
+            
+            // Token varsa kullanıcıyı al
+            $user = $request->bearerToken() ? auth('sanctum')->user() : null;
 
             $sets = collect($paginator->items())->map(function ($set) use ($user) {
                 $setData = $set->toArray();
