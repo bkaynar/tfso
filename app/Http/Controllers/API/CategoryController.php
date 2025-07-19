@@ -441,8 +441,14 @@ class CategoryController extends Controller
                         'data' => [
                             'id' => $set->id,
                             'name' => $set->name,
-                            'cover_image' => $set->cover_image ? url($set->cover_image) : null,
-                            'audio_file' => $set->audio_file ? url($set->audio_file) : null,
+                            'cover_image' => $set->cover_image ? 
+                                (str_starts_with($set->cover_image, '/storage/') ? 
+                                    url($set->cover_image) : 
+                                    url('/storage/' . $set->cover_image)) : null,
+                            'audio_file' => $set->audio_file ? 
+                                (str_starts_with($set->audio_file, '/storage/') ? 
+                                    url($set->audio_file) : 
+                                    url('/storage/' . $set->audio_file)) : null,
                             'is_premium' => $set->is_premium,
                             'created_at' => $set->created_at,
                             'isLiked' => $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false,
