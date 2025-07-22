@@ -53,6 +53,8 @@ class DJController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth('sanctum')->user();
+
         // DJ'leri setleri ve parçalarıyla birlikte getir ve en çok içeriğe sahip olanları önce sırala
         $djs = User::role('dj')
             ->with(['sets', 'tracks'])
@@ -64,7 +66,7 @@ class DJController extends Controller
             ->values();
 
         // Yanıtı formatla
-        $result = $djs->map(function ($dj) {
+        $result = $djs->map(function ($dj) use ($user) {
             return [
                 'id' => $dj->id,
                 'name' => $dj->name,
@@ -92,6 +94,7 @@ class DJController extends Controller
                         'image_url' => $track->image_url,
                     ];
                 }),
+                'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
             ];
         });
 
@@ -125,6 +128,7 @@ class DJController extends Controller
     public function paginatedIndex(Request $request)
     {
         try {
+            $user = auth('sanctum')->user();
             $perPage = 6;
             $page = (int) $request->get('page', 1);
 
@@ -134,7 +138,7 @@ class DJController extends Controller
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
 
-            $djs = collect($paginator->items())->map(function ($dj) {
+            $djs = collect($paginator->items())->map(function ($dj) use ($user) {
                 return [
                     'id' => $dj->id,
                     'name' => $dj->name,
@@ -162,6 +166,7 @@ class DJController extends Controller
                             'image_url' => $track->image_url,
                         ];
                     }),
+                    'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
                 ];
             });
 
@@ -218,8 +223,9 @@ class DJController extends Controller
     public function search(Request $request)
     {
         try {
+            $user = auth('sanctum')->user();
             $query = $request->get('query');
-            
+
             if (empty($query)) {
                 return response()->json([
                     'message' => 'Arama sorgusu gereklidir.',
@@ -236,7 +242,7 @@ class DJController extends Controller
 
             $paginator = $djQuery->paginate($perPage, array('*'), 'page', $page);
 
-            $djs = collect($paginator->items())->map(function ($dj) {
+            $djs = collect($paginator->items())->map(function ($dj) use ($user) {
                 return [
                     'id' => $dj->id,
                     'name' => $dj->name,
@@ -264,6 +270,7 @@ class DJController extends Controller
                             'image_url' => $track->image_url,
                         ];
                     }),
+                    'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
                 ];
             });
 
@@ -413,8 +420,10 @@ class DJController extends Controller
      *     )
      * )
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $user = auth('sanctum')->user();
+
         // DJ rolüne sahip kullanıcıyı bul
         $dj = User::role('dj')->find($id);
 
@@ -450,6 +459,7 @@ class DJController extends Controller
                     'image_url' => $track->image_url,
                 ];
             }),
+            'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
         ];
 
         return response()->json($response);
