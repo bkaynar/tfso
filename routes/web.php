@@ -33,6 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Users - only admin can access
     Route::resource('users', UserController::class)->middleware('role:admin');
+
+    //Events - admin, dj can access
+    Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index')->middleware('role:admin,dj');
 });
 
 require __DIR__ . '/settings.php';
