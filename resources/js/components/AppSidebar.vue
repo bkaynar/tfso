@@ -50,6 +50,11 @@ const mainNavItems = computed((): NavItem[] => {
                 title: 'Tracks',
                 href: '/tracks',
                 icon: Radio,
+            },
+            {
+                title: 'Events',
+                href: '/events',
+                icon: FolderOpen,
             }
         );
     }

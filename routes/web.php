@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CategoryController;
@@ -35,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('users', UserController::class)->middleware('role:admin');
 
     //Events - admin, dj can access
-    Route::get('events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index')->middleware('role:admin,dj');
+    Route::resource('events', EventController::class)->middleware('role:admin,dj');
 });
 
 require __DIR__ . '/settings.php';
