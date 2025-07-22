@@ -58,7 +58,9 @@ class User extends Authenticatable
         'soundcloud',
         'cover_image',
         'iap_product_id',
-        'premium'
+        'premium',
+        'fcm_token', // Add this line
+
     ];
     protected $hidden = [
         'password',
