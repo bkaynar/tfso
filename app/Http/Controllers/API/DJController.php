@@ -55,13 +55,13 @@ class DJController extends Controller
     {
         $user = auth('sanctum')->user();
 
-        // DJ'leri setleri ve parçalarıyla birlikte getir ve en çok içeriğe sahip olanları önce sırala
+        // DJ'leri setleri, parçaları ve etkinlikleriyle birlikte getir ve en çok içeriğe sahip olanları önce sırala
         $djs = User::role('dj')
-            ->with(['sets', 'tracks'])
-            ->withCount(['sets', 'tracks'])
+            ->with(['sets', 'tracks', 'events'])
+            ->withCount(['sets', 'tracks', 'events'])
             ->get()
             ->sortByDesc(function ($dj) {
-                return $dj->sets_count + $dj->tracks_count;
+                return $dj->sets_count + $dj->tracks_count + $dj->events_count;
             })
             ->values();
 
@@ -92,6 +92,17 @@ class DJController extends Controller
                         'title' => $track->title,
                         'audio_url' => $track->audio_url,
                         'image_url' => $track->image_url,
+                    ];
+                }),
+                'events' => $dj->events->map(function ($event) {
+                    return [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                        'description' => $event->description,
+                        'event_date' => $event->event_date,
+                        'time' => $event->event_time,
+                        'location' => $event->location,
+                        'image' => $event->image ? url('/storage/' . $event->image) : null,
                     ];
                 }),
                 'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
@@ -133,7 +144,7 @@ class DJController extends Controller
             $page = (int) $request->get('page', 1);
 
             $query = User::role('dj')
-                ->with(['sets', 'tracks'])
+                ->with(['sets', 'tracks', 'events'])
                 ->orderBy('name', 'asc');
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
@@ -164,6 +175,17 @@ class DJController extends Controller
                             'title' => $track->title,
                             'audio_url' => $track->audio_url,
                             'image_url' => $track->image_url,
+                        ];
+                    }),
+                    'events' => $dj->events->map(function ($event) {
+                        return [
+                            'id' => $event->id,
+                            'title' => $event->title,
+                            'description' => $event->description,
+                            'event_date' => $event->event_date,
+                            'time' => $event->event_time,
+                            'location' => $event->location,
+                            'image' => $event->image ? url('/storage/' . $event->image) : null,
                         ];
                     }),
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
@@ -236,7 +258,7 @@ class DJController extends Controller
             $page = (int) $request->get('page', 1);
 
             $djQuery = User::role('dj')
-                ->with(['sets', 'tracks'])
+                ->with(['sets', 'tracks', 'events'])
                 ->where('name', 'LIKE', '%' . $query . '%')
                 ->orderBy('name', 'asc');
 
@@ -268,6 +290,17 @@ class DJController extends Controller
                             'title' => $track->title,
                             'audio_url' => $track->audio_url,
                             'image_url' => $track->image_url,
+                        ];
+                    }),
+                    'events' => $dj->events->map(function ($event) {
+                        return [
+                            'id' => $event->id,
+                            'title' => $event->title,
+                            'description' => $event->description,
+                            'event_date' => $event->event_date,
+                            'time' => $event->event_time,
+                            'location' => $event->location,
+                            'image' => $event->image ? url('/storage/' . $event->image) : null,
                         ];
                     }),
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
@@ -457,6 +490,17 @@ class DJController extends Controller
                     'title' => $track->title,
                     'audio_url' => $track->audio_url,
                     'image_url' => $track->image_url,
+                ];
+            }),
+            'events' => $dj->events->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'event_date' => $event->event_date,
+                    'time' => $event->event_time,
+                    'location' => $event->location,
+                    'image' => $event->image ? url('/storage/' . $event->image) : null,
                 ];
             }),
             'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
