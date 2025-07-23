@@ -102,7 +102,7 @@ class DJController extends Controller
                         'event_date' => $event->event_date,
                         'time' => $event->event_time,
                         'location' => $event->location,
-                        'image' => $event->image ? url('/storage/' . $event->image) : null,
+                        'image' => $event->photo ? url('/storage/' . $event->photo) : null,
                     ];
                 }),
                 'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
@@ -185,7 +185,7 @@ class DJController extends Controller
                             'event_date' => $event->event_date,
                             'time' => $event->event_time,
                             'location' => $event->location,
-                            'image' => $event->image ? url('/storage/' . $event->image) : null,
+                            'image' => $event->photo ? url('/storage/' . $event->photo) : null,
                         ];
                     }),
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
@@ -300,7 +300,7 @@ class DJController extends Controller
                             'event_date' => $event->event_date,
                             'time' => $event->event_time,
                             'location' => $event->location,
-                            'image' => $event->image ? url('/storage/' . $event->image) : null,
+                            'image' => $event->photo ? url('/storage/' . $event->photo) : null,
                         ];
                     }),
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
@@ -500,7 +500,7 @@ class DJController extends Controller
                     'event_date' => $event->event_date,
                     'time' => $event->event_time,
                     'location' => $event->location,
-                    'image' => $event->image ? url('/storage/' . $event->image) : null,
+                    'image' => $event->photo ? url('/storage/' . $event->photo) : null,
                 ];
             }),
             'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,

@@ -16,11 +16,8 @@ class Event extends Model
         'location',
         'ticket_url',
         'photo',
-        'cover_image',
         'event_date',
         'event_time',
-        'is_premium',
-        'iap_product_id',
     ];
 
     public function user()

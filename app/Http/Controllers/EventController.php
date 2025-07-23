@@ -44,13 +44,10 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'location' => 'nullable|string|max:255',
             'ticket_url' => 'nullable|url',
-            'photo' => 'nullable|string',
+            'photo' => 'nullable|file|image|max:2048',
             'event_date' => 'nullable|date',
             'event_time' => 'nullable',
             'user_id' => 'nullable|exists:users,id',
-            'cover_image' => 'nullable|file|image|max:2048',
-            'is_premium' => 'boolean',
-            'iap_product_id' => 'nullable|string',
         ]);
 
         // Admin değilse kendi ID'sini kullan
@@ -58,9 +55,9 @@ class EventController extends Controller
             $validated['user_id'] = Auth::id();
         }
 
-        // Cover image upload
-        if ($request->hasFile('cover_image')) {
-            $validated['cover_image'] = $request->file('cover_image')->store('events', 'public');
+        // Photo upload
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('events', 'public');
         }
 
         $event = Event::create($validated);
@@ -101,9 +98,7 @@ class EventController extends Controller
             'event_date' => 'nullable|date',
             'event_time' => 'nullable',
             'user_id' => 'nullable|exists:users,id',
-            'cover_image' => 'nullable|file|image|max:2048',
-            'is_premium' => 'boolean',
-            'iap_product_id' => 'nullable|string',
+            'photo' => 'nullable|file|image|max:2048',
         ]);
 
         // Admin değilse sadece kendi event'lerini düzenleyebilir
@@ -111,13 +106,13 @@ class EventController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Cover image upload
-        if ($request->hasFile('cover_image')) {
+        // Photo upload
+        if ($request->hasFile('photo')) {
             // Eski resmi sil
-            if ($event->cover_image) {
-                \Storage::disk('public')->delete($event->cover_image);
+            if ($event->photo) {
+                \Storage::disk('public')->delete($event->photo);
             }
-            $validated['cover_image'] = $request->file('cover_image')->store('events', 'public');
+            $validated['photo'] = $request->file('photo')->store('events', 'public');
         }
 
         $event->update($validated);
