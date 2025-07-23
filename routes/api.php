@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/update-fcm-token', [AuthController::class, 'updateFcmToken']);
 
     // Favorites
     Route::prefix('favorites')->name('favorites.')->group(function () {
