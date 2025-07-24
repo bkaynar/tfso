@@ -240,4 +240,84 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
+
+    /**
+     * Show the form for editing user's own profile.
+     */
+    public function editProfile()
+    {
+        $user = auth()->user();
+        $user->load('roles');
+
+        return Inertia::render('profile/EditOrCreate', [
+            'user' => $user,
+            'isOwnProfile' => true
+        ]);
+    }
+
+    /**
+     * Update user's own profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'bio' => 'nullable|string|max:5000',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'instagram' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'facebook' => 'nullable|string|max:255',
+            'tiktok' => 'nullable|string|max:255',
+            'soundcloud' => 'nullable|string|max:255',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $data = $request->only([
+            'name',
+            'email',
+            'bio',
+            'instagram',
+            'twitter',
+            'facebook',
+            'tiktok',
+            'soundcloud'
+        ]);
+
+        // Handle password update
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old profile photo if exists
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+
+            $profilePhoto = $request->file('profile_photo');
+            $profilePhotoPath = $profilePhoto->store('users/profiles', 'public');
+            $data['profile_photo'] = $profilePhotoPath;
+        }
+
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            // Delete old cover image if exists
+            if ($user->cover_image) {
+                Storage::disk('public')->delete($user->cover_image);
+            }
+
+            $coverImage = $request->file('cover_image');
+            $coverImagePath = $coverImage->store('users/covers', 'public');
+            $data['cover_image'] = $coverImagePath;
+        }
+
+        $user->update($data);
+
+        return redirect('/')->with('success', 'Profile updated successfully.');
+    }
 }

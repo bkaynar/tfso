@@ -37,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Events - admin, dj can access
     Route::resource('events', EventController::class)->middleware('role:admin,dj');
+
+    // Profile routes - all authenticated users can access
+    Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
+    Route::patch('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
 require __DIR__ . '/settings.php';

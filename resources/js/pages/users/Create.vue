@@ -76,13 +76,13 @@
                         <div>
                             <label for="instagram"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Instagram</label>
-                            <input v-model="form.instagram" id="instagram" type="text" placeholder="@username"
+                            <input v-model="form.instagram" id="instagram" type="text" placeholder="username"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
                         <div>
                             <label for="twitter"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twitter</label>
-                            <input v-model="form.twitter" id="twitter" type="text" placeholder="@username"
+                            <input v-model="form.twitter" id="twitter" type="text" placeholder="username"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
                     </div>
@@ -95,9 +95,9 @@
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
                         <div>
-                            <label for="tiktok"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TikTok</label>
-                            <input v-model="form.tiktok" id="tiktok" type="text" placeholder="@username"
+                            <label for="youtube"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Youtube</label>
+                            <input v-model="form.tiktok" id="tiktok" type="text" placeholder="Youtube channel URL"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
                     </div>

@@ -33,6 +33,8 @@ const mainNavItems = computed((): NavItem[] => {
         },
     ];
 
+
+
     // Only admin and dj can see content management
     if (hasAnyRole(['admin', 'dj'])) {
         items.push(
@@ -56,6 +58,15 @@ const mainNavItems = computed((): NavItem[] => {
                 href: '/events',
                 icon: FolderOpen,
             }
+        );
+    }
+    if (hasAnyRole(['dj'])){
+        items.push(
+            {
+                title: 'Profile',
+                href: '/profile/edit',
+                icon: Users,
+            },
         );
     }
 
