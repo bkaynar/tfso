@@ -317,11 +317,34 @@ class CategoryController extends Controller
     public function getTracksByCategory($id)
     {
         try {
-            $category = Category::with('tracks')->find($id);
+            $category = Category::with('tracks.user')->find($id);
             if (!$category) {
                 return response()->json(['message' => 'Kategori bulunamadı.'], 404);
             }
-            return response()->json($category->tracks);
+            
+            // Token varsa kullanıcıyı al
+            $user = request()->bearerToken() ? auth('sanctum')->user() : null;
+            
+            $tracks = $category->tracks->map(function ($track) use ($user) {
+                return [
+                    'id' => $track->id,
+                    'title' => $track->title,
+                    'audio_url' => $track->audio_url,
+                    'image_url' => $track->image_url,
+                    'duration' => $track->duration,
+                    'is_premium' => $track->is_premium,
+                    'created_at' => $track->created_at,
+                    'updated_at' => $track->updated_at,
+                    'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
+                    'user' => $track->user ? [
+                        'id' => $track->user->id,
+                        'name' => $track->user->name,
+                        'profile_photo' => $track->user->profile_photo ? url('/storage/' . $track->user->profile_photo) : null,
+                    ] : null
+                ];
+            });
+            
+            return response()->json($tracks);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Şarkılar getirilirken bir hata oluştu.',
@@ -366,11 +389,39 @@ class CategoryController extends Controller
     public function getSetsByCategory($id)
     {
         try {
-            $category = Category::with('sets')->find($id);
+            $category = Category::with('sets.user')->find($id);
             if (!$category) {
                 return response()->json(['message' => 'Kategori bulunamadı.'], 404);
             }
-            return response()->json($category->sets);
+            
+            // Token varsa kullanıcıyı al
+            $user = request()->bearerToken() ? auth('sanctum')->user() : null;
+            
+            $sets = $category->sets->map(function ($set) use ($user) {
+                return [
+                    'id' => $set->id,
+                    'name' => $set->name,
+                    'cover_image' => $set->cover_image ? 
+                        (str_starts_with($set->cover_image, '/storage/') ? 
+                            url($set->cover_image) : 
+                            url('/storage/' . $set->cover_image)) : null,
+                    'audio_file' => $set->audio_file ? 
+                        (str_starts_with($set->audio_file, '/storage/') ? 
+                            url($set->audio_file) : 
+                            url('/storage/' . $set->audio_file)) : null,
+                    'is_premium' => $set->is_premium,
+                    'created_at' => $set->created_at,
+                    'updated_at' => $set->updated_at,
+                    'isLiked' => $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false,
+                    'user' => $set->user ? [
+                        'id' => $set->user->id,
+                        'name' => $set->user->name,
+                        'profile_photo' => $set->user->profile_photo ? url('/storage/' . $set->user->profile_photo) : null,
+                    ] : null
+                ];
+            });
+            
+            return response()->json($sets);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Setler getirilirken bir hata oluştu.',
@@ -473,6 +524,7 @@ class CategoryController extends Controller
                             'audio_url' => $track->audio_url,
                             'image_url' => $track->image_url,
                             'duration' => $track->duration,
+                            'is_premium' => $track->is_premium,
                             'created_at' => $track->created_at,
                             'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
                             'user' => $track->user ? [
