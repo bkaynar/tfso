@@ -271,8 +271,8 @@ class UserController extends Controller
         ]);
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255',
             'password' => 'nullable|string|min:8|confirmed',
             'bio' => 'nullable|string|max:5000',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -325,6 +325,8 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
+        Log::info('Profile update request data:', $request->all());
 
         return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
     }

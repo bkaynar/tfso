@@ -1,4 +1,5 @@
 <template>
+
     <Head :title="'Edit Profile'" />
     <AppLayout :breadcrumbs="[
         { title: 'Dashboard', href: '/dashboard' },
@@ -42,16 +43,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="password"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New
+                                Password</label>
                             <input v-model="form.password" id="password" type="password"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
                             <div v-if="form.errors.password" class="mt-1 text-sm text-red-600">{{ form.errors.password
-                            }}</div>
+                                }}</div>
                             <p class="mt-1 text-sm text-gray-500">Leave blank to keep current password</p>
                         </div>
                         <div>
                             <label for="password_confirmation"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New
+                                Password</label>
                             <input v-model="form.password_confirmation" id="password_confirmation" type="password"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
                         </div>
@@ -116,9 +119,8 @@
 
                             <!-- Current profile photo preview -->
                             <div v-if="props.user?.profile_photo && !form.profile_photo" class="mb-4 text-center">
-                                <img :src="`/storage/${props.user.profile_photo}`"
-                                     alt="Current profile photo"
-                                     class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-gray-200 dark:border-gray-600">
+                                <img :src="`/storage/${props.user.profile_photo}`" alt="Current profile photo"
+                                    class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-gray-200 dark:border-gray-600">
                                 <p class="text-sm text-gray-500 mt-1">Current photo</p>
                             </div>
 
@@ -131,7 +133,7 @@
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ form.profile_photo.name
-                                    }}</span>
+                                        }}</span>
                                 </template>
                                 <template v-else>
                                     <svg class="w-12 h-12 text-green-400 dark:text-green-600 mb-2" fill="none"
@@ -139,7 +141,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">Click to change profile photo</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Click to change profile
+                                        photo</span>
                                 </template>
                                 <input id="profile_photo" type="file" accept="image/*"
                                     @change="handleProfilePhotoChange" class="hidden" />
@@ -156,9 +159,8 @@
 
                             <!-- Current cover image preview -->
                             <div v-if="props.user?.cover_image && !form.cover_image" class="mb-4 text-center">
-                                <img :src="`/storage/${props.user.cover_image}`"
-                                     alt="Current cover image"
-                                     class="w-32 h-20 mx-auto object-cover rounded border-2 border-gray-200 dark:border-gray-600">
+                                <img :src="`/storage/${props.user.cover_image}`" alt="Current cover image"
+                                    class="w-32 h-20 mx-auto object-cover rounded border-2 border-gray-200 dark:border-gray-600">
                                 <p class="text-sm text-gray-500 mt-1">Current cover</p>
                             </div>
 
@@ -171,7 +173,7 @@
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ form.cover_image.name
-                                    }}</span>
+                                        }}</span>
                                 </template>
                                 <template v-else>
                                     <svg class="w-12 h-12 text-purple-400 dark:text-purple-600 mb-2" fill="none"
@@ -179,7 +181,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">Click to change cover image</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Click to change cover
+                                        image</span>
                                 </template>
                                 <input id="cover_image" type="file" accept="image/*" @change="handleCoverImageChange"
                                     class="hidden" />
@@ -246,10 +249,12 @@ const handleCoverImageChange = (event: Event) => {
 }
 
 const submit = () => {
-    form.patch(route('profile.update'))
+    console.log('Form data:', form);
+    form.post(route('profile.update'), {
+        forceFormData: true,
+        _method: 'patch'
+    });
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

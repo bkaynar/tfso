@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
-    Route::patch('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::match(['patch', 'post'], 'profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
 require __DIR__ . '/auth.php';
