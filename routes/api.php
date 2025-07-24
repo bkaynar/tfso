@@ -34,11 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/radios/{radio}/toggle-favorite', [FavoriteController::class, 'toggleRadio'])->name('radios.toggle-favorite');
     Route::post('/djs/{dj}/toggle-favorite', [FavoriteController::class, 'toggleDj'])->name('djs.toggle-favorite');
 
-    // DJ Routes (Authenticated)
-    Route::post('/djs', [DJController::class, 'store']);
-    Route::post('/djs/{id}', [DJController::class, 'update']); // Use POST for multipart/form-data updates
-    Route::delete('/djs/{id}', [DJController::class, 'destroy']);
-
     // Access Logs (Authenticated)
     Route::apiResource('access-logs', AccessLogController::class)->only([
         'index',
