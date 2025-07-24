@@ -69,7 +69,7 @@ class UserController extends Controller
             'instagram' => 'nullable|string|max:255',
             'twitter' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
-            'tiktok' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
             'soundcloud' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'iap_product_id' => 'nullable|string|max:255',
@@ -84,7 +84,7 @@ class UserController extends Controller
             'instagram',
             'twitter',
             'facebook',
-            'tiktok',
+            'youtube',
             'soundcloud',
             'iap_product_id'
         ]);
@@ -162,7 +162,7 @@ class UserController extends Controller
             'instagram' => 'nullable|string|max:255',
             'twitter' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
-            'tiktok' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
             'soundcloud' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'iap_product_id' => 'nullable|string|max:255',
@@ -177,7 +177,7 @@ class UserController extends Controller
             'instagram',
             'twitter',
             'facebook',
-            'tiktok',
+            'youtube',
             'soundcloud',
             'iap_product_id'
         ]);
@@ -262,6 +262,14 @@ class UserController extends Controller
     {
         $user = auth()->user();
 
+        // Debug için log ekleyelim
+        Log::info('Profile update request (UserController):', [
+            'has_profile_photo' => $request->hasFile('profile_photo'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'all_files' => $request->allFiles(),
+            'request_data' => $request->except(['password', 'password_confirmation'])
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -271,7 +279,7 @@ class UserController extends Controller
             'instagram' => 'nullable|string|max:255',
             'twitter' => 'nullable|string|max:255',
             'facebook' => 'nullable|string|max:255',
-            'tiktok' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
             'soundcloud' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -283,7 +291,7 @@ class UserController extends Controller
             'instagram',
             'twitter',
             'facebook',
-            'tiktok',
+            'youtube',
             'soundcloud'
         ]);
 
@@ -318,6 +326,6 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect('/')->with('success', 'Profile updated successfully.');
+        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
     }
 }

@@ -93,7 +93,7 @@
                         <div>
                             <label for="youtube"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Youtube</label>
-                            <input v-model="form.tiktok" id="tiktok" type="text" placeholder="Youtube Link"
+                            <input v-model="form.youtube" id="youtube" type="text" placeholder="Youtube Link"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                                 Photo</label>
 
                             <!-- Current profile photo preview -->
-                            <div v-if="props.user.profile_photo && !form.profile_photo" class="mb-4 text-center">
+                            <div v-if="props.user?.profile_photo && !form.profile_photo" class="mb-4 text-center">
                                 <img :src="`/storage/${props.user.profile_photo}`"
                                      alt="Current profile photo"
                                      class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-gray-200 dark:border-gray-600">
@@ -155,7 +155,7 @@
                                 Image</label>
 
                             <!-- Current cover image preview -->
-                            <div v-if="props.user.cover_image && !form.cover_image" class="mb-4 text-center">
+                            <div v-if="props.user?.cover_image && !form.cover_image" class="mb-4 text-center">
                                 <img :src="`/storage/${props.user.cover_image}`"
                                      alt="Current cover image"
                                      class="w-32 h-20 mx-auto object-cover rounded border-2 border-gray-200 dark:border-gray-600">
@@ -227,7 +227,7 @@ const form = useForm({
     instagram: props.user?.instagram || '',
     twitter: props.user?.twitter || '',
     facebook: props.user?.facebook || '',
-    tiktok: props.user?.tiktok || '',
+    youtube: props.user?.youtube || '',
     soundcloud: props.user?.soundcloud || '',
 })
 

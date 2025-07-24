@@ -43,5 +43,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
-require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/settings.php';

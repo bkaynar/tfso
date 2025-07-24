@@ -29,15 +29,56 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Debug için log ekleyelim
+        \Illuminate\Support\Facades\Log::info('Profile update request:', [
+            'has_profile_photo' => $request->hasFile('profile_photo'),
+            'has_cover_image' => $request->hasFile('cover_image'),
+            'validated_data' => $data,
+        ]);
+
+        // Handle password update
+        if (!empty($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            unset($data['password']);
         }
 
-        $request->user()->save();
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old profile photo if exists
+            if ($user->profile_photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            }
 
-        return to_route('profile.edit');
+            $profilePhoto = $request->file('profile_photo');
+            $profilePhotoPath = $profilePhoto->store('users/profiles', 'public');
+            $data['profile_photo'] = $profilePhotoPath;
+        }
+
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            // Delete old cover image if exists
+            if ($user->cover_image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->cover_image);
+            }
+
+            $coverImage = $request->file('cover_image');
+            $coverImagePath = $coverImage->store('users/covers', 'public');
+            $data['cover_image'] = $coverImagePath;
+        }
+
+        $user->fill($data);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return redirect()->back()->with('success', 'Profile updated successfully.');
     }
 
     /**

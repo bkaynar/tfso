@@ -26,7 +26,7 @@ use Spatie\Translatable\HasTranslations;
     *     @OA\Property(property="instagram", type="string", description="Instagram handle of the user"),
     *     @OA\Property(property="twitter", type="string", description="Twitter handle of the user"),
     *     @OA\Property(property="facebook", type="string", description="Facebook profile URL of the user"),
-    *     @OA\Property(property="tiktok", type="string", description="TikTok handle of the user"),
+    *     @OA\Property(property="youtube", type="string", description="Youtube link of the user"),
     *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation timestamp of the user account", readOnly=true),
     *     @OA\Property(property="updated_at", type="string", format="date-time", description="Last update timestamp of the user account", readOnly=true)
     * )
@@ -54,7 +54,7 @@ class User extends Authenticatable
         'instagram',
         'twitter',
         'facebook',
-        'tiktok',
+        'youtube', // tiktok yerine youtube
         'soundcloud',
         'cover_image',
         'iap_product_id',
