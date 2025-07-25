@@ -34,12 +34,18 @@ class Track extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'description',
         'audio_file',
         'image_file',
         'is_premium',
         'iap_product_id',
         'category_id',
+    ];
+
+    protected $hidden = [
+        'liked_by_users_count',
+        'description',
+        'created_at',
+        'updated_at',
     ];
 
     public function user()
@@ -50,6 +56,11 @@ class Track extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_tracks')->withTimestamps();
     }
 
     // Audio URL accessor

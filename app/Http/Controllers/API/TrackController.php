@@ -34,7 +34,8 @@ class TrackController extends Controller
         try {
             $perPage = 4;
             $page = (int) $request->get('page', 1);
-            $paginator = Track::with(['category', 'user'])
+            $paginator = Track::with(['category', 'user:id,name'])
+                ->withCount('likedByUsers')
                 ->latest()
                 ->paginate($perPage, ['*'], 'page', $page);
 
@@ -44,6 +45,7 @@ class TrackController extends Controller
             $tracks = collect($paginator->items())->map(function ($track) use ($user) {
                 $trackData = $track->toArray();
                 $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+                $trackData['likes_count'] = $track->liked_by_users_count + 15;
                 return $trackData;
             });
 
@@ -162,13 +164,16 @@ class TrackController extends Controller
     public function show($id, Request $request)
     {
         try {
-            $track = Track::with(['category', 'user'])->findOrFail($id);
+            $track = Track::with(['category', 'user:id,name'])
+                ->withCount('likedByUsers')
+                ->findOrFail($id);
 
             // Kullanıcı varsa getir, yoksa null
             $user = $request->bearerToken() ? auth('sanctum')->user() : null;
 
             $trackData = $track->toArray();
             $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+            $trackData['likes_count'] = $track->liked_by_users_count + 15;
 
             return response()->json($trackData);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -369,7 +374,8 @@ class TrackController extends Controller
             // Auth olan kullanıcıyı al (opsiyonel)
             $user = $request->bearerToken() ? auth('sanctum')->user() : null;
 
-            $tracks = Track::with(['category', 'user'])
+            $tracks = Track::with(['category', 'user:id,name'])
+                ->withCount('likedByUsers')
                 ->where('created_at', '>=', $cutoffDate)
                 ->latest('created_at') // En yeni olanlar önce
                 ->limit($limit)
@@ -386,6 +392,7 @@ class TrackController extends Controller
                         'days_since_release' => $track->created_at->diffInDays(now()),
                         'is_premium' => $track->is_premium,
                         'isLiked' => $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false,
+                        'likes_count' => $track->liked_by_users_count + 15,
                     ];
                 });
 
@@ -453,7 +460,8 @@ class TrackController extends Controller
             $page = (int) $request->get('page', 1);
 
             $trackQuery = Track::query()
-                ->with(['user', 'category'])
+                ->with(['user:id,name', 'category'])
+                ->withCount('likedByUsers')
                 ->where('title', 'LIKE', '%' . $query . '%')
                 ->orderBy('title', 'asc');
 
@@ -463,6 +471,7 @@ class TrackController extends Controller
             $tracks = collect($paginator->items())->map(function ($track) use ($user) {
                 $trackData = $track->toArray();
                 $trackData['isLiked'] = $user ? $user->favoriteTracks()->where('track_id', $track->id)->exists() : false;
+                $trackData['likes_count'] = $track->liked_by_users_count + 15;
                 return $trackData;
             });
 

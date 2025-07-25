@@ -14,6 +14,11 @@ class Category extends Model
         'image',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     protected $appends = ['image_url'];
 
     public function getImageUrlAttribute()

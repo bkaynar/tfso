@@ -11,6 +11,11 @@ class LastPlayedContent extends Model
 
     protected $fillable = ['user_id', 'last_played_set_id', 'last_played_track_id', 'last_played_radio_id'];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
