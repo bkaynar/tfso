@@ -95,9 +95,9 @@
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
                         <div>
-                            <label for="tiktok"
+                            <label for="youtube"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Youtube</label>
-                            <input v-model="form.tiktok" id="tiktok" type="text" placeholder="Youtube channel URL"
+                            <input v-model="form.youtube" id="youtube" type="text" placeholder="Youtube channel URL"
                                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         </div>
                     </div>
@@ -277,7 +277,7 @@ const form = useForm({
     instagram: props.user?.instagram || '',
     twitter: props.user?.twitter || '',
     facebook: props.user?.facebook || '',
-    tiktok: props.user?.tiktok || '',
+    youtube: props.user?.youtube || '',
     soundcloud: props.user?.soundcloud || '',
     iap_product_id: props.user?.iap_product_id || '',
     roles: props.user?.roles?.map((role: any) => role.name) || [] as string[],

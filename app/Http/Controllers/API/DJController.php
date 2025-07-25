@@ -333,7 +333,7 @@ class DJController extends Controller
                 'instagram' => $dj->instagram ? "https://instagram.com/{$dj->instagram}" : null,
                 'twitter' => $dj->twitter ? "https://twitter.com/{$dj->twitter}" : null,
                 'facebook' => $dj->facebook ? $dj->facebook : null,
-                'tiktok' => $dj->tiktok ? "https://tiktok.com/@{$dj->tiktok}" : null
+                'youtube' => $dj->youtube ? "{$dj->youtube}" : null
             ],
             'sets' => $dj->sets->map(function ($set) {
                 return [
