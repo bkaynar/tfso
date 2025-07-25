@@ -40,7 +40,9 @@ const form = useForm({
     category_id: '',
     user_id: '',
     is_premium: false,
-    iap_product_id: ''
+    iap_product_id: '',
+    ownership_declaration: false,
+    publication_permission: false
 })
 
 // Auto-set user_id for DJ
@@ -104,6 +106,9 @@ const removeImageFile = () => {
 }
 
 const submitForm = () => {
+    if (!form.ownership_declaration || !form.publication_permission) {
+        return;
+    }
     form.post(route('tracks.store'), {
         forceFormData: true
     })
@@ -325,6 +330,44 @@ const users = computed(() => props.users ?? [])
                         </div>
                     </div>
 
+                    <!-- Terms and Conditions -->
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 space-y-4">
+                        <h3 class="text-lg font-medium text-red-800 dark:text-red-200">
+                            Terms and Conditions
+                        </h3>
+                        
+                        <!-- Ownership Declaration -->
+                        <div class="flex items-start space-x-3">
+                            <input id="ownership_declaration" v-model="form.ownership_declaration" type="checkbox"
+                                class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-red-300 rounded" />
+                            <label for="ownership_declaration" class="text-sm text-red-700 dark:text-red-300 leading-relaxed">
+                                I declare that the uploaded work belongs to me.
+                            </label>
+                        </div>
+                        <div v-if="form.errors.ownership_declaration" class="text-sm text-red-600 ml-7">
+                            {{ form.errors.ownership_declaration }}
+                        </div>
+
+                        <!-- Publication Permission -->
+                        <div class="flex items-start space-x-3">
+                            <input id="publication_permission" v-model="form.publication_permission" type="checkbox"
+                                class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-red-300 rounded" />
+                            <label for="publication_permission" class="text-sm text-red-700 dark:text-red-300 leading-relaxed">
+                                I hereby grant permission for the work to be published on the TFSO Israel Platforms.
+                            </label>
+                        </div>
+                        <div v-if="form.errors.publication_permission" class="text-sm text-red-600 ml-7">
+                            {{ form.errors.publication_permission }}
+                        </div>
+
+                        <!-- Warning message -->
+                        <div v-if="!form.ownership_declaration || !form.publication_permission" class="bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded p-3">
+                            <p class="text-sm text-red-700 dark:text-red-300">
+                                <strong>Required:</strong> You must accept both terms to upload your track.
+                            </p>
+                        </div>
+                    </div>
+
                     <!-- Form Actions -->
                     <div
                         class="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-3 sm:space-y-0 pt-6 border-t border-gray-200 dark:border-gray-600">
@@ -332,7 +375,7 @@ const users = computed(() => props.users ?? [])
                             class="inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Cancel
                         </Link>
-                        <button type="submit" :disabled="form.processing"
+                        <button type="submit" :disabled="form.processing || !form.ownership_declaration || !form.publication_permission"
                             class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
                             <span v-if="form.processing">Creating...</span>
                             <span v-else>Create Track</span>
