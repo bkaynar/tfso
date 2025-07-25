@@ -120,7 +120,7 @@ class DJController extends Controller
                 }, 'tracks' => function($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
-                ->withCount('followers')
+                ->withCount(['followers', 'sets', 'tracks'])
                 ->orderBy('name', 'asc');
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
@@ -132,6 +132,8 @@ class DJController extends Controller
                     'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
                     'likes_count' => $dj->followers_count + 15,
+                    'sets_count' => $dj->sets_count,
+                    'tracks_count' => $dj->tracks_count,
                 ];
             });
 
@@ -206,7 +208,7 @@ class DJController extends Controller
                 }, 'tracks' => function($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
-                ->withCount('followers')
+                ->withCount(['followers', 'sets', 'tracks'])
                 ->where('name', 'LIKE', '%' . $query . '%')
                 ->orderBy('name', 'asc');
 
@@ -219,6 +221,8 @@ class DJController extends Controller
                     'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
                     'likes_count' => $dj->followers_count + 15,
+                    'sets_count' => $dj->sets_count,
+                    'tracks_count' => $dj->tracks_count,
                 ];
             });
 
