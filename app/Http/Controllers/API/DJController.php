@@ -62,7 +62,7 @@ class DJController extends Controller
             }, 'tracks' => function($query) {
                 $query->withCount('likedByUsers');
             }, 'events'])
-            ->withCount(['sets', 'tracks', 'events'])
+            ->withCount(['sets', 'tracks', 'events', 'followers'])
             ->get()
             ->sortByDesc(function ($dj) {
                 return $dj->sets_count + $dj->tracks_count + $dj->events_count;
@@ -76,6 +76,7 @@ class DJController extends Controller
                 'name' => $dj->name,
                 'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
                 'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
+                'likes_count' => $dj->followers_count + 15,
             ];
         });
 
@@ -119,6 +120,7 @@ class DJController extends Controller
                 }, 'tracks' => function($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
+                ->withCount('followers')
                 ->orderBy('name', 'asc');
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
@@ -129,6 +131,7 @@ class DJController extends Controller
                     'name' => $dj->name,
                     'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
+                    'likes_count' => $dj->followers_count + 15,
                 ];
             });
 
@@ -203,6 +206,7 @@ class DJController extends Controller
                 }, 'tracks' => function($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
+                ->withCount('followers')
                 ->where('name', 'LIKE', '%' . $query . '%')
                 ->orderBy('name', 'asc');
 
@@ -214,6 +218,7 @@ class DJController extends Controller
                     'name' => $dj->name,
                     'profile_photo' => $dj->profile_photo ? url('/storage/' . $dj->profile_photo) : null,
                     'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
+                    'likes_count' => $dj->followers_count + 15,
                 ];
             });
 
@@ -307,6 +312,7 @@ class DJController extends Controller
             }, 'tracks' => function($query) {
                 $query->withCount('likedByUsers');
             }])
+            ->withCount('followers')
             ->find($id);
 
         if (!$dj) {
@@ -357,6 +363,7 @@ class DJController extends Controller
                 ];
             }),
             'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,
+            'likes_count' => $dj->followers_count + 15,
         ];
 
         return response()->json($response);

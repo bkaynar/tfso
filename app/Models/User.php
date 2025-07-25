@@ -104,6 +104,11 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'favorite_djs', 'user_id', 'favorited_user_id')->withTimestamps();
     }
 
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_djs', 'favorited_user_id', 'user_id')->withTimestamps();
+    }
+
     public function events()
     {
         return $this->hasMany(Event::class);
