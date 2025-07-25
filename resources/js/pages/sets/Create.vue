@@ -121,6 +121,7 @@
                                 <input id="audio_file" type="file" accept="audio/*" @change="handleAudioFileChange"
                                     class="hidden" />
                             </label>
+                            <p class="text-red-600 text-sm mt-2">Please upload only sets in 192kbps MP3 format with a maximum duration of 90 minutes.</p>
                         </div>
                     </div>
 

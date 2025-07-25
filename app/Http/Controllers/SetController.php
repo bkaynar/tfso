@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class SetController extends Controller
 {
@@ -66,10 +67,15 @@ class SetController extends Controller
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
+            'audio_file' => 'nullable|mimes:mp3|max:204800', // Only MP3, 200MB max
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
+
+        // Additional validation for audio file
+        if ($request->hasFile('audio_file')) {
+            $this->validateAudioFile($request->file('audio_file'));
+        }
 
         // Authorization check for DJ users
         $user = Auth::user();
@@ -160,10 +166,15 @@ class SetController extends Controller
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:204800', // 200MB max
+            'audio_file' => 'nullable|mimes:mp3|max:204800', // Only MP3, 200MB max
             'is_premium' => 'boolean',
             'iap_product_id' => 'nullable|string|max:255',
         ]);
+
+        // Additional validation for audio file
+        if ($request->hasFile('audio_file')) {
+            $this->validateAudioFile($request->file('audio_file'));
+        }
 
         // Additional authorization check for DJ users
         if ($user->hasRole('dj') && !$user->hasRole('admin')) {
@@ -237,5 +248,49 @@ class SetController extends Controller
         $set->delete();
 
         return redirect()->route('sets.index')->with('success', 'Set deleted successfully.');
+    }
+
+    /**
+     * Validate uploaded audio file for bitrate and duration
+     */
+    private function validateAudioFile($audioFile)
+    {
+        $filePath = $audioFile->getPathname();
+        
+        // Check if getid3 is available
+        if (!class_exists('getID3')) {
+            // If getid3 is not available, skip advanced validation
+            return;
+        }
+        
+        try {
+            $getID3 = new \getID3();
+            $fileInfo = $getID3->analyze($filePath);
+            
+            // Check duration (maximum 90 minutes = 5400 seconds)
+            if (isset($fileInfo['playtime_seconds'])) {
+                $duration = $fileInfo['playtime_seconds'];
+                if ($duration > 5400) {
+                    throw ValidationException::withMessages([
+                        'audio_file' => 'Audio file duration must not exceed 90 minutes.'
+                    ]);
+                }
+            }
+            
+            // Check bitrate (192 kbps)
+            if (isset($fileInfo['audio']['bitrate'])) {
+                $bitrate = $fileInfo['audio']['bitrate'];
+                // Allow some tolerance (±5 kbps)
+                if ($bitrate < 187000 || $bitrate > 197000) {
+                    throw ValidationException::withMessages([
+                        'audio_file' => 'Audio file must be 192kbps bitrate.'
+                    ]);
+                }
+            }
+            
+        } catch (\Exception $e) {
+            // If analysis fails, log the error but don't block upload
+            \Log::warning('Audio file validation failed: ' . $e->getMessage());
+        }
     }
 }
