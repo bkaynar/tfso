@@ -42,6 +42,7 @@ class Set extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
+        'liked_by_users_count',
     ];
 
     public function user()
@@ -52,6 +53,11 @@ class Set extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_sets')->withTimestamps();
     }
 
     // Audio URL accessor

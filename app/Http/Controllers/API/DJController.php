@@ -57,7 +57,9 @@ class DJController extends Controller
 
         // DJ'leri setleri, parçaları ve etkinlikleriyle birlikte getir ve en çok içeriğe sahip olanları önce sırala
         $djs = User::role('dj')
-            ->with(['sets', 'tracks' => function($query) {
+            ->with(['sets' => function($query) {
+                $query->withCount('likedByUsers');
+            }, 'tracks' => function($query) {
                 $query->withCount('likedByUsers');
             }, 'events'])
             ->withCount(['sets', 'tracks', 'events'])
@@ -112,7 +114,9 @@ class DJController extends Controller
             $page = (int) $request->get('page', 1);
 
             $query = User::role('dj')
-                ->with(['sets', 'tracks' => function($query) {
+                ->with(['sets' => function($query) {
+                    $query->withCount('likedByUsers');
+                }, 'tracks' => function($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
                 ->orderBy('name', 'asc');
@@ -194,7 +198,9 @@ class DJController extends Controller
             $page = (int) $request->get('page', 1);
 
             $djQuery = User::role('dj')
-                ->with(['sets', 'tracks' => function($query) {
+                ->with(['sets' => function($query) {
+                    $query->withCount('likedByUsers');
+                }, 'tracks' => function($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
                 ->where('name', 'LIKE', '%' . $query . '%')
@@ -296,7 +302,9 @@ class DJController extends Controller
 
         // DJ rolüne sahip kullanıcıyı bul
         $dj = User::role('dj')
-            ->with(['tracks' => function($query) {
+            ->with(['sets' => function($query) {
+                $query->withCount('likedByUsers');
+            }, 'tracks' => function($query) {
                 $query->withCount('likedByUsers');
             }])
             ->find($id);
@@ -324,6 +332,7 @@ class DJController extends Controller
                     'cover_image' => $set->cover_image ? url($set->cover_image) : null,
                     'audio_file' => $set->audio_file ? url('/storage/' . $set->audio_file) : null,
                     'is_premium' => $set->is_premium,
+                    'likes_count' => $set->liked_by_users_count + 15,
                 ];
             }),
             'tracks' => $dj->tracks->map(function ($track) {

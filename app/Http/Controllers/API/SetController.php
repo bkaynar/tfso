@@ -37,6 +37,7 @@ class SetController extends Controller
                     return $query->where('is_premium', $request->input('is_premium'));
                 })
                 ->with(['user'])
+                ->withCount('likedByUsers')
                 ->latest();
 
             $paginator = $query->paginate($perPage, array('*'), 'page', $page);
@@ -60,6 +61,7 @@ class SetController extends Controller
                         url('/storage/' . $set->audio_file)) : null;
                 
                 $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
+                $setData['likes_count'] = $set->liked_by_users_count + 15;
                 return $setData;
             });
 
@@ -103,6 +105,7 @@ class SetController extends Controller
                 return $query->where('is_premium', $request->input('is_premium'));
             })
             ->with(['user'])
+            ->withCount('likedByUsers')
             ->orderByDesc('created_at')
             ->paginate(10);
 
@@ -122,6 +125,7 @@ class SetController extends Controller
 
             // isLiked kontrolü
             $set->isLiked = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
+            $set->likes_count = $set->liked_by_users_count + 15;
 
             return $set;
         });
@@ -187,6 +191,7 @@ class SetController extends Controller
                 })
                 ->where('name', 'LIKE', '%' . $query . '%')
                 ->with(['user'])
+                ->withCount('likedByUsers')
                 ->orderBy('name', 'asc');
 
             $paginator = $setQuery->paginate($perPage, array('*'), 'page', $page);
@@ -210,6 +215,7 @@ class SetController extends Controller
                         url('/storage/' . $set->audio_file)) : null;
                 
                 $setData['isLiked'] = $user ? $user->favoriteSets()->where('set_id', $set->id)->exists() : false;
+                $setData['likes_count'] = $set->liked_by_users_count + 15;
                 return $setData;
             });
 
