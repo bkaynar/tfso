@@ -394,7 +394,6 @@ class TrackController extends Controller
             return response()->json([
                 'message' => '🔥 Yeni çıkan parçalar getirildi!',
                 'total_count' => $tracks->count(),
-                'period' => "Son {$days} gün",
                 'tracks' => $tracks
             ]);
         } catch (\Exception $e) {
