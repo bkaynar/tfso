@@ -366,17 +366,12 @@ class TrackController extends Controller
         try {
             // Parametreleri al ve varsayılan değerleri belirle
             $limit = min((int)$request->get('limit', 20), 50); // Maksimum 50
-            $days = min((int)$request->get('days', 30), 365);   // Maksimum 365 gün
-
-            // Son X gün içinde eklenen parçaları getir
-            $cutoffDate = now()->subDays($days);
 
             // Auth olan kullanıcıyı al (opsiyonel)
             $user = $request->bearerToken() ? auth('sanctum')->user() : null;
 
             $tracks = Track::with(['category', 'user:id,name'])
                 ->withCount('likedByUsers')
-                ->where('created_at', '>=', $cutoffDate)
                 ->latest('created_at') // En yeni olanlar önce
                 ->limit($limit)
                 ->get()
