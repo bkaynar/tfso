@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Intervention\Image\ImageManager;
 
 class UserController extends Controller
 {
@@ -94,14 +95,22 @@ class UserController extends Controller
         // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
             $profilePhoto = $request->file('profile_photo');
-            $profilePhotoPath = $profilePhoto->store('users/profiles', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($profilePhoto)->toWebp(90);
+            $imageName = uniqid('user_profile_') . '.webp';
+            $profilePhotoPath = 'users/profiles/' . $imageName;
+            Storage::disk('public')->put($profilePhotoPath, (string) $image);
             $data['profile_photo'] = $profilePhotoPath;
         }
 
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {
             $coverImage = $request->file('cover_image');
-            $coverImagePath = $coverImage->store('users/covers', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($coverImage)->toWebp(90);
+            $imageName = uniqid('user_cover_') . '.webp';
+            $coverImagePath = 'users/covers/' . $imageName;
+            Storage::disk('public')->put($coverImagePath, (string) $image);
             $data['cover_image'] = $coverImagePath;
         }
 
@@ -195,7 +204,11 @@ class UserController extends Controller
             }
 
             $profilePhoto = $request->file('profile_photo');
-            $profilePhotoPath = $profilePhoto->store('users/profiles', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($profilePhoto)->toWebp(90);
+            $imageName = uniqid('user_profile_') . '.webp';
+            $profilePhotoPath = 'users/profiles/' . $imageName;
+            Storage::disk('public')->put($profilePhotoPath, (string) $image);
             $data['profile_photo'] = $profilePhotoPath;
         }
 
@@ -207,7 +220,11 @@ class UserController extends Controller
             }
 
             $coverImage = $request->file('cover_image');
-            $coverImagePath = $coverImage->store('users/covers', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($coverImage)->toWebp(90);
+            $imageName = uniqid('user_cover_') . '.webp';
+            $coverImagePath = 'users/covers/' . $imageName;
+            Storage::disk('public')->put($coverImagePath, (string) $image);
             $data['cover_image'] = $coverImagePath;
         }
 
@@ -308,7 +325,11 @@ class UserController extends Controller
             }
 
             $profilePhoto = $request->file('profile_photo');
-            $profilePhotoPath = $profilePhoto->store('users/profiles', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($profilePhoto)->toWebp(90);
+            $imageName = uniqid('user_profile_') . '.webp';
+            $profilePhotoPath = 'users/profiles/' . $imageName;
+            Storage::disk('public')->put($profilePhotoPath, (string) $image);
             $data['profile_photo'] = $profilePhotoPath;
         }
 
@@ -320,7 +341,11 @@ class UserController extends Controller
             }
 
             $coverImage = $request->file('cover_image');
-            $coverImagePath = $coverImage->store('users/covers', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($coverImage)->toWebp(90);
+            $imageName = uniqid('user_cover_') . '.webp';
+            $coverImagePath = 'users/covers/' . $imageName;
+            Storage::disk('public')->put($coverImagePath, (string) $image);
             $data['cover_image'] = $coverImagePath;
         }
 
