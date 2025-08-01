@@ -18,6 +18,7 @@ class StageFeedController extends Controller
     {
         try {
             $start = microtime(true);
+            $user = auth('sanctum')->user();
 
             $page = (int) $request->get('page', 1);
             $limit = min((int) $request->get('limit', 20), 50);
@@ -48,7 +49,8 @@ class StageFeedController extends Controller
                     'user' => [
                         'id' => $set->user->id,
                         'name' => $set->user->name,
-                        'profile_photo' => $set->user->profile_photo_url
+                        'profile_photo' => $set->user->profile_photo_url,
+                        'is_following' => $user ? $user->favoriteDJs()->where('favorited_user_id', $set->user->id)->exists() : false
                     ],
                     'content' => [
                         'type' => 'set',
@@ -81,7 +83,8 @@ class StageFeedController extends Controller
                     'user' => [
                         'id' => $track->user->id,
                         'name' => $track->user->name,
-                        'profile_photo' => $track->user->profile_photo_url
+                        'profile_photo' => $track->user->profile_photo_url,
+                        'is_following' => $user ? $user->favoriteDJs()->where('favorited_user_id', $track->user->id)->exists() : false
                     ],
                     'content' => [
                         'type' => 'track',
@@ -120,7 +123,6 @@ class StageFeedController extends Controller
                         ],
                         'joined_at' => $newUser->created_at->toISOString(),
                         'join_date' => $this->formatTimeAgo($newUser->created_at),
-                        'follower_count' => 0,
                         'is_following' => false,
                     ]);
                 }
