@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Intervention\Image\ImageManager;
 
 class SetController extends Controller
 {
@@ -91,8 +92,12 @@ class SetController extends Controller
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {
             $coverImage = $request->file('cover_image');
-            $coverImagePath = $coverImage->store('sets/covers', 'public');
-            $data['cover_image'] = Storage::url($coverImagePath);
+            $manager = ImageManager::gd();
+            $image = $manager->read($coverImage)->toWebp(90);
+            $imageName = uniqid('set_cover_') . '.webp';
+            $imagePath = 'sets/covers/' . $imageName;
+            Storage::disk('public')->put($imagePath, (string) $image);
+            $data['cover_image'] = Storage::url($imagePath);
         }
 
         // Handle audio file upload
@@ -195,8 +200,12 @@ class SetController extends Controller
             }
 
             $coverImage = $request->file('cover_image');
-            $coverImagePath = $coverImage->store('sets/covers', 'public');
-            $data['cover_image'] = Storage::url($coverImagePath);
+            $manager = ImageManager::gd();
+            $image = $manager->read($coverImage)->toWebp(90);
+            $imageName = uniqid('set_cover_') . '.webp';
+            $imagePath = 'sets/covers/' . $imageName;
+            Storage::disk('public')->put($imagePath, (string) $image);
+            $data['cover_image'] = Storage::url($imagePath);
         }
 
         // Handle audio file upload
@@ -256,17 +265,17 @@ class SetController extends Controller
     private function validateAudioFile($audioFile)
     {
         $filePath = $audioFile->getPathname();
-        
+
         // Check if getid3 is available
         if (!class_exists('getID3')) {
             // If getid3 is not available, skip advanced validation
             return;
         }
-        
+
         try {
             $getID3 = new \getID3();
             $fileInfo = $getID3->analyze($filePath);
-            
+
             // Check duration (maximum 90 minutes = 5400 seconds)
             if (isset($fileInfo['playtime_seconds'])) {
                 $duration = $fileInfo['playtime_seconds'];
@@ -276,7 +285,7 @@ class SetController extends Controller
                     ]);
                 }
             }
-            
+
             // Check bitrate (192 kbps)
             if (isset($fileInfo['audio']['bitrate'])) {
                 $bitrate = $fileInfo['audio']['bitrate'];
@@ -287,7 +296,7 @@ class SetController extends Controller
                     ]);
                 }
             }
-            
+
         } catch (\Exception $e) {
             // If analysis fails, log the error but don't block upload
             \Log::warning('Audio file validation failed: ' . $e->getMessage());

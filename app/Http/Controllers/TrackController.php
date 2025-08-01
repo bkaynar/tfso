@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManager;
 
 class TrackController extends Controller
 {
@@ -94,8 +95,12 @@ class TrackController extends Controller
         // Handle image file upload
         if ($request->hasFile('image_file')) {
             $imageFile = $request->file('image_file');
-            $imageFilePath = $imageFile->store('tracks/images', 'public');
-            $data['image_file'] = $imageFilePath;
+            $manager = ImageManager::gd();
+            $image = $manager->read($imageFile)->toWebp(90);
+            $imageName = uniqid('track_image_') . '.webp';
+            $imagePath = 'tracks/images/' . $imageName;
+            Storage::disk('public')->put($imagePath, (string) $image);
+            $data['image_file'] = $imagePath;
         }
 
         Track::create($data);
@@ -201,8 +206,12 @@ class TrackController extends Controller
             }
 
             $imageFile = $request->file('image_file');
-            $imageFilePath = $imageFile->store('tracks/images', 'public');
-            $data['image_file'] = $imageFilePath;
+            $manager = ImageManager::gd();
+            $image = $manager->read($imageFile)->toWebp(90);
+            $imageName = uniqid('track_image_') . '.webp';
+            $imagePath = 'tracks/images/' . $imageName;
+            Storage::disk('public')->put($imagePath, (string) $image);
+            $data['image_file'] = $imagePath;
         }
 
         $track->update($data);
