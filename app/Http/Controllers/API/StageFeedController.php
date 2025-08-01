@@ -59,7 +59,6 @@ class StageFeedController extends Controller
                     'created_at' => $set->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($set->created_at),
                     'likes_count' => rand(10, 50),
-                    'comments_count' => rand(0, 25),
                     'is_liked' => false,
                 ]);
             }
@@ -91,7 +90,6 @@ class StageFeedController extends Controller
                     'created_at' => $track->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($track->created_at),
                     'likes_count' => rand(10, 50),
-                    'comments_count' => rand(0, 25),
                     'is_liked' => false,
                 ]);
             }
