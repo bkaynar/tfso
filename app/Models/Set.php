@@ -32,19 +32,23 @@ class Set extends Model
         'name',
         'description',
         'cover_image',
-        'audio_file', // 🎧 dosya yolu
+        'audio_file',
         'is_premium',
         'iap_product_id',
         'category_id',
     ];
 
-    //hide timestamps in API responses
     protected $hidden = [
-        'created_at',
         'updated_at',
         'liked_by_users_count',
     ];
 
+    protected $appends = [
+        'audio_url',
+        'cover_image_url',
+    ];
+
+    // İlişkiler
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -60,15 +64,20 @@ class Set extends Model
         return $this->belongsToMany(User::class, 'favorite_sets')->withTimestamps();
     }
 
-    // Audio URL accessor
+    // Accessors
+
     public function getAudioUrlAttribute()
     {
-        return $this->audio_file ? asset('storage/' . $this->audio_file) : null;
+        return $this->audio_file ? asset('storage/' . ltrim($this->audio_file, '/')) : null;
     }
 
-    // Audio file name accessor
     public function getAudioFileNameAttribute()
     {
         return $this->audio_file ? basename($this->audio_file) : null;
+    }
+
+    public function getCoverImageUrlAttribute()
+    {
+        return $this->cover_image ? asset('storage/' . ltrim($this->cover_image, '/')) : null;
     }
 }
