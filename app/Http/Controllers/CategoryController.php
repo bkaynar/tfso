@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Intervention\Image\ImageManager;
+
 
 class CategoryController extends Controller
 {
@@ -47,7 +49,11 @@ class CategoryController extends Controller
         // Handle image upload
         if ($request->hasFile('image')) {
             $imageFile = $request->file('image');
-            $imagePath = $imageFile->store('categories', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($imageFile)->toWebp(90);
+            $imageName = uniqid('category_') . '.webp';
+            $imagePath = 'categories/' . $imageName;
+            Storage::disk('public')->put($imagePath, $image);
             $data['image'] = $imagePath;
         }
 
@@ -92,7 +98,11 @@ class CategoryController extends Controller
             }
 
             $imageFile = $request->file('image');
-            $imagePath = $imageFile->store('categories', 'public');
+            $manager = ImageManager::gd();
+            $image = $manager->read($imageFile)->toWebp(90);
+            $imageName = uniqid('category_') . '.webp';
+            $imagePath = 'categories/' . $imageName;
+            Storage::disk('public')->put($imagePath, (string) $image);
             $data['image'] = $imagePath;
         }
 
