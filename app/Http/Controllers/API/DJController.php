@@ -57,9 +57,9 @@ class DJController extends Controller
 
         // DJ'leri setleri, parçaları ve etkinlikleriyle birlikte getir ve en çok içeriğe sahip olanları önce sırala
         $djs = User::role('dj')
-            ->with(['sets' => function($query) {
+            ->with(['sets' => function ($query) {
                 $query->withCount('likedByUsers');
-            }, 'tracks' => function($query) {
+            }, 'tracks' => function ($query) {
                 $query->withCount('likedByUsers');
             }, 'events'])
             ->withCount(['sets', 'tracks', 'events', 'followers'])
@@ -115,9 +115,9 @@ class DJController extends Controller
             $page = (int) $request->get('page', 1);
 
             $query = User::role('dj')
-                ->with(['sets' => function($query) {
+                ->with(['sets' => function ($query) {
                     $query->withCount('likedByUsers');
-                }, 'tracks' => function($query) {
+                }, 'tracks' => function ($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
                 ->withCount(['followers', 'sets', 'tracks'])
@@ -203,9 +203,9 @@ class DJController extends Controller
             $page = (int) $request->get('page', 1);
 
             $djQuery = User::role('dj')
-                ->with(['sets' => function($query) {
+                ->with(['sets' => function ($query) {
                     $query->withCount('likedByUsers');
-                }, 'tracks' => function($query) {
+                }, 'tracks' => function ($query) {
                     $query->withCount('likedByUsers');
                 }, 'events'])
                 ->withCount(['followers', 'sets', 'tracks'])
@@ -242,7 +242,7 @@ class DJController extends Controller
         }
     }
 
-    
+
 
     /**
      * @OA\Get(
@@ -311,9 +311,9 @@ class DJController extends Controller
 
         // DJ rolüne sahip kullanıcıyı bul
         $dj = User::role('dj')
-            ->with(['sets' => function($query) {
+            ->with(['sets' => function ($query) {
                 $query->withCount('likedByUsers');
-            }, 'tracks' => function($query) {
+            }, 'tracks' => function ($query) {
                 $query->withCount('likedByUsers');
             }])
             ->withCount('followers')
@@ -323,7 +323,10 @@ class DJController extends Controller
             return response()->json(['message' => 'DJ not found'], 404);
         }
 
-        // Yanıtı formatla
+        // Setler ve parçalar en son eklenenler ilk başta olacak şekilde sıralanıyor
+        $sortedSets = $dj->sets->sortByDesc('created_at')->values();
+        $sortedTracks = $dj->tracks->sortByDesc('created_at')->values();
+
         $response = [
             'id' => $dj->id,
             'name' => $dj->name,
@@ -335,7 +338,7 @@ class DJController extends Controller
                 'facebook' => $dj->facebook ? $dj->facebook : null,
                 'youtube' => $dj->youtube ? "{$dj->youtube}" : null
             ],
-            'sets' => $dj->sets->map(function ($set) {
+            'sets' => $sortedSets->map(function ($set) {
                 return [
                     'id' => $set->id,
                     'name' => $set->name,
@@ -345,14 +348,14 @@ class DJController extends Controller
                     'likes_count' => $set->liked_by_users_count + 15,
                 ];
             }),
-            'tracks' => $dj->tracks->map(function ($track) {
+            'tracks' => $sortedTracks->map(function ($track) {
                 return [
                     'id' => $track->id,
                     'title' => $track->title,
                     'audio_url' => $track->audio_url,
                     'image_url' => $track->image_url,
                     'is_premium' => $track->is_premium,
-                    'likes_count' => $track->liked_by_users_count+15, // likedByUsers count + 15 for demo purposes
+                    'likes_count' => $track->liked_by_users_count + 15, // likedByUsers count + 15 for demo purposes
                 ];
             }),
             'events' => $dj->events->map(function ($event) {
