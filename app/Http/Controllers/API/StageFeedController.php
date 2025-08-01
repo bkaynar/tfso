@@ -34,6 +34,7 @@ class StageFeedController extends Controller
             // SETS
             $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'created_at')
                 ->with('user:id,name,profile_photo')
+                ->withCount('likedByUsers')
                 ->orderByDesc('created_at')
                 ->skip($offset)
                 ->take($setLimit)
@@ -58,7 +59,7 @@ class StageFeedController extends Controller
                     ],
                     'created_at' => $set->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($set->created_at),
-                    'likes_count' => rand(10, 50),
+                    'likes_count' => $set->liked_by_users_count + 15,
                     'is_liked' => false,
                 ]);
             }
@@ -66,6 +67,7 @@ class StageFeedController extends Controller
             // TRACKS
             $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'created_at')
                 ->with('user:id,name,profile_photo')
+                ->withCount('likedByUsers')
                 ->orderByDesc('created_at')
                 ->skip($offset)
                 ->take($trackLimit)
@@ -89,7 +91,7 @@ class StageFeedController extends Controller
                     ],
                     'created_at' => $track->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($track->created_at),
-                    'likes_count' => rand(10, 50),
+                    'likes_count' => $track->liked_by_users_count + 15,
                     'is_liked' => false,
                 ]);
             }
