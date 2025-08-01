@@ -9,6 +9,7 @@ use App\Http\Controllers\API\TrackController;
 use App\Http\Controllers\API\DJController;
 use App\Http\Controllers\API\SetController;
 use App\Http\Controllers\API\AccessLogController;
+use App\Http\Controllers\API\StageFeedController;
 
 Route::post('/mobile-register', [AuthController::class, 'register']);
 Route::post('/mobile-login', [AuthController::class, 'login']);
@@ -67,3 +68,6 @@ Route::get('/sets/search', [SetController::class, 'search']);
 
 Route::get('/tracks/search', [TrackController::class, 'search']);
 Route::apiResource('tracks', TrackController::class);
+
+// Stage Feed
+Route::get('/stage-feed', [StageFeedController::class, 'index']);
