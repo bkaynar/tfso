@@ -52,8 +52,8 @@ class StageFeedController extends Controller
                     'content' => [
                         'type' => 'set',
                         'title' => $set->name,
-                        'image' => $set->cover_image_url,
-                        'audio_url' => $set->audio_url,
+                        'image' => $set->cover_image ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->cover_image, '/'))) : null,
+                        'audio_url' => $set->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->audio_file, '/'))) : null,
                         'description' => $set->description,
                     ],
                     'created_at' => $set->created_at->toISOString(),
@@ -85,9 +85,8 @@ class StageFeedController extends Controller
                     'content' => [
                         'type' => 'track',
                         'title' => $track->title,
-                      'image' => $track->image_url,
-            'audio_url' => $track->audio_url,
-        
+                        'image' => $track->image_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->image_file, '/'))) : null,
+                        'audio_url' => $track->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->audio_file, '/'))) : null,
                     ],
                     'created_at' => $track->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($track->created_at),
