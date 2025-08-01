@@ -33,7 +33,7 @@ class StageFeedController extends Controller
             $welcomeLimit = round($limit * 0.2);
 
             // SETS
-            $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'created_at')
+            $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'created_at')
                 ->with('user:id,name,profile_photo')
                 ->withCount('likedByUsers')
                 ->orderByDesc('created_at')
@@ -58,6 +58,7 @@ class StageFeedController extends Controller
                         'image' => $set->cover_image ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->cover_image, '/'))) : null,
                         'audio_url' => $set->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->audio_file, '/'))) : null,
                         'description' => $set->description,
+                        'is_premium' => (bool) $set->is_premium,
                     ],
                     'created_at' => $set->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($set->created_at),
@@ -67,7 +68,7 @@ class StageFeedController extends Controller
             }
 
             // TRACKS
-            $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'created_at')
+            $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'is_premium', 'created_at')
                 ->with('user:id,name,profile_photo')
                 ->withCount('likedByUsers')
                 ->orderByDesc('created_at')
@@ -91,6 +92,7 @@ class StageFeedController extends Controller
                         'title' => $track->title,
                         'image' => $track->image_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->image_file, '/'))) : null,
                         'audio_url' => $track->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->audio_file, '/'))) : null,
+                        'is_premium' => (bool) $track->is_premium,
                     ],
                     'created_at' => $track->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($track->created_at),
