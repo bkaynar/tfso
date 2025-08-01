@@ -10,6 +10,7 @@ use App\Http\Controllers\API\DJController;
 use App\Http\Controllers\API\SetController;
 use App\Http\Controllers\API\AccessLogController;
 use App\Http\Controllers\API\StageFeedController;
+use App\Http\Controllers\API\UserController;
 
 Route::post('/mobile-register', [AuthController::class, 'register']);
 Route::post('/mobile-login', [AuthController::class, 'login']);
@@ -20,6 +21,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/update-fcm-token', [AuthController::class, 'updateFcmToken']);
+
+    // User Profile
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::post('/profile/update-photo', [UserController::class, 'updateProfilePhoto']);
 
     // Favorites
     Route::prefix('favorites')->name('favorites.')->group(function () {

@@ -24,7 +24,7 @@ class StageFeedController extends Controller
             $limit = min((int) $request->get('limit', 20), 50);
             $includeWelcome = $request->boolean('include_welcome', true);
 
-            $offset = ($page - 1) * $limit;
+
             $feedItems = collect();
 
             // Dinamik oranlar
@@ -32,12 +32,17 @@ class StageFeedController extends Controller
             $trackLimit = round($limit * 0.3);
             $welcomeLimit = round($limit * 0.2);
 
+            // Her veri tipi için ayrı offset
+            $setOffset = ($page - 1) * $setLimit;
+            $trackOffset = ($page - 1) * $trackLimit;
+            $welcomeOffset = ($page - 1) * $welcomeLimit;
+
             // SETS
             $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'created_at')
                 ->with('user:id,name,profile_photo')
                 ->withCount('likedByUsers')
                 ->orderByDesc('created_at')
-                ->skip($offset)
+                ->skip($setOffset)
                 ->take($setLimit)
                 ->get();
 
@@ -72,7 +77,7 @@ class StageFeedController extends Controller
                 ->with('user:id,name,profile_photo')
                 ->withCount('likedByUsers')
                 ->orderByDesc('created_at')
-                ->skip($offset)
+                ->skip($trackOffset)
                 ->take($trackLimit)
                 ->get();
 
@@ -107,6 +112,7 @@ class StageFeedController extends Controller
                     ->select('id', 'name', 'profile_photo', 'created_at')
                     ->where('created_at', '>=', Carbon::now()->subDays(30))
                     ->orderByDesc('created_at')
+                    ->skip($welcomeOffset)
                     ->take($welcomeLimit)
                     ->get();
 
