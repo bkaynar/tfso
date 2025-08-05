@@ -55,9 +55,13 @@ class PlaceController extends Controller
         $place = Place::create($validated);
 
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('places', 'public');
-                $place->images()->create(['path' => $path]);
+            foreach ($request->file('images') as $imageFile) {
+                $manager = ImageManager::gd();
+                $image = $manager->read($imageFile)->toWebp(90);
+                $imageName = uniqid('place_') . '.webp';
+                $imagePath = 'places/' . $imageName;
+                Storage::disk('public')->put($imagePath, $image);
+                $place->images()->create(['path' => $imagePath]);
             }
         }
 
@@ -108,9 +112,13 @@ class PlaceController extends Controller
         $place->update($validated);
 
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('places', 'public');
-                $place->images()->create(['path' => $path]);
+            foreach ($request->file('images') as $imageFile) {
+                $manager = ImageManager::gd();
+                $image = $manager->read($imageFile)->toWebp(90);
+                $imageName = uniqid('place_') . '.webp';
+                $imagePath = 'places/' . $imageName;
+                Storage::disk('public')->put($imagePath, $image);
+                $place->images()->create(['path' => $imagePath]);
             }
         }
 
