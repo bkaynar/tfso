@@ -11,8 +11,9 @@ class RoleSeeder extends Seeder
     {
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $djRole = Role::firstOrCreate(['name' => 'dj']);
+        $placeManagerRole = Role::firstOrCreate(['name' => 'placeManager']);
 
-        $this->command->info('Admin ve Dj rolleri oluşturuldu/kontrol edildi.');
+        $this->command->info('Admin, Dj ve PlaceManager rolleri oluşturuldu/kontrol edildi.');
 
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SetController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PlaceController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -35,8 +35,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Users - only admin can access
     Route::resource('users', UserController::class)->middleware('role:admin');
 
-    //Events - admin, dj can access
-    Route::resource('events', EventController::class)->middleware('role:admin,dj');
+
+    // Places - admin, placeManager can access
+    Route::resource('places', PlaceController::class)->middleware('role:admin,placeManager');
 
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
