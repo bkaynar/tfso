@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, MapPinIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, PencilIcon, TrashIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     places: Object
@@ -25,12 +25,6 @@ const canManage = computed(() => isAdmin.value || isPlaceManager.value);
 const placeToDelete = ref<any>(null)
 const showDeleteModal = computed(() => placeToDelete.value !== null)
 
-const deletePlace = (place: any) => {
-    if (confirm('Silmek istediğinize emin misiniz?')) {
-        router.delete(route('places.destroy', place.id));
-    }
-}
-
 const askDeletePlace = (place: any) => {
     if (!canManage.value) return;
     placeToDelete.value = place
@@ -46,9 +40,31 @@ const confirmDeletePlace = () => {
 const cancelDeletePlace = () => {
     placeToDelete.value = null
 }
+
+// Helper function to get image URL
+const getImageUrl = (image: any) => {
+    if (typeof image === 'string') {
+        // If it's already a string URL
+        if (image.startsWith('http')) {
+            return image;
+        }
+        // If it's a path, construct full URL
+        const baseUrl = window.location.origin;
+        return `${baseUrl}/storage/${image}`;
+    } else if (image && image.url) {
+        // If it's an object with url property (from accessor)
+        return image.url;
+    } else if (image && image.path) {
+        // If it's an object with path property
+        const baseUrl = window.location.origin;
+        return `${baseUrl}/storage/${image.path}`;
+    }
+    return `${window.location.origin}/images/placeholder.jpg`; // Fallback image
+};
 </script>
 
 <template>
+
     <Head title="Places" />
 
     <AppLayout :breadcrumbs="[
@@ -71,14 +87,14 @@ const cancelDeletePlace = () => {
                         <!-- Admin and PlaceManager can create new places -->
                         <Link v-if="canManage" :href="route('places.create')"
                             class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                            <PlusIcon class="w-4 h-4 mr-2" />
-                            Yeni Mekan
+                        <PlusIcon class="w-4 h-4 mr-2" />
+                        Yeni Mekan
                         </Link>
 
                         <!-- View only notice for others -->
                         <div v-else
                             class="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg">
-                            <EyeIcon class="w-4 h-4 mr-2" />
+                            <MapPinIcon class="w-4 h-4 mr-2" />
                             Sadece Görüntüleme
                         </div>
                     </div>
@@ -91,19 +107,24 @@ const cancelDeletePlace = () => {
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Resim
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Mekan Adı
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Konum
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Premium
                                 </th>
-                                <th v-if="canManage" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th v-if="canManage"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     İşlemler
                                 </th>
                             </tr>
@@ -116,7 +137,7 @@ const cancelDeletePlace = () => {
                                         <div class="flex-shrink-0 h-10 w-10">
                                             <div v-if="place.images && place.images.length > 0"
                                                 class="h-10 w-10 rounded-full overflow-hidden">
-                                                <img :src="place.images[0]" :alt="place.name"
+                                                <img :src="getImageUrl(place.images[0])" :alt="place.name"
                                                     class="w-full h-full object-cover" />
                                             </div>
                                             <div v-else
@@ -137,29 +158,22 @@ const cancelDeletePlace = () => {
                                     <div class="text-sm text-gray-900 dark:text-white">{{ place.location }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span v-if="place.is_premium" 
+                                    <span v-if="place.is_premium"
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                         Premium
                                     </span>
-                                    <span v-else 
+                                    <span v-else
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                                         Standard
                                     </span>
                                 </td>
                                 <td v-if="canManage" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <!-- View -->
-                                        <Link :href="route('places.show', place.id)"
-                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
-                                            title="Görüntüle">
-                                            <EyeIcon class="w-4 h-4" />
-                                        </Link>
-
                                         <!-- Edit -->
                                         <Link :href="route('places.edit', place.id)"
                                             class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 p-1 rounded-md hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors duration-200"
                                             title="Düzenle">
-                                            <PencilIcon class="w-4 h-4" />
+                                        <PencilIcon class="w-4 h-4" />
                                         </Link>
 
                                         <!-- Delete -->
@@ -180,15 +194,13 @@ const cancelDeletePlace = () => {
                     class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
                     <div class="flex items-center justify-between">
                         <div class="flex-1 flex justify-between sm:hidden">
-                            <Link v-if="props.places && props.places.prev_page_url"
-                                :href="props.places.prev_page_url"
+                            <Link v-if="props.places && props.places.prev_page_url" :href="props.places.prev_page_url"
                                 class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                Önceki
+                            Önceki
                             </Link>
-                            <Link v-if="props.places && props.places.next_page_url"
-                                :href="props.places.next_page_url"
+                            <Link v-if="props.places && props.places.next_page_url" :href="props.places.next_page_url"
                                 class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                Sonraki
+                            Sonraki
                             </Link>
                         </div>
                         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">

@@ -37,7 +37,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // Places - admin, placeManager can access
-    Route::resource('places', PlaceController::class)->middleware('role:admin,placeManager');
+    Route::get('places', [PlaceController::class, 'index'])->name('places.index')->middleware('role:admin,placeManager');
+    Route::get('places/create', [PlaceController::class, 'create'])->name('places.create')->middleware('role:admin,placeManager');
+    Route::post('places', [PlaceController::class, 'store'])->name('places.store')->middleware('role:admin,placeManager');
+    Route::get('places/{place}/edit', [PlaceController::class, 'edit'])->name('places.edit')->middleware('role:admin,placeManager');
+    Route::put('places/{place}', [PlaceController::class, 'update'])->name('places.update')->middleware('role:admin,placeManager');
+    Route::patch('places/{place}', [PlaceController::class, 'update'])->name('places.update')->middleware('role:admin,placeManager');
+    Route::delete('places/{place}', [PlaceController::class, 'destroy'])->name('places.destroy')->middleware('role:admin,placeManager');
 
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
