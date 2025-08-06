@@ -55,17 +55,17 @@ class DJController extends Controller
     {
         $user = auth('sanctum')->user();
 
-        // DJ'leri setleri, parçaları ve etkinlikleriyle birlikte getir ve en çok içeriğe sahip olanları önce sırala
+        // DJ'leri setleri ve parçalarıyla birlikte getir ve en çok içeriğe sahip olanları önce sırala
         $djs = User::role('dj')
             ->with(['sets' => function ($query) {
                 $query->withCount('likedByUsers');
             }, 'tracks' => function ($query) {
                 $query->withCount('likedByUsers');
-            }, 'events'])
-            ->withCount(['sets', 'tracks', 'events', 'followers'])
+            }])
+            ->withCount(['sets', 'tracks', 'followers'])
             ->get()
             ->sortByDesc(function ($dj) {
-                return $dj->sets_count + $dj->tracks_count + $dj->events_count;
+                return $dj->sets_count + $dj->tracks_count;
             })
             ->values();
 
@@ -119,7 +119,7 @@ class DJController extends Controller
                     $query->withCount('likedByUsers');
                 }, 'tracks' => function ($query) {
                     $query->withCount('likedByUsers');
-                }, 'events'])
+                }])
                 ->withCount(['followers', 'sets', 'tracks'])
                 ->orderBy('name', 'asc');
 
@@ -207,7 +207,7 @@ class DJController extends Controller
                     $query->withCount('likedByUsers');
                 }, 'tracks' => function ($query) {
                     $query->withCount('likedByUsers');
-                }, 'events'])
+                }])
                 ->withCount(['followers', 'sets', 'tracks'])
                 ->where('name', 'LIKE', '%' . $query . '%')
                 ->orderBy('name', 'asc');
@@ -356,17 +356,6 @@ class DJController extends Controller
                     'image_url' => $track->image_url,
                     'is_premium' => $track->is_premium,
                     'likes_count' => $track->liked_by_users_count + 15, // likedByUsers count + 15 for demo purposes
-                ];
-            }),
-            'events' => $dj->events->map(function ($event) {
-                return [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'description' => $event->description,
-                    'event_date' => $event->event_date,
-                    'time' => $event->event_time,
-                    'location' => $event->location,
-                    'image' => $event->photo ? url('/storage/' . $event->photo) : null,
                 ];
             }),
             'isLiked' => $user ? $user->favoriteDJs()->where('favorited_user_id', $dj->id)->exists() : false,

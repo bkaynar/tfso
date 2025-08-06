@@ -109,11 +109,6 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'favorite_djs', 'favorited_user_id', 'user_id')->withTimestamps();
     }
 
-    public function events()
-    {
-        return $this->hasMany(Event::class);
-    }
-
     // Profile photo URL accessor
     public function getProfilePhotoUrlAttribute()
     {
