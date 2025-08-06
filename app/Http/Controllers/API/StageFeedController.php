@@ -41,6 +41,11 @@ class StageFeedController extends Controller
             $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'created_at')
                 ->with('user:id,name,profile_photo')
                 ->withCount('likedByUsers')
+                ->when($user, function($query) use ($user) {
+                    return $query->with(['likedByUsers' => function($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    }]);
+                })
                 ->orderByDesc('created_at')
                 ->skip($setOffset)
                 ->take($setLimit)
@@ -68,7 +73,7 @@ class StageFeedController extends Controller
                     'created_at' => $set->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($set->created_at),
                     'likes_count' => $set->liked_by_users_count + 15,
-                    'is_liked' => false,
+                    'is_liked' => $user ? $set->likedByUsers->contains($user->id) : false,
                 ]);
             }
 
@@ -76,6 +81,11 @@ class StageFeedController extends Controller
             $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'is_premium', 'created_at')
                 ->with('user:id,name,profile_photo')
                 ->withCount('likedByUsers')
+                ->when($user, function($query) use ($user) {
+                    return $query->with(['likedByUsers' => function($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    }]);
+                })
                 ->orderByDesc('created_at')
                 ->skip($trackOffset)
                 ->take($trackLimit)
@@ -102,7 +112,7 @@ class StageFeedController extends Controller
                     'created_at' => $track->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($track->created_at),
                     'likes_count' => $track->liked_by_users_count + 15,
-                    'is_liked' => false,
+                    'is_liked' => $user ? $track->likedByUsers->contains($user->id) : false,
                 ]);
             }
 

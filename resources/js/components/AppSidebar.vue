@@ -69,6 +69,15 @@ const mainNavItems = computed((): NavItem[] => {
             },
         );
     }
+    if (hasAnyRole(['admin', 'dj', 'placeManager'])) {
+        items.push(
+            {
+                title: 'Events',
+                href: '/events',
+                icon: BookOpen,
+            },
+        );
+    }
 
     return items;
 });

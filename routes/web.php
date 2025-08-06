@@ -7,6 +7,7 @@ use App\Http\Controllers\SetController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\EventsController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -45,6 +46,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('places/{place}', [PlaceController::class, 'update'])->name('places.update')->middleware('role:admin,placeManager');
     Route::delete('places/{place}', [PlaceController::class, 'destroy'])->name('places.destroy')->middleware('role:admin,placeManager');
 
+    // Events - admin, dj, placeManager can access
+    Route::resource('events', EventsController::class)->middleware('role:admin,dj,placeManager');
+    
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::match(['patch', 'post'], 'profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
