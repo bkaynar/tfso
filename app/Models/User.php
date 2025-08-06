@@ -109,6 +109,11 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'favorite_djs', 'favorited_user_id', 'user_id')->withTimestamps();
     }
 
+    public function places()
+    {
+        return $this->hasMany(Place::class);
+    }
+
     // Profile photo URL accessor
     public function getProfilePhotoUrlAttribute()
     {

@@ -16,7 +16,20 @@ class PlaceController extends Controller
      */
     public function index()
     {
-        $places = Place::with('images')->paginate(10);
+        $user = Auth::user();
+        
+        // If user is admin, show all places
+        if ($user->hasRole('admin')) {
+            $places = Place::with('images')->paginate(10);
+        } 
+        // If user is placeManager, show only their own places
+        elseif ($user->hasRole('placeManager')) {
+            $places = Place::with('images')->where('user_id', $user->id)->paginate(10);
+        } 
+        else {
+            abort(403, 'Unauthorized access to places.');
+        }
+        
         return Inertia::render('places/Index', [
             'places' => $places
         ]);
@@ -28,10 +41,21 @@ class PlaceController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            abort(403, 'Only administrators can create places.');
+        if (!$user->hasRole('admin') && !$user->hasRole('placeManager')) {
+            abort(403, 'Only administrators and place managers can create places.');
         }
-        return Inertia::render('places/Create');
+        
+        // If admin, provide list of placeManager users
+        $placeManagers = [];
+        if ($user->hasRole('admin')) {
+            $placeManagers = \App\Models\User::whereHas('roles', function($query) {
+                $query->where('name', 'placeManager');
+            })->get(['id', 'name']);
+        }
+        
+        return Inertia::render('places/Create', [
+            'placeManagers' => $placeManagers
+        ]);
     }
 
     /**
@@ -40,8 +64,8 @@ class PlaceController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            abort(403, 'Only administrators can create places.');
+        if (!$user->hasRole('admin') && !$user->hasRole('placeManager')) {
+            abort(403, 'Only administrators and place managers can create places.');
         }
 
         $validated = $request->validate([
@@ -62,6 +86,16 @@ class PlaceController extends Controller
 
         // Remove images from validation data
         $placeData = \Illuminate\Support\Arr::except($validated, ['images']);
+        
+        // If placeManager, set user_id to current user
+        if ($user->hasRole('placeManager')) {
+            $placeData['user_id'] = $user->id;
+        }
+        // If admin, allow setting user_id if provided, otherwise null
+        elseif ($user->hasRole('admin') && $request->has('user_id')) {
+            $placeData['user_id'] = $request->user_id;
+        }
+        
         $place = Place::create($placeData);
 
         if ($request->hasFile('images')) {
@@ -86,7 +120,14 @@ class PlaceController extends Controller
      */
     public function edit(string $id)
     {
+        $user = Auth::user();
         $place = Place::with('images')->findOrFail($id);
+        
+        // If placeManager, check if they own this place
+        if ($user->hasRole('placeManager') && $place->user_id !== $user->id) {
+            abort(403, 'You can only edit your own places.');
+        }
+        
         return Inertia::render('places/Edit', [
             'place' => $place
         ]);
@@ -98,8 +139,16 @@ class PlaceController extends Controller
     public function update(Request $request, string $id)
     {
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            abort(403, 'Only administrators can update places.');
+        $place = Place::findOrFail($id);
+        
+        // Check permissions
+        if (!$user->hasRole('admin') && !$user->hasRole('placeManager')) {
+            abort(403, 'Only administrators and place managers can update places.');
+        }
+        
+        // If placeManager, check if they own this place
+        if ($user->hasRole('placeManager') && $place->user_id !== $user->id) {
+            abort(403, 'You can only update your own places.');
         }
 
         $validated = $request->validate([
@@ -118,8 +167,6 @@ class PlaceController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'existing_images' => 'nullable|string', // JSON string of existing images to keep
         ]);
-
-        $place = Place::findOrFail($id);
 
         // Remove images from validation data
         $placeData = \Illuminate\Support\Arr::except($validated, ['images', 'existing_images']);
@@ -169,11 +216,17 @@ class PlaceController extends Controller
     public function destroy(string $id)
     {
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            abort(403, 'Only administrators can delete places.');
-        }
-
         $place = Place::findOrFail($id);
+        
+        // Check permissions
+        if (!$user->hasRole('admin') && !$user->hasRole('placeManager')) {
+            abort(403, 'Only administrators and place managers can delete places.');
+        }
+        
+        // If placeManager, check if they own this place
+        if ($user->hasRole('placeManager') && $place->user_id !== $user->id) {
+            abort(403, 'You can only delete your own places.');
+        }
 
         // Delete associated images from storage
         foreach ($place->images as $image) {

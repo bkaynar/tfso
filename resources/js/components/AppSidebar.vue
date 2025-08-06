@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users, UserCheck } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { computed } from 'vue';
 
@@ -94,7 +94,17 @@ const userNavItems = computed((): NavItem[] => {
             href: '/users',
             icon: Users,
         },
+        {
+            title: 'DJ Applications',
+            href: '/admin/dj-applications',
+            icon: UserCheck,
+        },
     ];
+});
+
+// Footer navigation items
+const footerNavItems = computed((): NavItem[] => {
+    return [];
 });
 </script>
 

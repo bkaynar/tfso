@@ -1,4 +1,5 @@
-<?php
+
+    <?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -27,7 +28,7 @@ return new class extends Migration
             $table->string('twitter_url')->nullable();
             $table->string('instagram_url')->nullable();
             $table->string('youtube_url')->nullable();
-            
+
             $table->timestamps();
         });
     }

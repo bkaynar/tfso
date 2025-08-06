@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Place extends Model
 {
     protected $fillable = [
+        'user_id',
         'name',
         'description',
         'google_maps_url',
@@ -28,5 +29,10 @@ class Place extends Model
     public function images(): HasMany
     {
         return $this->hasMany(PlaceImage::class)->orderBy('sort_order');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

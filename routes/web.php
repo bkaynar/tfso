@@ -13,9 +13,7 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Categories - DJ can only view (index), Admin can do everything
@@ -48,6 +46,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Events - admin, dj, placeManager can access
     Route::resource('events', EventsController::class)->middleware('role:admin,dj,placeManager');
+    
+    // DJ Applications
+    Route::get('dj/application/create', [App\Http\Controllers\DjApplicationController::class, 'create'])->name('dj.application.create')->middleware('auth');
+    Route::post('dj/application', [App\Http\Controllers\DjApplicationController::class, 'store'])->name('dj.application.store')->middleware('auth');
+    Route::get('dj/application/status', [App\Http\Controllers\DjApplicationController::class, 'status'])->name('dj.application.status')->middleware('auth');
+    
+    // Admin DJ Applications
+    Route::get('admin/dj-applications', [App\Http\Controllers\DjApplicationController::class, 'index'])->name('admin.dj-applications.index')->middleware('role:admin');
+    Route::get('admin/dj-applications/{djApplication}', [App\Http\Controllers\DjApplicationController::class, 'show'])->name('admin.dj-applications.show')->middleware('role:admin');
+    Route::post('admin/dj-applications/{djApplication}/approve', [App\Http\Controllers\DjApplicationController::class, 'approve'])->name('admin.dj-applications.approve')->middleware('role:admin');
+    Route::post('admin/dj-applications/{djApplication}/reject', [App\Http\Controllers\DjApplicationController::class, 'reject'])->name('admin.dj-applications.reject')->middleware('role:admin');
     
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');

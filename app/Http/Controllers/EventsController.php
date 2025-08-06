@@ -15,7 +15,23 @@ class EventsController extends Controller
      */
     public function index()
     {
-        $events = Events::paginate(10);
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // If user is admin or dj, show all events
+        if ($user->hasRole('admin') || $user->hasRole('dj')) {
+            $events = Events::with(['user', 'place'])->paginate(10);
+        } 
+        // If user is placeManager, show only events for their places
+        elseif ($user->hasRole('placeManager')) {
+            $userPlaceIds = $user->places->pluck('id');
+            $events = Events::with(['user', 'place'])
+                ->whereIn('place_id', $userPlaceIds)
+                ->paginate(10);
+        } 
+        else {
+            abort(403, 'Unauthorized access to events.');
+        }
+        
         return Inertia::render('events/Index', [
             'events' => $events
         ]);
@@ -26,7 +42,28 @@ class EventsController extends Controller
      */
     public function create()
     {
-        return Inertia::render('events/Create');
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        $users = \App\Models\User::whereHas('roles', function($query) {
+            $query->where('name', 'dj');
+        })->get(['id', 'name']);
+        
+        // If user is admin or dj, show all places
+        if ($user->hasRole('admin') || $user->hasRole('dj')) {
+            $places = \App\Models\Place::get(['id', 'name']);
+        } 
+        // If user is placeManager, show only their places
+        elseif ($user->hasRole('placeManager')) {
+            $places = $user->places()->get(['id', 'name']);
+        } 
+        else {
+            abort(403, 'Unauthorized access to create events.');
+        }
+        
+        return Inertia::render('events/Create', [
+            'users' => $users,
+            'places' => $places
+        ]);
     }
 
     /**
@@ -34,27 +71,38 @@ class EventsController extends Controller
      */
     public function store(Request $request)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'place_id' => 'required|exists:places,id',
+            'user_id' => 'nullable|exists:users,id',
+            'place_id' => 'nullable|exists:places,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'date' => 'nullable|date',
             'location' => 'nullable|string|max:255',
-            'image' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'ticket_link' => 'nullable|string|max:255',
         ]);
+
+        // If placeManager, validate they can only create events for their places
+        if ($user->hasRole('placeManager') && $validated['place_id']) {
+            $userPlaceIds = $user->places->pluck('id')->toArray();
+            if (!in_array($validated['place_id'], $userPlaceIds)) {
+                abort(403, 'You can only create events for your own places.');
+            }
+        }
 
         if ($request->hasFile('image')) {
             $imageFile = $request->file('image');
             $manager = ImageManager::gd();
             $image = $manager->read($imageFile)->toWebp(90);
-            $imageName = uniqid('category_') . '.webp';
-            $imagePath = 'categories/' . $imageName;
+            $imageName = uniqid('event_') . '.webp';
+            $imagePath = 'events/' . $imageName;
             Storage::disk('public')->put($imagePath, $image);
-            $data['image'] = $imagePath;
+            $validated['image'] = $imagePath;
         }
-        $event = Events::create($validated);
+        
+        Events::create($validated);
 
         return redirect()->route('events.index')->with('success', 'Event created successfully.');
     }
@@ -65,8 +113,36 @@ class EventsController extends Controller
      */
     public function edit(Events $events)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // If placeManager, check if this event belongs to their place
+        if ($user->hasRole('placeManager')) {
+            $userPlaceIds = $user->places->pluck('id')->toArray();
+            if ($events->place_id && !in_array($events->place_id, $userPlaceIds)) {
+                abort(403, 'You can only edit events for your own places.');
+            }
+        }
+        
+        $users = \App\Models\User::whereHas('roles', function($query) {
+            $query->where('name', 'dj');
+        })->get(['id', 'name']);
+        
+        // If user is admin or dj, show all places
+        if ($user->hasRole('admin') || $user->hasRole('dj')) {
+            $places = \App\Models\Place::get(['id', 'name']);
+        } 
+        // If user is placeManager, show only their places
+        elseif ($user->hasRole('placeManager')) {
+            $places = $user->places()->get(['id', 'name']);
+        } 
+        else {
+            abort(403, 'Unauthorized access to edit events.');
+        }
+        
         return Inertia::render('events/Edit', [
-            'event' => $events
+            'event' => $events,
+            'users' => $users,
+            'places' => $places
         ]);
     }
 
@@ -75,27 +151,53 @@ class EventsController extends Controller
      */
     public function update(Request $request, Events $events)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // If placeManager, check if this event belongs to their place
+        if ($user->hasRole('placeManager')) {
+            $userPlaceIds = $user->places->pluck('id')->toArray();
+            if ($events->place_id && !in_array($events->place_id, $userPlaceIds)) {
+                abort(403, 'You can only update events for your own places.');
+            }
+        }
+        
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'place_id' => 'required|exists:places,id',
+            'user_id' => 'nullable|exists:users,id',
+            'place_id' => 'nullable|exists:places,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'date' => 'nullable|date',
             'location' => 'nullable|string|max:255',
-            'image' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'ticket_link' => 'nullable|string|max:255',
         ]);
 
+        // If placeManager, validate they can only update to their places
+        if ($user->hasRole('placeManager') && $validated['place_id']) {
+            $userPlaceIds = $user->places->pluck('id')->toArray();
+            if (!in_array($validated['place_id'], $userPlaceIds)) {
+                abort(403, 'You can only update events to your own places.');
+            }
+        }
+
         if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($events->image) {
+                Storage::disk('public')->delete($events->image);
+            }
+            
             $imageFile = $request->file('image');
             $manager = ImageManager::gd();
             $image = $manager->read($imageFile)->toWebp(90);
-            $imageName = uniqid('category_') . '.webp';
-            $imagePath = 'categories/' . $imageName;
+            $imageName = uniqid('event_') . '.webp';
+            $imagePath = 'events/' . $imageName;
             Storage::disk('public')->put($imagePath, $image);
             $validated['image'] = $imagePath;
         }
+        
         $events->update($validated);
+        
+        return redirect()->route('events.index')->with('success', 'Event updated successfully.');
     }
 
     /**
@@ -103,6 +205,16 @@ class EventsController extends Controller
      */
     public function destroy(Events $events)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // If placeManager, check if this event belongs to their place
+        if ($user->hasRole('placeManager')) {
+            $userPlaceIds = $user->places->pluck('id')->toArray();
+            if ($events->place_id && !in_array($events->place_id, $userPlaceIds)) {
+                abort(403, 'You can only delete events for your own places.');
+            }
+        }
+        
         if ($events->image) {
             Storage::disk('public')->delete($events->image);
         }

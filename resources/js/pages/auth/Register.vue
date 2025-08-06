@@ -13,6 +13,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    role: 'dj', // Default to DJ
 });
 
 const submit = () => {
@@ -68,7 +69,42 @@ const submit = () => {
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
+                <div class="grid gap-3">
+                    <Label>Account Type</Label>
+                    <div class="flex gap-6">
+                        <div class="flex items-center space-x-2">
+                            <input
+                                id="role-dj"
+                                type="radio"
+                                name="role"
+                                value="dj"
+                                v-model="form.role"
+                                :tabindex="5"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                            <Label for="role-dj" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                DJ
+                            </Label>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input
+                                id="role-place"
+                                type="radio"
+                                name="role"
+                                value="placeManager"
+                                v-model="form.role"
+                                :tabindex="6"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                            <Label for="role-place" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Place Manager
+                            </Label>
+                        </div>
+                    </div>
+                    <InputError :message="form.errors.role" />
+                </div>
+
+                <Button type="submit" class="mt-2 w-full" tabindex="7" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Create account
                 </Button>
@@ -76,7 +112,7 @@ const submit = () => {
 
             <div class="text-center text-sm text-muted-foreground">
                 Already have an account?
-                <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="6">Log in</TextLink>
+                <TextLink :href="route('login')" class="underline underline-offset-4" :tabindex="8">Log in</TextLink>
             </div>
         </form>
     </AuthBase>

@@ -34,6 +34,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|string|in:dj,placeManager',
         ]);
 
         $user = User::create([
@@ -42,10 +43,21 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return to_route('dashboard');
+        // If role is DJ, don't assign role yet - they need to complete application
+        if ($request->role === 'dj') {
+            event(new Registered($user));
+            Auth::login($user);
+            
+            // Redirect to DJ application form
+            return to_route('dj.application.create')->with('info', 'Please complete your DJ application to access the platform.');
+        } 
+        // If role is placeManager, assign role immediately
+        else {
+            $user->assignRole($request->role);
+            event(new Registered($user));
+            Auth::login($user);
+            
+            return to_route('dashboard');
+        }
     }
 }
