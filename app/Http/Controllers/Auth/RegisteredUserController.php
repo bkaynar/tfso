@@ -51,13 +51,21 @@ class RegisteredUserController extends Controller
             // Redirect to DJ application form
             return to_route('dj.application.create')->with('info', 'Please complete your DJ application to access the platform.');
         } 
-        // If role is placeManager, assign role immediately
+        // If role is placeManager, assign role and redirect to place creation
         else {
             $user->assignRole($request->role);
+            
+            // Refresh the user model to ensure role is loaded
+            $user->refresh();
+            
             event(new Registered($user));
             Auth::login($user);
             
-            return to_route('dashboard');
+            // Clear any cached permissions
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+            
+            // Redirect to place creation for placeManager
+            return to_route('placemanager.place.create')->with('info', 'Welcome! Please create your place to complete your profile.');
         }
     }
 }

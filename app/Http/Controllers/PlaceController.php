@@ -18,17 +18,12 @@ class PlaceController extends Controller
     {
         $user = Auth::user();
         
-        // If user is admin, show all places
-        if ($user->hasRole('admin')) {
-            $places = Place::with('images')->paginate(10);
-        } 
-        // If user is placeManager, show only their own places
-        elseif ($user->hasRole('placeManager')) {
-            $places = Place::with('images')->where('user_id', $user->id)->paginate(10);
-        } 
-        else {
-            abort(403, 'Unauthorized access to places.');
+        // Only admin can access places index
+        if (!$user->hasRole('admin')) {
+            abort(403, 'Only administrators can access places listing.');
         }
+        
+        $places = Place::with('images')->paginate(10);
         
         return Inertia::render('places/Index', [
             'places' => $places
@@ -236,5 +231,99 @@ class PlaceController extends Controller
         $place->delete();
 
         return redirect()->route('places.index')->with('success', 'Place deleted successfully.');
+    }
+    
+    /**
+     * Show the form for creating a new place specifically for new placeManagers
+     */
+    public function createForPlaceManager()
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('placeManager')) {
+            abort(403, 'Only place managers can access this page.');
+        }
+        
+        // Check if user already has a place
+        $existingPlace = Place::where('user_id', $user->id)->first();
+        if ($existingPlace) {
+            return redirect()->route('places.index')->with('info', 'You already have a place registered.');
+        }
+        
+        return Inertia::render('placemanager/CreatePlace');
+    }
+    
+    /**
+     * Store a newly created place for new placeManagers
+     */
+    public function storeForPlaceManager(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('placeManager')) {
+            abort(403, 'Only place managers can create places through this method.');
+        }
+        
+        // Check if user already has a place
+        $existingPlace = Place::where('user_id', $user->id)->first();
+        if ($existingPlace) {
+            return redirect()->route('places.index')->with('info', 'You already have a place registered.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'location' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'google_maps_url' => 'nullable|url',
+            'apple_maps_url' => 'nullable|url',
+            'facebook_url' => 'nullable|url',
+            'instagram_url' => 'nullable|url',
+            'twitter_url' => 'nullable|url',
+            'youtube_url' => 'nullable|url',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Remove images from validation data and set user_id
+        $placeData = \Illuminate\Support\Arr::except($validated, ['images']);
+        $placeData['user_id'] = $user->id;
+        $placeData['is_premium'] = false; // Default to non-premium for new placeManagers
+        
+        $place = Place::create($placeData);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $manager = ImageManager::gd();
+                $image = $manager->read($imageFile);
+
+                $imageName = uniqid('place_') . '.png';
+                $imagePath = 'places/' . $imageName;
+                Storage::disk('public')->put($imagePath, $image->toPng());
+
+                $place->images()->create(['path' => $imagePath]);
+            }
+        }
+
+        return redirect()->route('dashboard')->with('success', 'Your place has been created successfully! Welcome to the platform.');
+    }
+    
+    /**
+     * PlaceManager'ın kendi mekanını düzenlemesi için doğrudan yönlendirme
+     */
+    public function editMyPlace()
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('placeManager')) {
+            abort(403, 'Only place managers can access this page.');
+        }
+        
+        // PlaceManager'ın mekanını bul
+        $place = Place::where('user_id', $user->id)->first();
+        
+        if (!$place) {
+            return redirect()->route('placemanager.place.create')->with('info', 'Please create your place first.');
+        }
+        
+        // Normal edit sayfasına yönlendir
+        return redirect()->route('places.edit', $place->id);
     }
 }

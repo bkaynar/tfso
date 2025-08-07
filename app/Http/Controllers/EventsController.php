@@ -111,14 +111,14 @@ class EventsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Events $events)
+    public function edit(Events $event)
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         
         // If placeManager, check if this event belongs to their place
         if ($user->hasRole('placeManager')) {
             $userPlaceIds = $user->places->pluck('id')->toArray();
-            if ($events->place_id && !in_array($events->place_id, $userPlaceIds)) {
+            if ($event->place_id && !in_array($event->place_id, $userPlaceIds)) {
                 abort(403, 'You can only edit events for your own places.');
             }
         }
@@ -140,7 +140,7 @@ class EventsController extends Controller
         }
         
         return Inertia::render('events/Edit', [
-            'event' => $events,
+            'event' => $event,
             'users' => $users,
             'places' => $places
         ]);
@@ -149,14 +149,14 @@ class EventsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Events $events)
+    public function update(Request $request, Events $event)
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         
         // If placeManager, check if this event belongs to their place
         if ($user->hasRole('placeManager')) {
             $userPlaceIds = $user->places->pluck('id')->toArray();
-            if ($events->place_id && !in_array($events->place_id, $userPlaceIds)) {
+            if ($event->place_id && !in_array($event->place_id, $userPlaceIds)) {
                 abort(403, 'You can only update events for your own places.');
             }
         }
@@ -182,8 +182,8 @@ class EventsController extends Controller
 
         if ($request->hasFile('image')) {
             // Delete old image if exists
-            if ($events->image) {
-                Storage::disk('public')->delete($events->image);
+            if ($event->image) {
+                Storage::disk('public')->delete($event->image);
             }
             
             $imageFile = $request->file('image');
@@ -195,7 +195,7 @@ class EventsController extends Controller
             $validated['image'] = $imagePath;
         }
         
-        $events->update($validated);
+        $event->update($validated);
         
         return redirect()->route('events.index')->with('success', 'Event updated successfully.');
     }
@@ -203,22 +203,22 @@ class EventsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Events $events)
+    public function destroy(Events $event)
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         
         // If placeManager, check if this event belongs to their place
         if ($user->hasRole('placeManager')) {
             $userPlaceIds = $user->places->pluck('id')->toArray();
-            if ($events->place_id && !in_array($events->place_id, $userPlaceIds)) {
+            if ($event->place_id && !in_array($event->place_id, $userPlaceIds)) {
                 abort(403, 'You can only delete events for your own places.');
             }
         }
         
-        if ($events->image) {
-            Storage::disk('public')->delete($events->image);
+        if ($event->image) {
+            Storage::disk('public')->delete($event->image);
         }
-        $events->delete();
+        $event->delete();
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
     }

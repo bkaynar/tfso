@@ -52,17 +52,76 @@
 
           <!-- User and Place Row -->
           <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
-            <div class="flex-1">
+            <div :class="isPlaceManager ? 'w-full' : 'flex-1'">
               <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 DJ
               </label>
-              <select v-model="form.user_id" id="user_id"
-                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">DJ seçin</option>
-                <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-              </select>
+              
+              <!-- DJ Selection for Admin/DJ (dropdown) -->
+              <div v-if="!isPlaceManager">
+                <select v-model="form.user_id" id="user_id"
+                  class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">DJ seçin</option>
+                  <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                </select>
+              </div>
+              
+              <!-- DJ Search for PlaceManager -->
+              <div v-else class="relative">
+                <div class="flex">
+                  <input 
+                    v-model="djSearchQuery" 
+                    type="text"
+                    placeholder="DJ adı yazın ve arayın..."
+                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    @input="searchDJs"
+                  />
+                  <button 
+                    type="button" 
+                    @click="searchDJs"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- Search Results Dropdown -->
+                <div v-if="djSearchResults.length > 0 && showDjResults" 
+                  class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div 
+                    v-for="dj in djSearchResults" 
+                    :key="dj.id"
+                    @click="selectDJ(dj)"
+                    class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                    <div class="font-medium text-gray-900 dark:text-white">{{ dj.name }}</div>
+                  </div>
+                </div>
+                
+                <!-- Selected DJ Display -->
+                <div v-if="selectedDJ" class="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                  <div class="flex items-center justify-between">
+                    <span class="text-green-800 dark:text-green-200">
+                      <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      Seçilen DJ: {{ selectedDJ.name }}
+                    </span>
+                    <button type="button" @click="clearDJSelection" 
+                      class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  DJ seçimi isteğe bağlıdır. Etkinlikte DJ varsa arayıp seçebilirsiniz.
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
+            <div v-if="!isPlaceManager" class="flex-1">
               <label for="place_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mekan
               </label>
@@ -71,6 +130,17 @@
                 <option value="">Mekan seçin</option>
                 <option v-for="place in places" :key="place.id" :value="place.id">{{ place.name }}</option>
               </select>
+            </div>
+            <!-- Hidden input for placeManager's place -->
+            <input v-if="isPlaceManager" type="hidden" v-model="form.place_id" />
+            <!-- Show selected place for placeManager -->
+            <div v-if="isPlaceManager && places && places.length > 0" class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Mekan
+              </label>
+              <div class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
+                {{ places[0].name }} (Sizin mekanınız)
+              </div>
             </div>
           </div>
 
@@ -116,7 +186,7 @@
           <div class="flex items-center space-x-3">
             <button type="submit"
               class="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-              Kaydet  
+              Kaydet
             </button>
             <Link :href="route('events.index')"
               class="inline-flex items-center px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
@@ -131,13 +201,23 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
   users: Array,
   places: Array
 })
+
+const page = usePage()
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+  const userRoles = page.props.auth.roles as string[];
+  return userRoles && userRoles.includes(role);
+};
+
+const isPlaceManager = computed(() => hasRole('placeManager'));
 
 const form = ref({
   user_id: '',
@@ -149,6 +229,63 @@ const form = ref({
   image: null as File | null,
   ticket_link: ''
 })
+
+// Auto-select place for placeManager
+onMounted(() => {
+  if (isPlaceManager.value && props.places && props.places.length > 0) {
+    form.value.place_id = props.places[0].id;
+  }
+});
+
+// DJ Search for PlaceManager
+const djSearchQuery = ref('')
+const djSearchResults = ref([])
+const showDjResults = ref(false)
+const selectedDJ = ref(null)
+let searchTimeout: number
+
+const searchDJs = async () => {
+  const query = djSearchQuery.value.trim()
+  
+  if (query.length < 2) {
+    djSearchResults.value = []
+    showDjResults.value = false
+    return
+  }
+
+  // Clear previous timeout
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+
+  // Debounce search
+  searchTimeout = setTimeout(async () => {
+    try {
+      // Filter from existing users list
+      djSearchResults.value = props.users.filter(user => 
+        user.name.toLowerCase().includes(query.toLowerCase())
+      )
+      showDjResults.value = true
+    } catch (error) {
+      console.error('DJ search error:', error)
+    }
+  }, 300)
+}
+
+const selectDJ = (dj: any) => {
+  selectedDJ.value = dj
+  form.value.user_id = dj.id
+  djSearchQuery.value = dj.name
+  showDjResults.value = false
+}
+
+const clearDJSelection = () => {
+  selectedDJ.value = null
+  form.value.user_id = ''
+  djSearchQuery.value = ''
+  djSearchResults.value = []
+  showDjResults.value = false
+}
 
 const imagePreview = ref<string | null>(null)
 
@@ -172,11 +309,11 @@ const submit = async () => {
   data.append('date', form.value.date)
   data.append('location', form.value.location)
   data.append('ticket_link', form.value.ticket_link)
-  
+
   if (form.value.image) {
     data.append('image', form.value.image)
   }
-  
+
   await router.post('/events', data)
 }
 </script>

@@ -35,8 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('users', UserController::class)->middleware('role:admin');
 
 
-    // Places - admin, placeManager can access
-    Route::get('places', [PlaceController::class, 'index'])->name('places.index')->middleware('role:admin,placeManager');
+    // Places - only admin can access index
+    Route::get('places', [PlaceController::class, 'index'])->name('places.index')->middleware('role:admin');
     Route::get('places/create', [PlaceController::class, 'create'])->name('places.create')->middleware('role:admin,placeManager');
     Route::post('places', [PlaceController::class, 'store'])->name('places.store')->middleware('role:admin,placeManager');
     Route::get('places/{place}/edit', [PlaceController::class, 'edit'])->name('places.edit')->middleware('role:admin,placeManager');
@@ -57,6 +57,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('admin/dj-applications/{djApplication}', [App\Http\Controllers\DjApplicationController::class, 'show'])->name('admin.dj-applications.show')->middleware('role:admin');
     Route::post('admin/dj-applications/{djApplication}/approve', [App\Http\Controllers\DjApplicationController::class, 'approve'])->name('admin.dj-applications.approve')->middleware('role:admin');
     Route::post('admin/dj-applications/{djApplication}/reject', [App\Http\Controllers\DjApplicationController::class, 'reject'])->name('admin.dj-applications.reject')->middleware('role:admin');
+    
+    // PlaceManager place creation - for new placeManagers
+    Route::get('placemanager/place/create', [PlaceController::class, 'createForPlaceManager'])->name('placemanager.place.create')->middleware('auth');
+    Route::post('placemanager/place', [PlaceController::class, 'storeForPlaceManager'])->name('placemanager.place.store')->middleware('auth');
+    
+    // PlaceManager direct edit - redirect to their place edit page
+    Route::get('placemanager/place/edit', [PlaceController::class, 'editMyPlace'])->name('placemanager.place.edit')->middleware('role:placeManager');
     
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');

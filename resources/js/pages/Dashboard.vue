@@ -31,6 +31,7 @@ const userRole = computed(() => {
     if (!userRoles || userRoles.length === 0) return 'user';
     if (userRoles.includes('admin')) return 'admin';
     if (userRoles.includes('dj')) return 'dj';
+    if (userRoles.includes('placeManager')) return 'placeManager';
     return 'user';
 });
 
@@ -43,6 +44,8 @@ const welcomeMessage = computed(() => {
             return `Hoş geldin ${userName}! Admin paneline tam erişiminiz var.`;
         case 'dj':
             return `Hoş geldin ${userName}! DJ olarak içeriklerinizi yönetebilirsiniz.`;
+        case 'placeManager':
+            return `Hoş geldin ${userName}! Mekan yöneticisi olarak mekanınızı ve etkinliklerinizi yönetebilirsiniz.`;
         default:
             return `Hoş geldin ${userName}! Sisteme hoş geldiniz.`;
     }
@@ -180,6 +183,21 @@ const welcomeMessage = computed(() => {
                             <a href="/tracks"
                                 class="block rounded-lg bg-primary/10 p-3 text-sm text-primary hover:bg-primary/20 transition-colors">
                                 🎧 Tracks
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- PlaceManager Actions -->
+                    <div v-if="hasRole('placeManager')" class="space-y-2">
+                        <h4 class="font-medium text-sidebar-foreground">Mekan Yönetimi</h4>
+                        <div class="space-y-1">
+                            <a href="/placemanager/place/edit"
+                                class="block rounded-lg bg-primary/10 p-3 text-sm text-primary hover:bg-primary/20 transition-colors">
+                                🏢 Mekanımı Düzenle
+                            </a>
+                            <a href="/events"
+                                class="block rounded-lg bg-primary/10 p-3 text-sm text-primary hover:bg-primary/20 transition-colors">
+                                🎉 Etkinliklerim
                             </a>
                         </div>
                     </div>

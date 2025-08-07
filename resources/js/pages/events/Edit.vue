@@ -1,10 +1,10 @@
 <template>
 
-  <Head :title="isAdmin ? 'Etkinlik Düzenle' : 'Etkinlik Görüntüle'" />
+  <Head :title="canEdit ? 'Etkinlik Düzenle' : 'Etkinlik Görüntüle'" />
   <AppLayout :breadcrumbs="[
     { title: 'Admin', href: '/admin/dashboard' },
     { title: 'Etkinlikler', href: '/events' },
-    { title: isAdmin ? 'Etkinlik Düzenle' : 'Etkinlik Görüntüle', href: '' }
+    { title: canEdit ? 'Etkinlik Düzenle' : 'Etkinlik Görüntüle', href: '' }
   ]">
     <div class="max-w-2xl mx-auto py-10">
       <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-8">
@@ -14,11 +14,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-6 0h6m-6 0V7a1 1 0 00-1 1v10a1 1 0 001 1h6a1 1 0 001-1V8a1 1 0 00-1-1V7" />
             </svg>
           </span>
-          {{ isAdmin ? 'Etkinlik Düzenle' : 'Etkinlik Görüntüle' }}
+          {{ canEdit ? 'Etkinlik Düzenle' : 'Etkinlik Görüntüle' }}
         </h1>
 
-        <!-- Read-only notice for DJ -->
-        <div v-if="!isAdmin"
+        <!-- Read-only notice for users without edit permissions -->
+        <div v-if="!canEdit"
           class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
           <p class="text-sm text-yellow-800 dark:text-yellow-200">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -26,11 +26,11 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            Sadece görüntüleme yetkisine sahipsiniz. Etkinlikleri düzenlemek için admin yetkisi gerekir.
+            Sadece görüntüleme yetkisine sahipsiniz. Bu etkinliği düzenlemek için yetkiniz bulunmuyor.
           </p>
         </div>
 
-        <form v-if="isAdmin" @submit.prevent="submit" class="space-y-6" enctype="multipart/form-data">
+        <form v-if="canEdit" @submit.prevent="submit" class="space-y-6" enctype="multipart/form-data">
           <!-- Title and Image Row -->
           <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 items-center">
             <div class="flex-1">
@@ -64,17 +64,78 @@
 
           <!-- User and Place Row -->
           <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
-            <div class="flex-1">
+            <div :class="isPlaceManager ? 'w-full' : 'flex-1'">
               <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 DJ
               </label>
-              <select v-model="form.user_id" id="user_id"
-                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">DJ seçin</option>
-                <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-              </select>
+              
+              <!-- DJ Selection for Admin/DJ (dropdown) -->
+              <div v-if="!isPlaceManager">
+                <select v-model="form.user_id" id="user_id"
+                  class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">DJ seçin</option>
+                  <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                </select>
+              </div>
+              
+              <!-- DJ Search for PlaceManager -->
+              <div v-else class="relative">
+                <div class="flex">
+                  <input 
+                    v-model="djSearchQuery" 
+                    type="text"
+                    placeholder="DJ adı yazın ve arayın..."
+                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    @input="searchDJs"
+                  />
+                  <button 
+                    type="button" 
+                    @click="searchDJs"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- Search Results Dropdown -->
+                <div v-if="djSearchResults.length > 0 && showDjResults" 
+                  class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div 
+                    v-for="dj in djSearchResults" 
+                    :key="dj.id"
+                    @click="selectDJ(dj)"
+                    class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                    <div class="font-medium text-gray-900 dark:text-white">{{ dj.name }}</div>
+                  </div>
+                </div>
+                
+                <!-- Selected DJ Display -->
+                <div v-if="selectedDJ" class="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                  <div class="flex items-center justify-between">
+                    <span class="text-green-800 dark:text-green-200">
+                      <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      Seçilen DJ: {{ selectedDJ.name }}
+                    </span>
+                    <button type="button" @click="clearDJSelection" 
+                      class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  DJ seçimi isteğe bağlıdır. Etkinlikte DJ varsa arayıp seçebilirsiniz.
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
+            
+            <!-- Place Selection - Only for Admin/DJ -->
+            <div v-if="!isPlaceManager" class="flex-1">
               <label for="place_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mekan
               </label>
@@ -83,6 +144,20 @@
                 <option value="">Mekan seçin</option>
                 <option v-for="place in places" :key="place.id" :value="place.id">{{ place.name }}</option>
               </select>
+            </div>
+            
+            <!-- Place Display for PlaceManager -->
+            <div v-else class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Mekan
+              </label>
+              <div class="flex items-center block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
+                <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                {{ currentPlaceName }} (Sizin mekanınız)
+              </div>
             </div>
           </div>
 
@@ -137,7 +212,7 @@
           </div>
         </form>
 
-        <!-- Read-only view for DJ -->
+        <!-- Read-only view for users without edit permissions -->
         <div v-else class="space-y-6">
           <!-- Title and Image Row -->
           <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 items-center">
@@ -261,8 +336,10 @@ const hasRole = (role: string) => {
   return userRoles && userRoles.includes(role);
 };
 
-// Check if user is admin
+// Check if user is admin or placeManager  
 const isAdmin = computed(() => hasRole('admin'));
+const isPlaceManager = computed(() => hasRole('placeManager'));
+const canEdit = computed(() => isAdmin.value || isPlaceManager.value);
 
 // Format date to local string
 const formatDate = (dateString: string) => {
@@ -280,6 +357,8 @@ const formatDate = (dateString: string) => {
 const formatDateForInput = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
+  // Check if date is valid
+  if (isNaN(date.getTime())) return '';
   return date.toISOString().slice(0, 16);
 }
 
@@ -298,6 +377,72 @@ const imagePreview = ref<string | null>(
   props.event.image ? `/storage/${props.event.image}` : null
 )
 
+// DJ Search for PlaceManager
+const djSearchQuery = ref('')
+const djSearchResults = ref([])
+const showDjResults = ref(false)
+const selectedDJ = ref<any>(null)
+let searchTimeout: number
+
+// Initialize selected DJ if event already has one
+if (props.event.user_id && props.users) {
+  selectedDJ.value = props.users.find(user => user.id === props.event.user_id)
+  if (selectedDJ.value) {
+    djSearchQuery.value = selectedDJ.value.name
+  }
+}
+
+const searchDJs = async () => {
+  const query = djSearchQuery.value.trim()
+  
+  if (query.length < 2) {
+    djSearchResults.value = []
+    showDjResults.value = false
+    return
+  }
+
+  // Clear previous timeout
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+
+  // Debounce search
+  searchTimeout = setTimeout(async () => {
+    try {
+      // Filter from existing users list
+      djSearchResults.value = props.users.filter(user => 
+        user.name.toLowerCase().includes(query.toLowerCase())
+      )
+      showDjResults.value = true
+    } catch (error) {
+      console.error('DJ search error:', error)
+    }
+  }, 300)
+}
+
+const selectDJ = (dj: any) => {
+  selectedDJ.value = dj
+  form.value.user_id = dj.id
+  djSearchQuery.value = dj.name
+  showDjResults.value = false
+}
+
+const clearDJSelection = () => {
+  selectedDJ.value = null
+  form.value.user_id = ''
+  djSearchQuery.value = ''
+  djSearchResults.value = []
+  showDjResults.value = false
+}
+
+// Get current place name for placeManager
+const currentPlaceName = computed(() => {
+  if (isPlaceManager.value && props.places && props.places.length > 0) {
+    return props.places[0].name
+  }
+  return ''
+})
+
 const handleFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
@@ -310,10 +455,17 @@ const handleFileChange = (e: Event) => {
 }
 
 const submit = async () => {
-  if (!isAdmin.value) return; // Only admin can submit
+  if (!canEdit.value) return; // Admin or placeManager can submit
 
   const data = new FormData()
-  data.append('user_id', form.value.user_id)
+  
+  // For placeManager, use selectedDJ if available, otherwise use form value
+  if (isPlaceManager.value && selectedDJ.value) {
+    data.append('user_id', selectedDJ.value.id)
+  } else {
+    data.append('user_id', form.value.user_id)
+  }
+  
   data.append('place_id', form.value.place_id)
   data.append('title', form.value.title)
   data.append('description', form.value.description)
@@ -325,6 +477,6 @@ const submit = async () => {
     data.append('image', form.value.image)
   }
   
-  await router.post(`/events/${props.event.id}?_method=PUT`, data)
+  router.post(`/events/${props.event.id}?_method=PUT`, data)
 }
 </script>
