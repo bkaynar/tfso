@@ -164,20 +164,52 @@
               </div>
               
               <div v-for="message in messages" :key="message.id" 
-                :class="['flex', message.user_id === currentUserId ? 'justify-end' : 'justify-start']">
-                <div :class="['max-w-xs lg:max-w-sm px-4 py-2 rounded-lg text-sm', 
-                  message.user_id === currentUserId 
-                    ? 'bg-purple-600 text-white' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white']">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="font-medium text-xs opacity-75">
-                      {{ message.user.name }}
-                    </span>
-                    <span class="text-xs opacity-50 ml-2">
-                      {{ formatMessageTime(message.created_at) }}
-                    </span>
+                :class="['flex mb-4', message.user_id === currentUserId ? 'justify-end' : 'justify-start']">
+                
+                <!-- Message bubble with avatar -->
+                <div :class="['flex max-w-[70%]', message.user_id === currentUserId ? 'flex-row-reverse' : 'flex-row']">
+                  
+                  <!-- Avatar -->
+                  <div :class="['flex-shrink-0', message.user_id === currentUserId ? 'ml-2' : 'mr-2']">
+                    <div :class="['w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold', 
+                      message.user_id === currentUserId ? 'bg-purple-500' : 'bg-gray-500']">
+                      {{ message.user.name.charAt(0).toUpperCase() }}
+                    </div>
                   </div>
-                  <p class="whitespace-pre-wrap">{{ message.message }}</p>
+                  
+                  <!-- Message content -->
+                  <div class="flex flex-col">
+                    <!-- Message header -->
+                    <div :class="['flex items-center mb-1', message.user_id === currentUserId ? 'flex-row-reverse' : 'flex-row']">
+                      <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ message.user.name }}
+                      </span>
+                      <span :class="['text-xs text-gray-500 dark:text-gray-500', message.user_id === currentUserId ? 'mr-2' : 'ml-2']">
+                        {{ formatMessageTime(message.created_at) }}
+                      </span>
+                    </div>
+                    
+                    <!-- Message bubble -->
+                    <div :class="['px-4 py-3 rounded-2xl shadow-sm relative', 
+                      message.user_id === currentUserId 
+                        ? 'bg-purple-600 text-white rounded-br-md' 
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md']">
+                      
+                      <!-- Message text -->
+                      <p class="text-sm whitespace-pre-wrap leading-relaxed">{{ message.message }}</p>
+                      
+                      <!-- Message status for sent messages -->
+                      <div v-if="message.user_id === currentUserId" class="flex items-center justify-end mt-1">
+                        <svg v-if="message.is_read" class="w-4 h-4 text-purple-200" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg v-else class="w-4 h-4 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -185,12 +217,18 @@
             <!-- Message Input -->
             <div class="p-4 border-t border-gray-200 dark:border-gray-700">
               <form @submit.prevent="sendMessage" class="flex space-x-2">
-                <input v-model="newMessage" 
-                  type="text" 
-                  placeholder="Type your message..." 
+                <textarea 
+                  v-model="newMessage" 
+                  @input="handleTyping"
+                  @keydown.enter.exact.prevent="sendMessage"
+                  @keydown.enter.shift.exact="newMessage += '\n'"
+                  placeholder="Type your message... (Shift+Enter for new line)" 
                   maxlength="2000"
+                  rows="1"
                   :disabled="isSendingMessage"
-                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+                  class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                  style="min-height: 44px; max-height: 120px;"
+                  ref="messageInput"></textarea>
                 <button type="submit" 
                   :disabled="!newMessage.trim() || isSendingMessage"
                   class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-sm font-medium rounded-lg transition-colors">
