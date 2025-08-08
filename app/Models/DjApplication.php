@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DjApplication extends Model
 {
     protected $fillable = [
+        'user_id',
         'name',
         'email',
         'phone',
@@ -30,6 +31,14 @@ class DjApplication extends Model
     protected $hidden = [
         'password',
     ];
+
+    /**
+     * Get the user who submitted this application.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     /**
      * Get the admin who approved this application.

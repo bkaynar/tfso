@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users, UserCheck } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users, UserCheck, MessageSquare } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { computed } from 'vue';
 
@@ -75,6 +75,32 @@ const mainNavItems = computed((): NavItem[] => {
                 title: 'Events',
                 href: '/events',
                 icon: BookOpen,
+            },
+        );
+    }
+
+    // DJ Offers - for PlaceManagers and DJs
+    if (hasAnyRole(['placeManager'])) {
+        items.push(
+            {
+                title: 'Find DJs',
+                href: '/dj-offers/dj-list',
+                icon: MessageSquare,
+            },
+            {
+                title: 'My Offers',
+                href: '/dj-offers',
+                icon: MessageSquare,
+            },
+        );
+    }
+    
+    if (hasAnyRole(['dj'])) {
+        items.push(
+            {
+                title: 'DJ Offers',
+                href: '/dj-offers',
+                icon: MessageSquare,
             },
         );
     }

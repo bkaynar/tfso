@@ -1,0 +1,392 @@
+<template>
+  <Head title="Offer Details" />
+  <AppLayout :breadcrumbs="[
+    { title: isPlaceManager ? 'Sent Offers' : 'DJ Offers', href: route('dj-offers.index') },
+    { title: 'Offer Details', href: '' }
+  ]">
+    <div class="max-w-6xl mx-auto py-10">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Offer Details Panel -->
+        <div class="lg:col-span-2">
+          <!-- Offer Header -->
+          <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                  {{ isPlaceManager ? offer.dj.name.charAt(0).toUpperCase() : offer.place.name.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ isPlaceManager ? `Offer to ${offer.dj.name}` : `Offer from ${offer.place.name}` }}
+                  </h1>
+                  <p class="text-gray-600 dark:text-gray-400">
+                    {{ isPlaceManager ? offer.dj.email : offer.place.location }}
+                  </p>
+                </div>
+              </div>
+              
+              <span :class="getStatusBadgeClass(offer.status)" 
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                {{ getStatusText(offer.status) }}
+              </span>
+            </div>
+
+            <!-- Quick Actions -->
+            <div v-if="!isPlaceManager && offer.status === 'pending'" class="flex space-x-3">
+              <button @click="acceptOffer" :disabled="isProcessing"
+                class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Accept Offer
+              </button>
+              <button @click="rejectOffer" :disabled="isProcessing"
+                class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Reject Offer
+              </button>
+            </div>
+
+            <div v-if="isPlaceManager && offer.status === 'pending'" class="flex space-x-3">
+              <button @click="cancelOffer" :disabled="isProcessing"
+                class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Cancel Offer
+              </button>
+            </div>
+          </div>
+
+          <!-- Event Details -->
+          <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3a4 4 0 118 0v4m-4 8l2-2 2 2M8 13h8m-5-5.5A2.5 2.5 0 0113.5 5c0-1 1-2 2.5-2s2.5 1 2.5 2A2.5 2.5 0 0116 7.5V8a1 1 0 01-1 1H9a1 1 0 01-1-1v-.5z" />
+              </svg>
+              Event Details
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Date</h3>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ formatDate(offer.event_date) }}
+                </p>
+              </div>
+              
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Time</h3>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ formatTime(offer.event_time) }}
+                </p>
+              </div>
+              
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration</h3>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ offer.duration }} hours
+                </p>
+              </div>
+              
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Budget</h3>
+                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  ₺{{ formatBudget(offer.budget) }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Description -->
+          <div v-if="offer.description" class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Event Description
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ offer.description }}</p>
+          </div>
+
+          <!-- Venue Information -->
+          <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {{ isPlaceManager ? 'Your Venue' : 'Venue Information' }}
+            </h2>
+            
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0v-4a2 2 0 011-1h4a2 2 0 011 1v4M9 7h6m0 0v10m0-10h2m-8 0V5a2 2 0 011-1h2a2 2 0 011 1v2M9 7H7m2 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ offer.place.name }}</h3>
+                <p class="text-gray-600 dark:text-gray-400">{{ offer.place.location }}</p>
+                <span v-if="offer.place.is_premium" 
+                  class="inline-flex items-center px-2 py-1 mt-2 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  ⭐ Premium Venue
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messaging Panel -->
+        <div class="lg:col-span-1">
+          <div class="bg-white dark:bg-gray-800 shadow rounded-lg h-[600px] flex flex-col">
+            <!-- Messages Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Messages
+              </h2>
+            </div>
+
+            <!-- Messages List -->
+            <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+              <div v-if="messages.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8">
+                <svg class="mx-auto h-8 w-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p class="text-sm">No messages yet.</p>
+                <p class="text-xs mt-1">Start the conversation!</p>
+              </div>
+              
+              <div v-for="message in messages" :key="message.id" 
+                :class="['flex', message.user_id === currentUserId ? 'justify-end' : 'justify-start']">
+                <div :class="['max-w-xs lg:max-w-sm px-4 py-2 rounded-lg text-sm', 
+                  message.user_id === currentUserId 
+                    ? 'bg-purple-600 text-white' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white']">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-medium text-xs opacity-75">
+                      {{ message.user.name }}
+                    </span>
+                    <span class="text-xs opacity-50 ml-2">
+                      {{ formatMessageTime(message.created_at) }}
+                    </span>
+                  </div>
+                  <p class="whitespace-pre-wrap">{{ message.message }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+              <form @submit.prevent="sendMessage" class="flex space-x-2">
+                <input v-model="newMessage" 
+                  type="text" 
+                  placeholder="Type your message..." 
+                  maxlength="2000"
+                  :disabled="isSendingMessage"
+                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+                <button type="submit" 
+                  :disabled="!newMessage.trim() || isSendingMessage"
+                  class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-sm font-medium rounded-lg transition-colors">
+                  <svg v-if="isSendingMessage" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </form>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {{ newMessage.length }}/2000 characters
+              </p>
+            </div>
+          </div>
+
+          <!-- Offer Timeline -->
+          <div class="mt-6 bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Offer Timeline</h3>
+            <div class="space-y-2">
+              <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span>Offer created {{ formatDate(offer.created_at) }}</span>
+              </div>
+              
+              <div v-if="offer.status !== 'pending'" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <div :class="['w-2 h-2 rounded-full mr-2', 
+                  offer.status === 'accepted' ? 'bg-green-500' : 'bg-red-500']"></div>
+                <span>Offer {{ offer.status }} {{ formatDate(offer.updated_at) }}</span>
+              </div>
+              
+              <div v-if="offer.expires_at" class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <div class="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                <span>{{ isOfferExpired ? 'Expired' : 'Expires' }} {{ formatDate(offer.expires_at) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue'
+import { Head, usePage, useForm } from '@inertiajs/vue3'
+import { computed, ref, onMounted, nextTick } from 'vue'
+
+const page = usePage()
+const props = defineProps({
+  offer: Object,
+  messages: Array
+})
+
+const messagesContainer = ref(null)
+const newMessage = ref('')
+const messages = ref(props.messages || [])
+const isSendingMessage = ref(false)
+const isProcessing = ref(false)
+
+const currentUserId = computed(() => page.props.auth.user?.id)
+const isPlaceManager = computed(() => {
+  const roles = page.props.auth.roles as string[]
+  return roles && roles.includes('placeManager')
+})
+
+const isOfferExpired = computed(() => {
+  if (!props.offer.expires_at) return false
+  return new Date(props.offer.expires_at) < new Date()
+})
+
+const scrollToBottom = async () => {
+  await nextTick()
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  }
+}
+
+onMounted(() => {
+  scrollToBottom()
+  // Poll for new messages every 5 seconds
+  setInterval(fetchMessages, 5000)
+})
+
+const fetchMessages = async () => {
+  try {
+    const response = await fetch(route('offer-messages.index', props.offer.id))
+    const data = await response.json()
+    messages.value = data.messages
+  } catch (error) {
+    console.error('Error fetching messages:', error)
+  }
+}
+
+const sendMessage = async () => {
+  if (!newMessage.value.trim() || isSendingMessage.value) return
+  
+  isSendingMessage.value = true
+  
+  try {
+    const response = await fetch(route('offer-messages.store', props.offer.id), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({
+        message: newMessage.value
+      })
+    })
+    
+    const data = await response.json()
+    
+    if (data.success) {
+      messages.value.push(data.message)
+      newMessage.value = ''
+      scrollToBottom()
+    }
+  } catch (error) {
+    console.error('Error sending message:', error)
+  } finally {
+    isSendingMessage.value = false
+  }
+}
+
+const getStatusBadgeClass = (status: string) => {
+  const classes = {
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    accepted: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    expired: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+  }
+  return classes[status] || classes.pending
+}
+
+const getStatusText = (status: string) => {
+  const texts = {
+    pending: 'Pending Response',
+    accepted: 'Accepted',
+    rejected: 'Rejected',
+    expired: 'Expired'
+  }
+  return texts[status] || 'Unknown'
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('tr-TR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const formatTime = (time: string) => {
+  return time.slice(0, 5)
+}
+
+const formatBudget = (budget: number) => {
+  return new Intl.NumberFormat('tr-TR').format(budget)
+}
+
+const formatMessageTime = (date: string) => {
+  const messageDate = new Date(date)
+  const now = new Date()
+  const diffMinutes = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60))
+  
+  if (diffMinutes < 1) return 'now'
+  if (diffMinutes < 60) return `${diffMinutes}m`
+  if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h`
+  if (diffMinutes < 10080) return `${Math.floor(diffMinutes / 1440)}d`
+  return messageDate.toLocaleDateString('tr-TR')
+}
+
+const acceptOffer = () => {
+  if (confirm('Are you sure you want to accept this offer?')) {
+    isProcessing.value = true
+    const form = useForm({})
+    form.post(route('dj-offers.accept', props.offer.id))
+  }
+}
+
+const rejectOffer = () => {
+  if (confirm('Are you sure you want to reject this offer?')) {
+    isProcessing.value = true
+    const form = useForm({})
+    form.post(route('dj-offers.reject', props.offer.id))
+  }
+}
+
+const cancelOffer = () => {
+  if (confirm('Are you sure you want to cancel this offer?')) {
+    isProcessing.value = true
+    const form = useForm({})
+    form.post(route('dj-offers.cancel', props.offer.id))
+  }
+}
+</script>

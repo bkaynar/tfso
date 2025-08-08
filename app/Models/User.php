@@ -114,6 +114,11 @@ class User extends Authenticatable
         return $this->hasMany(Place::class);
     }
 
+    public function djApplications()
+    {
+        return $this->hasMany(DjApplication::class);
+    }
+
     // Profile photo URL accessor
     public function getProfilePhotoUrlAttribute()
     {
