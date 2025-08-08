@@ -70,6 +70,65 @@
                         <p class="mt-1 text-sm text-gray-500">Maximum 5000 characters</p>
                     </div>
 
+                    <!-- Location -->
+                    <div class="relative">
+                        <label for="location"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                        <div class="relative">
+                            <input 
+                                v-model="form.location" 
+                                @input="onLocationInput"
+                                @focus="showSuggestions = true"
+                                @blur="hideSuggestions"
+                                id="location" 
+                                type="text" 
+                                placeholder="e.g., Istanbul, Turkey"
+                                class="block w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                autocomplete="off" />
+                            
+                            <!-- Loading icon -->
+                            <div v-if="isSearching" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                            
+                            <!-- Location icon -->
+                            <div v-else class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Location suggestions dropdown -->
+                        <div v-if="showSuggestions && locationSuggestions.length > 0" 
+                            class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                            <ul class="py-1">
+                                <li v-for="(suggestion, index) in locationSuggestions" 
+                                    :key="index"
+                                    @mousedown="selectLocation(suggestion)"
+                                    class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0">
+                                    <div class="flex items-start">
+                                        <svg class="h-4 w-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ suggestion.text }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ suggestion.context?.join(', ') }}</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div v-if="form.errors.location" class="mt-1 text-sm text-red-600">{{ form.errors.location }}</div>
+                        <p class="mt-1 text-sm text-gray-500">Start typing to search for locations</p>
+                    </div>
+
                     <!-- Social Media -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -213,11 +272,18 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { ref, nextTick } from 'vue'
 
 const props = defineProps({
     user: Object,
     isOwnProfile: Boolean
 })
+
+// Location search states
+const isSearching = ref(false)
+const locationSuggestions = ref([])
+const showSuggestions = ref(false)
+const searchTimeout = ref<NodeJS.Timeout | null>(null)
 
 const form = useForm({
     name: props.user?.name || '',
@@ -225,6 +291,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     bio: props.user?.bio || '',
+    location: props.user?.location || '',
     profile_photo: null as File | null,
     cover_image: null as File | null,
     instagram: props.user?.instagram || '',
@@ -246,6 +313,68 @@ const handleCoverImageChange = (event: Event) => {
     if (target.files && target.files[0]) {
         form.cover_image = target.files[0]
     }
+}
+
+// Location search functionality
+const searchLocations = async (query: string) => {
+    try {
+        isSearching.value = true
+
+        // Mapbox Geocoding API
+        const mapboxToken = 'sk.eyJ1IjoiYnVyYWtrYXluYXIiLCJhIjoiY21keXVmNzE1MDUwZTJscXhvczVpdXp0bSJ9.Jxt1o-slW0hL6PaQYIXx6Q'
+        const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,locality,neighborhood,address&limit=5&language=en`
+
+        const response = await fetch(mapboxUrl)
+        const data = await response.json()
+
+        if (data.features) {
+            locationSuggestions.value = data.features.map((feature: any) => ({
+                place_name: feature.place_name,
+                text: feature.text,
+                context: feature.context?.map((c: any) => c.text) || [],
+                coordinates: feature.center
+            }))
+        }
+    } catch (error) {
+        console.error('Location search error:', error)
+        locationSuggestions.value = []
+    } finally {
+        isSearching.value = false
+    }
+}
+
+const selectLocation = (suggestion: any) => {
+    form.location = suggestion.place_name
+    locationSuggestions.value = []
+    showSuggestions.value = false
+}
+
+const onLocationInput = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const query = target.value.trim()
+    
+    // Clear existing timeout
+    if (searchTimeout.value) {
+        clearTimeout(searchTimeout.value)
+    }
+    
+    if (query.length >= 2) {
+        // Debounce search for 300ms
+        searchTimeout.value = setTimeout(() => {
+            searchLocations(query)
+        }, 300)
+        showSuggestions.value = true
+    } else {
+        locationSuggestions.value = []
+        showSuggestions.value = false
+    }
+}
+
+const hideSuggestions = () => {
+    // Delay hiding to allow click events on suggestions
+    setTimeout(() => {
+        showSuggestions.value = false
+    }, 150)
 }
 
 const submit = () => {

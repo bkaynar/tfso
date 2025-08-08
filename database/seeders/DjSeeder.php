@@ -26,6 +26,7 @@ class DjSeeder extends Seeder
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'bio' => 'Professional DJ specializing in electronic music and live performances.',
+                'location' => 'Istanbul, Turkey',
                 'instagram' => 'https://instagram.com/djtest',
                 'twitter' => 'https://twitter.com/djtest',
                 'soundcloud' => 'https://soundcloud.com/djtest',

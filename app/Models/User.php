@@ -51,6 +51,7 @@ class User extends Authenticatable
         'password',
         'profile_photo',
         'bio',
+        'location',
         'instagram',
         'twitter',
         'facebook',

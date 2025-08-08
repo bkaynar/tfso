@@ -152,8 +152,8 @@
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                         Bu mekanın yönetiminden sorumlu PlaceManager kullanıcısını seçin
                                         <span v-if="placeManagers.length === 0">
-                                            (Önce 
-                                            <Link :href="route('users.create')" 
+                                            (Önce
+                                            <Link :href="route('users.create')"
                                                 class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-medium">
                                                 PlaceManager rolü olan kullanıcı oluşturun
                                             </Link>)
@@ -307,59 +307,8 @@ const handleLocationSearch = async (e: Event) => {
     }, 300)
 }
 
-const searchLocations = async (query: string) => {
-    try {
-        isSearching.value = true
 
-        // Option 1: Mapbox Geocoding API (Recommended)
-        // Replace 'YOUR_MAPBOX_TOKEN' with your actual token
-        const mapboxToken = 'sk.eyJ1IjoiYnVyYWtrYXluYXIiLCJhIjoiY21keXVmNzE1MDUwZTJscXhvczVpdXp0bSJ9.Jxt1o-slW0hL6PaQYIXx6Q'
-        const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,locality,neighborhood,address&limit=5&language=en`
 
-        const response = await fetch(mapboxUrl)
-        const data = await response.json()
-
-        if (data.features) {
-            locationSuggestions.value = data.features.map((feature: any) => ({
-                place_name: feature.place_name,
-                text: feature.text,
-                context: feature.context?.map((c: any) => c.text) || [],
-                coordinates: feature.center
-            }))
-        }
-
-        // Option 2: Nominatim (Free alternative - uncomment to use)
-        /*
-        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=tr,en`
-
-        const response = await fetch(nominatimUrl, {
-          headers: {
-            'User-Agent': 'YourAppName/1.0'
-          }
-        })
-        const data = await response.json()
-
-        locationSuggestions.value = data.map((item: any) => ({
-          place_name: item.display_name,
-          text: item.name || item.display_name.split(',')[0],
-          context: item.display_name.split(',').slice(1),
-          coordinates: [parseFloat(item.lon), parseFloat(item.lat)]
-        }))
-        */
-
-    } catch (error) {
-        console.error('Location search error:', error)
-        locationSuggestions.value = []
-    } finally {
-        isSearching.value = false
-    }
-}
-
-const selectLocation = (suggestion: any) => {
-    form.value.location = suggestion.place_name
-    locationSuggestions.value = []
-    showSuggestions.value = false
-}
 
 const hideSuggestions = () => {
     // Delay hiding to allow click events
