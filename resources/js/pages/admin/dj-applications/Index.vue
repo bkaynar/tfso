@@ -15,7 +15,13 @@
               </svg>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">DJ Applications</h1>
+              <div class="flex items-center space-x-3">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">DJ Applications</h1>
+                <span v-if="pendingCount > 0" 
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  {{ pendingCount }} Pending
+                </span>
+              </div>
               <p class="text-sm text-gray-600 dark:text-gray-400">Review and manage DJ applications</p>
             </div>
           </div>
@@ -267,7 +273,8 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-  applications: Object
+  applications: Object,
+  pendingCount: Number
 })
 
 const statusFilter = ref('')

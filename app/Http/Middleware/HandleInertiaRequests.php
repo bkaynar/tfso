@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\DjApplication;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -39,6 +40,12 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Get pending DJ applications count for admin users
+        $pendingDjApplicationsCount = 0;
+        if ($request->user() && $request->user()->hasRole('admin')) {
+            $pendingDjApplicationsCount = DjApplication::where('status', 'pending')->count();
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -48,7 +55,7 @@ class HandleInertiaRequests extends Middleware
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
             ],
-          
+            'pendingDjApplicationsCount' => $pendingDjApplicationsCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

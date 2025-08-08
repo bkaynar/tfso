@@ -44,6 +44,10 @@ class DjApplicationController extends Controller
         $validated = $request->validate([
             'phone' => 'nullable|string|max:20',
             'intention_letter' => 'required|string|min:50|max:2000',
+            'facebook' => 'nullable|url|max:255',
+            'instagram' => 'nullable|url|max:255',
+            'twitter' => 'nullable|url|max:255',
+            'youtube' => 'nullable|url|max:255',
         ]);
 
         // Check if user already has an application
@@ -58,6 +62,10 @@ class DjApplicationController extends Controller
             'phone' => $validated['phone'],
             'password' => $user->password, // Copy existing password
             'intention_letter' => $validated['intention_letter'],
+            'facebook' => $validated['facebook'],
+            'instagram' => $validated['instagram'],
+            'twitter' => $validated['twitter'],
+            'youtube' => $validated['youtube'],
             'status' => 'pending',
         ]);
 
@@ -95,8 +103,11 @@ class DjApplicationController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        $pendingCount = DjApplication::where('status', 'pending')->count();
+
         return Inertia::render('admin/dj-applications/Index', [
-            'applications' => $applications
+            'applications' => $applications,
+            'pendingCount' => $pendingCount
         ]);
     }
 

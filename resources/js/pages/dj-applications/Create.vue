@@ -34,6 +34,64 @@
             </div>
           </div>
 
+          <!-- Social Media Links -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Social Media Profiles</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Share your social media profiles to help us understand your online presence and musical style.</p>
+            
+            <!-- Facebook -->
+            <div>
+              <label for="facebook" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Facebook Profile
+              </label>
+              <input v-model="form.facebook" id="facebook" type="url"
+                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="https://www.facebook.com/yourprofile" />
+              <div v-if="form.errors.facebook" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.errors.facebook }}
+              </div>
+            </div>
+
+            <!-- Instagram -->
+            <div>
+              <label for="instagram" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Instagram Profile
+              </label>
+              <input v-model="form.instagram" id="instagram" type="url"
+                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="https://www.instagram.com/yourprofile" />
+              <div v-if="form.errors.instagram" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.errors.instagram }}
+              </div>
+            </div>
+
+            <!-- Twitter -->
+            <div>
+              <label for="twitter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Twitter Profile
+              </label>
+              <input v-model="form.twitter" id="twitter" type="url"
+                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="https://twitter.com/yourprofile" />
+              <div v-if="form.errors.twitter" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.errors.twitter }}
+              </div>
+            </div>
+
+            <!-- YouTube -->
+            <div>
+              <label for="youtube" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                YouTube Channel
+              </label>
+              <input v-model="form.youtube" id="youtube" type="url"
+                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="https://www.youtube.com/channel/yourchannel" />
+              <div v-if="form.errors.youtube" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ form.errors.youtube }}
+              </div>
+            </div>
+          </div>
+
           <!-- Intention Letter -->
           <div>
             <label for="intention_letter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -74,6 +132,10 @@ import { Head, useForm } from '@inertiajs/vue3'
 
 const form = useForm({
   phone: '',
+  facebook: '',
+  instagram: '',
+  twitter: '',
+  youtube: '',
   intention_letter: ''
 })
 
