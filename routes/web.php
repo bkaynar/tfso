@@ -65,9 +65,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // PlaceManager direct edit - redirect to their place edit page
     Route::get('placemanager/place/edit', [PlaceController::class, 'editMyPlace'])->name('placemanager.place.edit')->middleware('role:placeManager');
     
+    // Premium management - only placeManagers can access
+    Route::get('premium', [App\Http\Controllers\PremiumController::class, 'index'])->name('premium.index')->middleware('role:placeManager');
+    Route::post('premium/trial', [App\Http\Controllers\PremiumController::class, 'startFreeTrial'])->name('premium.trial')->middleware('role:placeManager');
+    Route::post('premium/purchase', [App\Http\Controllers\PremiumController::class, 'purchase'])->name('premium.purchase')->middleware('role:placeManager');
+    
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
     Route::match(['patch', 'post'], 'profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::post('profile/update-password', [UserController::class, 'updatePassword'])->name('profile.update-password');
 });
 
 require __DIR__ . '/auth.php';

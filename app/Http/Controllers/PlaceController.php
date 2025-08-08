@@ -75,6 +75,7 @@ class PlaceController extends Controller
             'twitter_url' => 'nullable|url',
             'youtube_url' => 'nullable|url',
             'is_premium' => 'boolean',
+            'user_id' => 'nullable|exists:users,id',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -123,8 +124,17 @@ class PlaceController extends Controller
             abort(403, 'You can only edit your own places.');
         }
         
+        // If admin, provide list of placeManager users
+        $placeManagers = [];
+        if ($user->hasRole('admin')) {
+            $placeManagers = \App\Models\User::whereHas('roles', function($query) {
+                $query->where('name', 'placeManager');
+            })->get(['id', 'name']);
+        }
+        
         return Inertia::render('places/Edit', [
-            'place' => $place
+            'place' => $place,
+            'placeManagers' => $placeManagers
         ]);
     }
 
@@ -158,6 +168,7 @@ class PlaceController extends Controller
             'twitter_url' => 'nullable|url',
             'youtube_url' => 'nullable|url',
             'is_premium' => 'boolean',
+            'user_id' => 'nullable|exists:users,id',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'existing_images' => 'nullable|string', // JSON string of existing images to keep
@@ -165,6 +176,12 @@ class PlaceController extends Controller
 
         // Remove images from validation data
         $placeData = \Illuminate\Support\Arr::except($validated, ['images', 'existing_images']);
+        
+        // Only admin can change user_id (place manager)
+        if (!$user->hasRole('admin')) {
+            unset($placeData['user_id']);
+        }
+        
         $place->update($placeData);
 
         // Handle existing images removal (remove images not in the existing_images list)
@@ -286,9 +303,13 @@ class PlaceController extends Controller
         // Remove images from validation data and set user_id
         $placeData = \Illuminate\Support\Arr::except($validated, ['images']);
         $placeData['user_id'] = $user->id;
-        $placeData['is_premium'] = false; // Default to non-premium for new placeManagers
         
         $place = Place::create($placeData);
+        
+        // Start free 2-month premium trial for new places
+        if ($place->isEligibleForFreeTrial()) {
+            $place->startFreeTrial();
+        }
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $imageFile) {

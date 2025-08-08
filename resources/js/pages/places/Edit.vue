@@ -109,12 +109,41 @@
                 </div>
               </div>
 
-              <div class="flex items-center">
-                <input v-model="form.is_premium" id="is_premium" type="checkbox"
-                  class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                <label for="is_premium" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                  Premium Mekan
-                </label>
+              <div class="space-y-4">
+                <div class="flex items-center">
+                  <input v-model="form.is_premium" id="is_premium" type="checkbox"
+                    class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                  <label for="is_premium" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                    Premium Mekan
+                  </label>
+                </div>
+
+                <!-- Place Manager Selection - Only for Admin -->
+                <div v-if="isAdmin">
+                  <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Mekan Yöneticisi
+                  </label>
+                  <select v-model="form.user_id" id="user_id"
+                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    <option :value="null">Yönetici atanmamış</option>
+                    <option v-for="manager in placeManagers" :key="manager.id" :value="manager.id">
+                      {{ manager.name }}
+                    </option>
+                    <option v-if="placeManagers.length === 0" disabled value="">
+                      Henüz PlaceManager kullanıcısı yok
+                    </option>
+                  </select>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Bu mekanın yönetiminden sorumlu PlaceManager kullanıcısını seçin
+                    <span v-if="placeManagers.length === 0">
+                      (Önce 
+                      <Link :href="route('users.create')" 
+                          class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-medium">
+                          PlaceManager rolü olan kullanıcı oluşturun
+                      </Link>)
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -170,6 +199,66 @@
               </label>
               <input v-model="form.youtube_url" id="youtube_url" type="url"
                 class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+            </div>
+          </div>
+
+          <!-- Password Change Section - Only for PlaceManagers -->
+          <div v-if="isPlaceManager && !isAdmin" class="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2V5a2 2 0 00-2-2H9a2 2 0 00-2 2v.01M15 4.5h1a2 2 0 012 2v3a2 2 0 01-2 2h-1m-3 0H9a2 2 0 01-2-2V7a2 2 0 012-2h3m-3 4.5V12"/>
+                </svg>
+                Şifre Değiştirme
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Mevcut Şifre
+                  </label>
+                  <input v-model="passwordForm.current_password" id="current_password" type="password"
+                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                
+                <div>
+                  <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Yeni Şifre
+                  </label>
+                  <input v-model="passwordForm.new_password" id="new_password" type="password"
+                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                
+                <div>
+                  <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Yeni Şifre Tekrar
+                  </label>
+                  <input v-model="passwordForm.new_password_confirmation" id="new_password_confirmation" type="password"
+                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+              </div>
+              
+              <div class="mt-4 flex items-center space-x-3">
+                <button type="button" @click="updatePassword" :disabled="passwordLoading"
+                  class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                  <svg v-if="passwordLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ passwordLoading ? 'Güncelleniyor...' : 'Şifre Güncelle' }}
+                </button>
+                
+                <button type="button" @click="clearPasswordForm"
+                  class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                  Temizle
+                </button>
+              </div>
+              
+              <div v-if="passwordErrors.length > 0" class="mt-3">
+                <div v-for="error in passwordErrors" :key="error" class="text-sm text-red-600 dark:text-red-400">
+                  {{ error }}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -270,6 +359,10 @@ const props = defineProps({
   place: {
     type: Object,
     required: true
+  },
+  placeManagers: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -302,12 +395,23 @@ const form = ref({
   twitter_url: props.place.twitter_url || '',
   youtube_url: props.place.youtube_url || '',
   is_premium: props.place.is_premium || false,
+  user_id: props.place.user_id || null,
   images: [] as File[]
 })
 
 const existingImages = ref<any[]>(props.place.images || [])
 const imagePreviews = ref<string[]>([])
 const selectedImage = ref<string | null>(null)
+
+// Password change form
+const passwordForm = ref({
+  current_password: '',
+  new_password: '',
+  new_password_confirmation: ''
+})
+
+const passwordLoading = ref(false)
+const passwordErrors = ref<string[]>([])
 
 // Helper function to get image URL
 const getImageUrl = (image: any) => {
@@ -389,6 +493,7 @@ const submit = async () => {
   if (form.value.twitter_url) data.append('twitter_url', form.value.twitter_url)
   if (form.value.youtube_url) data.append('youtube_url', form.value.youtube_url)
   data.append('is_premium', form.value.is_premium ? '1' : '0')
+  if (form.value.user_id) data.append('user_id', form.value.user_id.toString())
 
   // Send existing images that weren't removed
   data.append('existing_images', JSON.stringify(existingImages.value))
@@ -399,5 +504,43 @@ const submit = async () => {
   })
 
   await router.post(`/places/${props.place.id}?_method=PUT`, data)
+}
+
+const updatePassword = async () => {
+  if (!isPlaceManager.value || isAdmin.value) return
+  
+  passwordLoading.value = true
+  passwordErrors.value = []
+  
+  try {
+    await router.post('/profile/update-password', {
+      current_password: passwordForm.value.current_password,
+      password: passwordForm.value.new_password,
+      password_confirmation: passwordForm.value.new_password_confirmation
+    }, {
+      onSuccess: () => {
+        clearPasswordForm()
+        // Success message will be handled by Inertia flash messages
+      },
+      onError: (errors: any) => {
+        passwordErrors.value = Object.values(errors).flat() as string[]
+      },
+      onFinish: () => {
+        passwordLoading.value = false
+      }
+    })
+  } catch (error) {
+    passwordLoading.value = false
+    passwordErrors.value = ['Şifre güncellenirken bir hata oluştu.']
+  }
+}
+
+const clearPasswordForm = () => {
+  passwordForm.value = {
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
+  }
+  passwordErrors.value = []
 }
 </script>

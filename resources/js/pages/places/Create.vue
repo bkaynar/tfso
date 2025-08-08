@@ -124,13 +124,42 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center">
-                                <input v-model="form.is_premium" id="is_premium" type="checkbox"
-                                    class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                <label for="is_premium"
-                                    class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                    Premium Mekan
-                                </label>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <input v-model="form.is_premium" id="is_premium" type="checkbox"
+                                        class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <label for="is_premium"
+                                        class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                        Premium Mekan
+                                    </label>
+                                </div>
+
+                                <!-- Place Manager Selection - Only for Admin -->
+                                <div v-if="isAdmin">
+                                    <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Mekan Yöneticisi
+                                    </label>
+                                    <select v-model="form.user_id" id="user_id"
+                                        class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                        <option :value="null">Yönetici atanmamış</option>
+                                        <option v-for="manager in placeManagers" :key="manager.id" :value="manager.id">
+                                            {{ manager.name }}
+                                        </option>
+                                        <option v-if="placeManagers.length === 0" disabled value="">
+                                            Henüz PlaceManager kullanıcısı yok
+                                        </option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        Bu mekanın yönetiminden sorumlu PlaceManager kullanıcısını seçin
+                                        <span v-if="placeManagers.length === 0">
+                                            (Önce 
+                                            <Link :href="route('users.create')" 
+                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-medium">
+                                                PlaceManager rolü olan kullanıcı oluşturun
+                                            </Link>)
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -213,8 +242,25 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  placeManagers: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const page = usePage()
+
+// Helper function to check if user has specific role
+const hasRole = (role: string) => {
+  const userRoles = page.props.auth.roles as string[];
+  return userRoles && userRoles.includes(role);
+};
+
+const isAdmin = computed(() => hasRole('admin'))
 
 const form = ref({
     name: '',
@@ -228,6 +274,7 @@ const form = ref({
     twitter_url: '',
     youtube_url: '',
     is_premium: false,
+    user_id: null as number | null,
     images: [] as File[]
 })
 
@@ -357,6 +404,7 @@ const submit = async () => {
     if (form.value.twitter_url) data.append('twitter_url', form.value.twitter_url)
     if (form.value.youtube_url) data.append('youtube_url', form.value.youtube_url)
     data.append('is_premium', form.value.is_premium ? '1' : '0')
+    if (form.value.user_id) data.append('user_id', form.value.user_id.toString())
 
     form.value.images.forEach((image, index) => {
         data.append(`images[${index}]`, image)
