@@ -18,9 +18,15 @@ const page = usePage();
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
-                    <Link :href="item.href">
-                    <component :is="item.icon" />
-                    <span>{{ item.title }}</span>
+                    <Link :href="item.href" class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-2">
+                        <component :is="item.icon" />
+                        <span>{{ item.title }}</span>
+                    </div>
+                    <span v-if="typeof item.badge === 'number' && item.badge > 0"
+                        class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-red-500 rounded-full">
+                        {{ item.badge }}
+                    </span>
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -34,14 +40,14 @@ const page = usePage();
             <SidebarMenuItem v-for="item in userItems" :key="item.title">
                 <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
                     <Link :href="item.href" class="flex items-center justify-between w-full">
-                        <div class="flex items-center">
-                            <component :is="item.icon" />
-                            <span>{{ item.title }}</span>
-                        </div>
-                        <span v-if="item.title === 'DJ Applications' && page.props.pendingDjApplicationsCount > 0" 
-                            class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full ml-2">
-                            {{ page.props.pendingDjApplicationsCount }}
-                        </span>
+                    <div class="flex items-center">
+                        <component :is="item.icon" />
+                        <span>{{ item.title }}</span>
+                    </div>
+                    <span v-if="item.title === 'DJ Applications' && page.props.pendingDjApplicationsCount > 0"
+                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full ml-2">
+                        {{ page.props.pendingDjApplicationsCount }}
+                    </span>
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>

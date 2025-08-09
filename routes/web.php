@@ -46,30 +46,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Events - admin, dj, placeManager can access
     Route::resource('events', EventsController::class)->middleware('role:admin,dj,placeManager');
-    
+
     // DJ Applications
     Route::get('dj/application/create', [App\Http\Controllers\DjApplicationController::class, 'create'])->name('dj.application.create')->middleware('auth');
     Route::post('dj/application', [App\Http\Controllers\DjApplicationController::class, 'store'])->name('dj.application.store')->middleware('auth');
     Route::get('dj/application/status', [App\Http\Controllers\DjApplicationController::class, 'status'])->name('dj.application.status')->middleware('auth');
-    
+
     // Admin DJ Applications
     Route::get('admin/dj-applications', [App\Http\Controllers\DjApplicationController::class, 'index'])->name('admin.dj-applications.index')->middleware('role:admin');
     Route::get('admin/dj-applications/{djApplication}', [App\Http\Controllers\DjApplicationController::class, 'show'])->name('admin.dj-applications.show')->middleware('role:admin');
     Route::post('admin/dj-applications/{djApplication}/approve', [App\Http\Controllers\DjApplicationController::class, 'approve'])->name('admin.dj-applications.approve')->middleware('role:admin');
     Route::post('admin/dj-applications/{djApplication}/reject', [App\Http\Controllers\DjApplicationController::class, 'reject'])->name('admin.dj-applications.reject')->middleware('role:admin');
-    
+
     // PlaceManager place creation - for new placeManagers
     Route::get('placemanager/place/create', [PlaceController::class, 'createForPlaceManager'])->name('placemanager.place.create')->middleware('auth');
     Route::post('placemanager/place', [PlaceController::class, 'storeForPlaceManager'])->name('placemanager.place.store')->middleware('auth');
-    
+
     // PlaceManager direct edit - redirect to their place edit page
     Route::get('placemanager/place/edit', [PlaceController::class, 'editMyPlace'])->name('placemanager.place.edit')->middleware('role:placeManager');
-    
+
     // Premium management - only placeManagers can access
     Route::get('premium', [App\Http\Controllers\PremiumController::class, 'index'])->name('premium.index')->middleware('role:placeManager');
     Route::post('premium/trial', [App\Http\Controllers\PremiumController::class, 'startFreeTrial'])->name('premium.trial')->middleware('role:placeManager');
     Route::post('premium/purchase', [App\Http\Controllers\PremiumController::class, 'purchase'])->name('premium.purchase')->middleware('role:placeManager');
-    
+
     // DJ Offers - PlaceManagers and DJs can access
     Route::get('dj-offers/dj-list', [App\Http\Controllers\DjOfferController::class, 'djList'])->name('dj-offers.dj-list')->middleware('role:placeManager');
     Route::get('dj-offers/create/{dj}', [App\Http\Controllers\DjOfferController::class, 'create'])->name('dj-offers.create')->middleware('role:placeManager');
@@ -79,10 +79,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('dj-offers/{offer}/accept', [App\Http\Controllers\DjOfferController::class, 'accept'])->name('dj-offers.accept')->middleware('role:dj');
     Route::post('dj-offers/{offer}/reject', [App\Http\Controllers\DjOfferController::class, 'reject'])->name('dj-offers.reject')->middleware('role:dj');
     Route::post('dj-offers/{offer}/cancel', [App\Http\Controllers\DjOfferController::class, 'cancel'])->name('dj-offers.cancel')->middleware('role:placeManager');
-    
+    // Offer budget update (placeManager)
+    Route::patch('dj-offers/{offer}/budget', [App\Http\Controllers\DjOfferController::class, 'updateBudget'])->name('dj-offers.update-budget')->middleware('role:placeManager');
+
     // Offer Messages - API endpoints for messaging
     Route::get('api/offers/{offer}/messages', [App\Http\Controllers\OfferMessageController::class, 'index'])->name('offer-messages.index')->middleware('role:placeManager,dj');
     Route::post('api/offers/{offer}/messages', [App\Http\Controllers\OfferMessageController::class, 'store'])->name('offer-messages.store')->middleware('role:placeManager,dj');
+    // Unread message count endpoint
+    Route::get('api/offers/unread-count', [App\Http\Controllers\OfferMessageController::class, 'unreadCount'])->name('offer-messages.unread-count')->middleware('role:placeManager,dj');
 
     // Profile routes - all authenticated users can access
     Route::get('profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
