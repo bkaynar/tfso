@@ -4,7 +4,7 @@
     <AppLayout :breadcrumbs="[
         { title: 'Find DJs', href: '' }
     ]">
-        <div class="max-w-6xl mx-auto py-10">
+        <div class="max-w-6xl p-3">
             <!-- Header -->
             <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
                 <div class="flex items-center justify-between mb-6">
@@ -164,7 +164,7 @@
                                 </span>
                             </div>
                             <div class="ml-4">
-                                <h3 class="text-xl font-semibold">{{ dj.name }}</h3>
+                                <h3 class="text-xs font-semibold truncate" title="{{ dj.name }}">{{ dj.name }}</h3>
                                 <!-- Email gizlendi -->
                                 <!-- <p class="text-purple-100 text-sm">{{ dj.email }}</p> -->
                                 <p v-if="dj.location" class="text-purple-200 text-xs flex items-center mt-1">
@@ -273,15 +273,39 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-    djs: Array
-})
+interface DjApplication {
+    status: string
+}
+
+interface DjItem {
+    id: number
+    name: string
+    email?: string
+    location?: string
+    bio?: string
+    avatar?: string
+    instagram?: string
+    twitter?: string
+    facebook?: string
+    soundcloud?: string
+    youtube?: string
+    dj_applications?: DjApplication[]
+}
+
+const props = defineProps<{ djs: DjItem[] }>()
 
 // Search and filter states
 const searchName = ref('')
 const searchLocation = ref('')
 const isLocationSearching = ref(false)
-const locationSuggestions = ref([])
+interface LocationSuggestion {
+    place_name: string
+    text: string
+    context: string[]
+    coordinates: [number, number]
+}
+
+const locationSuggestions = ref<LocationSuggestion[]>([])
 const showLocationSuggestions = ref(false)
 const locationSearchTimeout = ref<number | null>(null)
 
@@ -395,10 +419,7 @@ const hasSocialLinks = (dj: any) => {
     return dj.instagram || dj.twitter || dj.facebook || dj.soundcloud || dj.youtube
 }
 
-const hasApprovedApplication = (dj: any) => {
-    return dj.dj_applications && dj.dj_applications.some((app: any) => app.status === 'approved')
-}
-
+// hasApprovedApplication kaldırıldı; listelenen kullanıcılar zaten dj rolüne sahip.
 // Social media URL formatters
 const formatInstagramUrl = (username: string) => {
     if (!username) return '#'
