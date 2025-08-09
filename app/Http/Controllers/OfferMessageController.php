@@ -31,8 +31,11 @@ class OfferMessageController extends Controller
             'message' => $validated['message'],
         ]);
         
+        // Load user relation with only needed fields
+        $message->load(['user:id,name']);
+        
         return response()->json([
-            'message' => $message->load('user'),
+            'message' => $message,
             'success' => true
         ]);
     }

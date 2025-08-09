@@ -200,7 +200,10 @@
                       
                       <!-- Message status for sent messages -->
                       <div v-if="message.user_id === currentUserId" class="flex items-center justify-end mt-1">
-                        <svg v-if="message.is_read" class="w-4 h-4 text-purple-200" fill="currentColor" viewBox="0 0 20 20">
+                        <svg v-if="message.sending" class="w-3 h-3 text-purple-300 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                          <circle cx="10" cy="10" r="2"/>
+                        </svg>
+                        <svg v-else-if="message.is_read" class="w-4 h-4 text-purple-200" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                           <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
@@ -219,7 +222,6 @@
               <form @submit.prevent="sendMessage" class="flex space-x-2">
                 <textarea 
                   v-model="newMessage" 
-                  @input="handleTyping"
                   @keydown.enter.exact.prevent="sendMessage"
                   @keydown.enter.shift.exact="newMessage += '\n'"
                   placeholder="Type your message... (Shift+Enter for new line)" 
@@ -227,8 +229,7 @@
                   rows="1"
                   :disabled="isSendingMessage"
                   class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                  style="min-height: 44px; max-height: 120px;"
-                  ref="messageInput"></textarea>
+                  style="min-height: 44px; max-height: 120px;"></textarea>
                 <button type="submit" 
                   :disabled="!newMessage.trim() || isSendingMessage"
                   class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-sm font-medium rounded-lg transition-colors">
@@ -280,14 +281,41 @@ import { Head, usePage, useForm } from '@inertiajs/vue3'
 import { computed, ref, onMounted, nextTick } from 'vue'
 
 const page = usePage()
-const props = defineProps({
-  offer: Object,
-  messages: Array
-})
+interface OfferMessage {
+  id: number | string
+  message: string
+  user_id: number
+  user: { name: string }
+  created_at: string
+  is_read: boolean
+  sending?: boolean
+}
 
-const messagesContainer = ref(null)
+interface Offer {
+  id: number
+  status: string
+  created_at: string
+  updated_at: string
+  expires_at?: string
+  dj: { name: string; email: string }
+  place: { name: string; location: string; is_premium: boolean }
+  event_date: string
+  event_time: string
+  duration: number
+  budget: number
+  description?: string
+  place_manager_id: number
+  dj_id: number
+}
+
+const props = defineProps<{
+  offer: Offer
+  messages: OfferMessage[]
+}>()
+
+const messagesContainer = ref<HTMLElement | null>(null)
 const newMessage = ref('')
-const messages = ref(props.messages || [])
+const messages = ref<OfferMessage[]>(props.messages || [])
 const isSendingMessage = ref(false)
 const isProcessing = ref(false)
 
@@ -319,7 +347,7 @@ const fetchMessages = async () => {
   try {
     const response = await fetch(route('offer-messages.index', props.offer.id))
     const data = await response.json()
-    messages.value = data.messages
+    messages.value = data.messages as OfferMessage[]
   } catch (error) {
     console.error('Error fetching messages:', error)
   }
@@ -328,36 +356,69 @@ const fetchMessages = async () => {
 const sendMessage = async () => {
   if (!newMessage.value.trim() || isSendingMessage.value) return
   
+  const messageText = newMessage.value.trim()
+  newMessage.value = ''
   isSendingMessage.value = true
   
+  // Optimistic update - add message immediately
+  const tempMessage: OfferMessage = {
+    id: 'temp-' + Date.now(),
+    message: messageText,
+    user_id: currentUserId.value as number,
+    user: { name: page.props.auth.user?.name || 'User' },
+    created_at: new Date().toISOString(),
+    is_read: false,
+    sending: true
+  }
+  
+  messages.value.push(tempMessage)
+  scrollToBottom()
+  
   try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    
     const response = await fetch(route('offer-messages.store', props.offer.id), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken || ''
       },
       body: JSON.stringify({
-        message: newMessage.value
+        message: messageText
       })
     })
     
     const data = await response.json()
     
     if (data.success) {
-      messages.value.push(data.message)
-      newMessage.value = ''
-      scrollToBottom()
+      // Replace temp message with real one
+      const tempIndex = messages.value.findIndex(m => m.id === tempMessage.id)
+      if (tempIndex !== -1) {
+        messages.value[tempIndex] = data.message
+      }
+    } else {
+      // Remove temp message on error
+      const tempIndex = messages.value.findIndex(m => m.id === tempMessage.id)
+      if (tempIndex !== -1) {
+        messages.value.splice(tempIndex, 1)
+      }
+      newMessage.value = messageText // Restore message
     }
   } catch (error) {
     console.error('Error sending message:', error)
+    // Remove temp message on error
+    const tempIndex = messages.value.findIndex(m => m.id === tempMessage.id)
+    if (tempIndex !== -1) {
+      messages.value.splice(tempIndex, 1)
+    }
+    newMessage.value = messageText // Restore message
   } finally {
     isSendingMessage.value = false
   }
 }
 
 const getStatusBadgeClass = (status: string) => {
-  const classes = {
+  const classes: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
     accepted: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
@@ -367,7 +428,7 @@ const getStatusBadgeClass = (status: string) => {
 }
 
 const getStatusText = (status: string) => {
-  const texts = {
+  const texts: Record<string, string> = {
     pending: 'Pending Response',
     accepted: 'Accepted',
     rejected: 'Rejected',
