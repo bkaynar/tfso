@@ -52,12 +52,7 @@ const mainNavItems = computed((): NavItem[] => {
                 title: 'Tracks',
                 href: '/tracks',
                 icon: Radio,
-            },
-            {
-                title: 'Places',
-                href: '/places',
-                icon: Folder,
-            },
+            }
         );
     }
     if (hasAnyRole(['dj'])){
@@ -94,7 +89,7 @@ const mainNavItems = computed((): NavItem[] => {
             },
         );
     }
-    
+
     if (hasAnyRole(['dj'])) {
         items.push(
             {
@@ -125,6 +120,11 @@ const userNavItems = computed((): NavItem[] => {
             href: '/admin/dj-applications',
             icon: UserCheck,
         },
+           {
+                title: 'Places',
+                href: '/places',
+                icon: Folder,
+            },
     ];
 });
 
