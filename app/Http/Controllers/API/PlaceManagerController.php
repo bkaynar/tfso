@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Place;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
 
 /**
@@ -212,6 +213,156 @@ class PlaceManagerController extends Controller
         return response()->json([
             'success' => true,
             'data' => $lastPlaces
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/places-paginated",
+     *     operationId="getPlacesPaginated",
+     *     tags={"Place Manager"},
+     *     summary="Get paginated places",
+     *     description="Returns paginated places with their images and events for infinite scroll",
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(type="object")
+     *             ),
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=5),
+     *             @OA\Property(property="per_page", type="integer", example=10),
+     *             @OA\Property(property="total", type="integer", example=50),
+     *             @OA\Property(property="has_more_pages", type="boolean", example=true)
+     *         )
+     *     )
+     * )
+     */
+    public function paginatedIndex(Request $request): JsonResponse
+    {
+        $perPage = $request->get('per_page', 10);
+        
+        $places = Place::with(['images', 'events'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $places->items(),
+            'current_page' => $places->currentPage(),
+            'last_page' => $places->lastPage(),
+            'per_page' => $places->perPage(),
+            'total' => $places->total(),
+            'has_more_pages' => $places->hasMorePages()
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/places/search",
+     *     operationId="searchPlaces",
+     *     tags={"Place Manager"},
+     *     summary="Search places by name and location",
+     *     description="Search places by name or location with optional pagination",
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         description="Search query for name or location",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(type="object")
+     *             ),
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=5),
+     *             @OA\Property(property="per_page", type="integer", example=10),
+     *             @OA\Property(property="total", type="integer", example=50),
+     *             @OA\Property(property="has_more_pages", type="boolean", example=true),
+     *             @OA\Property(property="query", type="string", example="Istanbul")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Query parameter required",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Search query is required")
+     *         )
+     *     )
+     * )
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $query = $request->get('query');
+        $perPage = $request->get('per_page', 10);
+
+        if (empty($query)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Search query is required'
+            ], 400);
+        }
+
+        $places = Place::with(['images', 'events'])
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('location', 'LIKE', "%{$query}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $places->items(),
+            'current_page' => $places->currentPage(),
+            'last_page' => $places->lastPage(),
+            'per_page' => $places->perPage(),
+            'total' => $places->total(),
+            'has_more_pages' => $places->hasMorePages(),
+            'query' => $query
         ]);
     }
 }

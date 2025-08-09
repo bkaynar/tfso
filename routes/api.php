@@ -80,5 +80,7 @@ Route::get('/stage-feed', [StageFeedController::class, 'index']);
 
 // Place Manager Routes
 Route::get('/places', [PlaceManagerController::class, 'index']);
+Route::get('/places-paginated', [PlaceManagerController::class, 'paginatedIndex']);
+Route::get('/places/search', [PlaceManagerController::class, 'search']);
 Route::get('/places/last', [PlaceManagerController::class, 'lastPlace']);
 Route::get('/places/{id}', [PlaceManagerController::class, 'show']);
