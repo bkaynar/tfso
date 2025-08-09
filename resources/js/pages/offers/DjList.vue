@@ -230,22 +230,6 @@
                             </div>
                         </div>
 
-                        <!-- Application Status -->
-                        <div class="mb-4">
-                            <span v-if="hasApprovedApplication(dj)"
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                                Verified DJ
-                            </span>
-                            <span v-else
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                                Application Pending
-                            </span>
-                        </div>
-
                         <!-- Send Offer Button -->
                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                             <Link :href="route('dj-offers.create', dj.id)"
