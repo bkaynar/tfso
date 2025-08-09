@@ -894,89 +894,6 @@
                         }
                     }
                 }
-            },
-            "post": {
-                "tags": [
-                    "DJs"
-                ],
-                "summary": "Create a new DJ",
-                "operationId": "3da087d8b355291ba7bef0217dbc0ba5",
-                "requestBody": {
-                    "description": "Data for the new DJ",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Yeni DJ"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "yeni.dj@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password123"
-                                    },
-                                    "profile_photo": {
-                                        "type": "string",
-                                        "example": "path/to/photo.jpg"
-                                    },
-                                    "bio": {
-                                        "type": "string",
-                                        "example": "Yeni DJ'in biyografisi."
-                                    },
-                                    "instagram": {
-                                        "type": "string",
-                                        "example": "yenidj"
-                                    },
-                                    "twitter": {
-                                        "type": "string",
-                                        "example": "yenidj"
-                                    },
-                                    "facebook": {
-                                        "type": "string",
-                                        "example": "https://facebook.com/yenidj"
-                                    },
-                                    "tiktok": {
-                                        "type": "string",
-                                        "example": "yenidj"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "DJ created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/User"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/djs-paginated": {
@@ -1230,128 +1147,6 @@
                         }
                     }
                 }
-            },
-            "post": {
-                "tags": [
-                    "DJs"
-                ],
-                "summary": "Update a DJ's information",
-                "operationId": "c68b383165fa6447b92bf5de94f0d362",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the DJ to update",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Data to update for the DJ. Use multipart/form-data for file uploads.",
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Güncel DJ Adı"
-                                    },
-                                    "bio": {
-                                        "type": "string",
-                                        "example": "Güncel biyografi."
-                                    },
-                                    "profile_photo": {
-                                        "description": "DJ's new profile photo",
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "instagram": {
-                                        "type": "string",
-                                        "example": "gunceldj"
-                                    },
-                                    "twitter": {
-                                        "type": "string",
-                                        "example": "gunceldj"
-                                    },
-                                    "facebook": {
-                                        "type": "string",
-                                        "example": "https://facebook.com/gunceldj"
-                                    },
-                                    "tiktok": {
-                                        "type": "string",
-                                        "example": "gunceldj"
-                                    },
-                                    "_method": {
-                                        "description": "Must be PUT for this endpoint.",
-                                        "type": "string",
-                                        "example": "PUT"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "DJ updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/User"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "DJ not found"
-                    },
-                    "403": {
-                        "description": "Unauthorized"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "DJs"
-                ],
-                "summary": "Delete a DJ",
-                "operationId": "874a88d4f9a8176bec1bd2b866a514f0",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the DJ to delete",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "DJ deleted successfully"
-                    },
-                    "404": {
-                        "description": "DJ not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/favorites": {
@@ -1675,6 +1470,393 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/places": {
+            "get": {
+                "tags": [
+                    "Place Manager"
+                ],
+                "summary": "Get all places",
+                "description": "Returns a list of all places with their images and user information",
+                "operationId": "getPlaces",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Sample Place"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "A beautiful place"
+                                                    },
+                                                    "google_maps_url": {
+                                                        "type": "string",
+                                                        "example": "https://maps.google.com/..."
+                                                    },
+                                                    "apple_maps_url": {
+                                                        "type": "string",
+                                                        "example": "https://maps.apple.com/..."
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "Istanbul, Turkey"
+                                                    },
+                                                    "is_premium": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "premium_expires_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "premium_trial_used": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "+90 555 123 4567"
+                                                    },
+                                                    "facebook_url": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "twitter_url": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "instagram_url": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "youtube_url": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "images": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "user": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/places/{id}": {
+            "get": {
+                "tags": [
+                    "Place Manager"
+                ],
+                "summary": "Get place by ID",
+                "description": "Returns a specific place with its images and user information",
+                "operationId": "getPlace",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Place ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Sample Place"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A beautiful place"
+                                                },
+                                                "google_maps_url": {
+                                                    "type": "string",
+                                                    "example": "https://maps.google.com/..."
+                                                },
+                                                "apple_maps_url": {
+                                                    "type": "string",
+                                                    "example": "https://maps.apple.com/..."
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Istanbul, Turkey"
+                                                },
+                                                "is_premium": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "premium_expires_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "premium_trial_used": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+90 555 123 4567"
+                                                },
+                                                "facebook_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "twitter_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instagram_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "youtube_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "images": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Place not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Place not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/places/last": {
+            "get": {
+                "tags": [
+                    "Place Manager"
+                ],
+                "summary": "Get the latest place",
+                "description": "Returns the most recently created place with its images and user information",
+                "operationId": "getLastPlace",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Sample Place"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A beautiful place"
+                                                },
+                                                "google_maps_url": {
+                                                    "type": "string",
+                                                    "example": "https://maps.google.com/..."
+                                                },
+                                                "apple_maps_url": {
+                                                    "type": "string",
+                                                    "example": "https://maps.apple.com/..."
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Istanbul, Turkey"
+                                                },
+                                                "is_premium": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "premium_expires_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "premium_trial_used": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+90 555 123 4567"
+                                                },
+                                                "facebook_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "twitter_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "instagram_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "youtube_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "images": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No places found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No places found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/sets": {
@@ -2520,6 +2702,10 @@
         {
             "name": "Access Logs",
             "description": "API Endpoints for managing access logs"
+        },
+        {
+            "name": "Place Manager",
+            "description": "API Endpoints for managing places"
         },
         {
             "name": "Auth",

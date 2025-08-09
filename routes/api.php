@@ -11,6 +11,7 @@ use App\Http\Controllers\API\SetController;
 use App\Http\Controllers\API\AccessLogController;
 use App\Http\Controllers\API\StageFeedController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\PlaceManagerController;
 
 Route::post('/mobile-register', [AuthController::class, 'register']);
 Route::post('/mobile-login', [AuthController::class, 'login']);
@@ -76,3 +77,8 @@ Route::apiResource('tracks', TrackController::class);
 
 // Stage Feed
 Route::get('/stage-feed', [StageFeedController::class, 'index']);
+
+// Place Manager Routes
+Route::get('/places', [PlaceManagerController::class, 'index']);
+Route::get('/places/{id}', [PlaceManagerController::class, 'show']);
+Route::get('/places/last', [PlaceManagerController::class, 'lastPlace']);

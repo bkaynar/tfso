@@ -335,7 +335,7 @@ const users = computed(() => props.users ?? [])
                         <h3 class="text-lg font-medium text-red-800 dark:text-red-200">
                             Terms and Conditions
                         </h3>
-                        
+
                         <!-- Ownership Declaration -->
                         <div class="flex items-start space-x-3">
                             <input id="ownership_declaration" v-model="form.ownership_declaration" type="checkbox"
@@ -353,7 +353,7 @@ const users = computed(() => props.users ?? [])
                             <input id="publication_permission" v-model="form.publication_permission" type="checkbox"
                                 class="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-red-300 rounded" />
                             <label for="publication_permission" class="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-                                I hereby grant permission for the work to be published on the TFSO Israel Platforms.
+                                I hereby grant permission for the work to be published on the djEvoo Platforms.
                             </label>
                         </div>
                         <div v-if="form.errors.publication_permission" class="text-sm text-red-600 ml-7">

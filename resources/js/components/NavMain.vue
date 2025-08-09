@@ -14,7 +14,7 @@ const page = usePage();
 <template>
     <!-- Main Navigation Group -->
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel>TFSO Mobile</SidebarGroupLabel>
+        <SidebarGroupLabel>djEvoo</SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
