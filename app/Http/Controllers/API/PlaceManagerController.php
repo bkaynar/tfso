@@ -60,8 +60,8 @@ class PlaceManagerController extends Controller
      */
     public function index(): JsonResponse
     {
-        $places = Place::with(['images'])
-            ->orderBy('created_at', 'desc')
+        $places = Place::with(['images','events'])
+            ->orderBy('id', 'asc')
             ->get();
 
         return response()->json([
@@ -148,8 +148,8 @@ class PlaceManagerController extends Controller
      *     path="/api/places/last",
      *     operationId="getLastPlace",
      *     tags={"Place Manager"},
-     *     summary="Get the latest place",
-     *     description="Returns the most recently created place with its images and user information",
+     *     summary="Get the latest places",
+     *     description="Returns the 5 most recently created places with their images and events",
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -194,11 +194,12 @@ class PlaceManagerController extends Controller
      */
     public function lastPlace(): JsonResponse
     {
-        $lastPlace = Place::with(['images'])
+        $lastPlaces = Place::with(['images', 'events'])
             ->orderBy('created_at', 'desc')
-            ->first();
+            ->limit(5)
+            ->get();
 
-        if (!$lastPlace) {
+        if ($lastPlaces->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'No places found'
@@ -207,7 +208,7 @@ class PlaceManagerController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $lastPlace
+            'data' => $lastPlaces
         ]);
     }
 }
