@@ -62,6 +62,7 @@ class PlaceManagerController extends Controller
     {
         $places = Place::with(['images','events'])
             ->orderBy('id', 'asc')
+            ->limit(4)
             ->get();
 
         return response()->json([
@@ -128,18 +129,20 @@ class PlaceManagerController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $place = Place::with(['images', 'events'])->find($id);
+        $places = Place::with(['images', 'events'])
+            ->orderBy('id', 'asc')
+            ->get();
 
-        if (!$place) {
+        if ($places->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Place not found'
+                'message' => 'Places not found'
             ], 404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $place
+            'data' => $places
         ]);
     }
 
