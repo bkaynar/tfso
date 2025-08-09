@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PlaceManagerSeeder::class,
             DjSeeder::class,
+            TelAvivPlacesSeeder::class,
         ]);
     }
 }
