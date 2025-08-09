@@ -60,7 +60,7 @@ class PlaceManagerController extends Controller
      */
     public function index(): JsonResponse
     {
-        $places = Place::with(['images', 'user'])
+        $places = Place::with(['images'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -111,7 +111,7 @@ class PlaceManagerController extends Controller
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time"),
      *                 @OA\Property(property="images", type="array", @OA\Items(type="object")),
-     *                 @OA\Property(property="user", type="object")
+     *                 @OA\Property(property="events", type="array", @OA\Items(type="object"))
      *             )
      *         )
      *     ),
@@ -128,7 +128,7 @@ class PlaceManagerController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $place = Place::with(['images', 'user'])->find($id);
+        $place = Place::with(['images', 'events'])->find($id);
 
         if (!$place) {
             return response()->json([
@@ -177,7 +177,7 @@ class PlaceManagerController extends Controller
      *                 @OA\Property(property="created_at", type="string", format="date-time"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time"),
      *                 @OA\Property(property="images", type="array", @OA\Items(type="object")),
-     *                 @OA\Property(property="user", type="object")
+     *                 @OA\Property(property="events", type="array", @OA\Items(type="object"))
      *             )
      *         )
      *     ),
@@ -194,7 +194,7 @@ class PlaceManagerController extends Controller
      */
     public function lastPlace(): JsonResponse
     {
-        $lastPlace = Place::with(['images', 'user'])
+        $lastPlace = Place::with(['images'])
             ->orderBy('created_at', 'desc')
             ->first();
 

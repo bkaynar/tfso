@@ -1693,8 +1693,11 @@
                                                         "type": "object"
                                                     }
                                                 },
-                                                "user": {
-                                                    "type": "object"
+                                                "events": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -1824,8 +1827,11 @@
                                                         "type": "object"
                                                     }
                                                 },
-                                                "user": {
-                                                    "type": "object"
+                                                "events": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"

@@ -40,6 +40,11 @@ class Place extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function events(): HasMany
+    {
+        return $this->hasMany(Events::class);
+    }
+
     /**
      * Check if place is premium (considering expiry)
      */
