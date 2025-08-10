@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     /**
      * Update user profile photo
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -22,7 +22,7 @@ class UserController extends Controller
         try {
             // Get authenticated user
             $user = auth('sanctum')->user();
-            
+
             if (!$user) {
                 return response()->json([
                     'success' => false,
@@ -31,7 +31,7 @@ class UserController extends Controller
             }
 
             // Check if user has 'user' role
-            if (!$user->hasRole('user')) {
+            if (!$user->hasRole('user') && !$user->hasRole('admin')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Bu işlem için yetkiniz bulunmuyor'
@@ -99,7 +99,7 @@ class UserController extends Controller
 
     /**
      * Update only profile photo (simplified version)
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -107,7 +107,7 @@ class UserController extends Controller
     {
         try {
             $user = auth('sanctum')->user();
-            
+
             if (!$user) {
                 return response()->json([
                     'success' => false,
@@ -174,7 +174,7 @@ class UserController extends Controller
 
     /**
      * Get current user profile
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -182,7 +182,7 @@ class UserController extends Controller
     {
         try {
             $user = auth('sanctum')->user();
-            
+
             if (!$user) {
                 return response()->json([
                     'success' => false,
