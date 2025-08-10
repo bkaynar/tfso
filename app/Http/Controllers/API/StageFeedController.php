@@ -29,8 +29,8 @@ class StageFeedController extends Controller
             $offset = ($page - 1) * $limit;
 
             // SETS
-            $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'created_at')
-                ->with('user:id,name,profile_photo')
+            $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'category_id', 'created_at')
+                ->with(['user:id,name,profile_photo', 'category:id,name,image'])
                 ->withCount('likedByUsers')
                 ->when($user, function($query) use ($user) {
                     return $query->with(['likedByUsers' => function($q) use ($user) {
@@ -58,6 +58,7 @@ class StageFeedController extends Controller
                         'audio_url' => $set->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->audio_file, '/'))) : null,
                         'description' => $set->description,
                         'is_premium' => (bool) $set->is_premium,
+                        'category_name' => $set->category ? $set->category->name : null,
                     ],
                     'created_at' => $set->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($set->created_at),
@@ -67,8 +68,8 @@ class StageFeedController extends Controller
             }
 
             // TRACKS
-            $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'is_premium', 'created_at')
-                ->with('user:id,name,profile_photo')
+            $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'is_premium', 'category_id', 'created_at')
+                ->with(['user:id,name,profile_photo', 'category:id,name,image'])
                 ->withCount('likedByUsers')
                 ->when($user, function($query) use ($user) {
                     return $query->with(['likedByUsers' => function($q) use ($user) {
@@ -95,6 +96,7 @@ class StageFeedController extends Controller
                         'image' => $track->image_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->image_file, '/'))) : null,
                         'audio_url' => $track->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->audio_file, '/'))) : null,
                         'is_premium' => (bool) $track->is_premium,
+                        'category_name' => $track->category ? $track->category->name : null,
                     ],
                     'created_at' => $track->created_at->toISOString(),
                     'time_ago' => $this->formatTimeAgo($track->created_at),
