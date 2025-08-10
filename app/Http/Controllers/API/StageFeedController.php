@@ -61,6 +61,7 @@ class StageFeedController extends Controller
                     ],
                     'content' => [
                         'type' => 'set',
+                        'id' => $set->id,
                         'title' => $set->name,
                         'image' => $set->cover_image ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->cover_image, '/'))) : null,
                         'audio_url' => $set->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($set->audio_file, '/'))) : null,
@@ -122,6 +123,7 @@ class StageFeedController extends Controller
                     ],
                     'content' => [
                         'type' => 'track',
+                        'id' => $track->id,
                         'title' => $track->title,
                         'image' => $track->image_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->image_file, '/'))) : null,
                         'audio_url' => $track->audio_file ? url('storage/' . preg_replace('/^storage\//', '', ltrim($track->audio_file, '/'))) : null,
