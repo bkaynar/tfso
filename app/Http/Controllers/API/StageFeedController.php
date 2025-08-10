@@ -22,20 +22,11 @@ class StageFeedController extends Controller
 
             $page = (int) $request->get('page', 1);
             $limit = min((int) $request->get('limit', 20), 50);
-            $includeWelcome = $request->boolean('include_welcome', true);
-
 
             $feedItems = collect();
 
-            // Dinamik oranlar
-            $setLimit = round($limit * 0.5);
-            $trackLimit = round($limit * 0.3);
-            $welcomeLimit = round($limit * 0.2);
-
-            // Her veri tipi için ayrı offset
-            $setOffset = ($page - 1) * $setLimit;
-            $trackOffset = ($page - 1) * $trackLimit;
-            $welcomeOffset = ($page - 1) * $welcomeLimit;
+            // Posts için basit pagination
+            $offset = ($page - 1) * $limit;
 
             // SETS
             $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'created_at')
@@ -47,8 +38,6 @@ class StageFeedController extends Controller
                     }]);
                 })
                 ->orderByDesc('created_at')
-                ->skip($setOffset)
-                ->take($setLimit)
                 ->get();
 
             foreach ($sets as $set) {
@@ -87,8 +76,6 @@ class StageFeedController extends Controller
                     }]);
                 })
                 ->orderByDesc('created_at')
-                ->skip($trackOffset)
-                ->take($trackLimit)
                 ->get();
 
             foreach ($tracks as $track) {
@@ -116,38 +103,9 @@ class StageFeedController extends Controller
                 ]);
             }
 
-            // WELCOME USERS
-            if ($includeWelcome) {
-                $newUsers = User::with('roles:name') // eager load roles
-                    ->select('id', 'name', 'profile_photo', 'created_at')
-                    ->where('created_at', '>=', Carbon::now()->subDays(30))
-                    ->orderByDesc('created_at')
-                    ->skip($welcomeOffset)
-                    ->take($welcomeLimit)
-                    ->get();
 
-                foreach ($newUsers as $newUser) {
-                    $userRole = $newUser->roles->pluck('name')->contains('dj') ? 'dj' : 'user';
-
-                    $feedItems->push([
-                        'type' => 'welcome',
-                        'id' => 'welcome_' . $newUser->id,
-                        'timestamp' => $newUser->created_at->timestamp,
-                        'user' => [
-                            'id' => $newUser->id,
-                            'name' => $newUser->name,
-                            'profile_photo' => $newUser->profile_photo_url,
-                            'role' => $userRole,
-                        ],
-                        'joined_at' => $newUser->created_at->toISOString(),
-                        'join_date' => $this->formatTimeAgo($newUser->created_at),
-                        'is_following' => false,
-                    ]);
-                }
-            }
-
-            // Final sorting by timestamp
-            $feedItems = $feedItems->sortByDesc('timestamp')->values()->take($limit);
+            // Final sorting by timestamp and apply pagination
+            $feedItems = $feedItems->sortByDesc('timestamp')->values()->skip($offset)->take($limit);
 
             $hasMore = $feedItems->count() >= $limit;
             $nextCursor = $hasMore ? base64_encode(json_encode(['page' => $page + 1])) : null;
@@ -165,6 +123,7 @@ class StageFeedController extends Controller
                     'duration' => round(microtime(true) - $start, 3) . 's',
                     'sets' => $sets->count(),
                     'tracks' => $tracks->count(),
+                    'total_posts' => $feedItems->count(),
                 ],
             ]);
         } catch (\Exception $e) {
