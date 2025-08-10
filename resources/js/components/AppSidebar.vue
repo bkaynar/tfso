@@ -5,10 +5,9 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users, UserCheck, MessageSquare } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, FolderOpen, Music, Radio, Users, UserCheck } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
-import axios from 'axios';
+import { computed } from 'vue';
 
 const page = usePage();
 
@@ -75,34 +74,6 @@ const mainNavItems = computed((): NavItem[] => {
         );
     }
 
-    // DJ Offers - for PlaceManagers and DJs
-    if (hasAnyRole(['placeManager'])) {
-        items.push(
-            {
-                title: 'Find DJs',
-                href: '/dj-offers/dj-list',
-                icon: MessageSquare,
-            },
-            {
-                title: 'My Offers',
-                href: '/dj-offers',
-                icon: MessageSquare,
-                // unreadCount bir ref; .value kullanarak reactivity'i computed içinde tetikliyoruz
-                badge: unreadCount.value,
-            },
-        );
-    }
-
-    if (hasAnyRole(['dj'])) {
-        items.push(
-            {
-                title: 'DJ Offers',
-                href: '/dj-offers',
-                icon: MessageSquare,
-                badge: unreadCount.value,
-            },
-        );
-    }
 
     return items;
 });
@@ -137,40 +108,6 @@ const footerNavItems = computed((): NavItem[] => {
     return [];
 });
 
-const unreadCount = ref(0);
-
-const fetchUnreadCount = async () => {
-    try {
-        const response = await axios.get('/api/offers/unread-count');
-        unreadCount.value = response.data.unread_count;
-    } catch (error) {
-        // Sessiz geç, console'a sadece dev ortamında yaz.
-        if (import.meta.env.DEV) console.error('Failed to fetch unread count:', error);
-    }
-};
-
-let unreadInterval: number | undefined;
-
-onMounted(async () => {
-    await fetchUnreadCount();
-    // Mesaj okunma / gönderme olaylarında tekrar çek
-    const handler = () => fetchUnreadCount();
-    window.addEventListener('offer-unread-updated', handler);
-    // Periyodik (opsiyonel) 30 sn'de bir güncelle
-    unreadInterval = window.setInterval(fetchUnreadCount, 30000);
-    // Temizlik için ref'e koy
-    (window as any).__offerUnreadHandler = handler;
-});
-
-onBeforeUnmount(() => {
-    if ((window as any).__offerUnreadHandler) {
-        window.removeEventListener('offer-unread-updated', (window as any).__offerUnreadHandler);
-        delete (window as any).__offerUnreadHandler;
-    }
-    if (unreadInterval) clearInterval(unreadInterval);
-});
-
-// Artık ayrı bir computed'a gerek yok; doğrudan unreadCount.value kullanıyoruz
 </script>
 
 <template>
