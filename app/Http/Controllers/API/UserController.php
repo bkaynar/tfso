@@ -98,6 +98,81 @@ class UserController extends Controller
     }
 
     /**
+     * Update only profile photo (simplified version)
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changeProfilePhoto(Request $request)
+    {
+        try {
+            $user = auth('sanctum')->user();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kullanıcı doğrulanamadı'
+                ], 401);
+            }
+
+            // Validate the uploaded file
+            $request->validate([
+                'profile_photo' => [
+                    'required',
+                    'file',
+                    'image',
+                    'mimes:jpeg,png,jpg,gif,webp',
+                    'max:10240' // 10MB max
+                ]
+            ], [
+                'profile_photo.required' => 'Profil fotoğrafı gereklidir',
+                'profile_photo.file' => 'Geçerli bir dosya yükleyin',
+                'profile_photo.image' => 'Sadece resim dosyaları kabul edilir',
+                'profile_photo.mimes' => 'Sadece jpeg, png, jpg, gif, webp formatları kabul edilir',
+                'profile_photo.max' => 'Dosya boyutu en fazla 10MB olabilir'
+            ]);
+
+            // Delete old profile photo if exists
+            if ($user->profile_photo) {
+                $oldPhotoPath = 'public/' . $user->profile_photo;
+                if (Storage::exists($oldPhotoPath)) {
+                    Storage::delete($oldPhotoPath);
+                }
+            }
+
+            // Store the new profile photo
+            $file = $request->file('profile_photo');
+            $filename = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('users/profiles', $filename, 'public');
+
+            // Update user profile photo path in database
+            $user->update(['profile_photo' => $path]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil fotoğrafı başarıyla değiştirildi',
+                'data' => [
+                    'profile_photo_url' => asset('storage/' . $path),
+                    'profile_photo_path' => $path
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Doğrulama hatası',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil fotoğrafı güncellenirken hata oluştu',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get current user profile
      * 
      * @param Request $request

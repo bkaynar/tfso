@@ -64,6 +64,11 @@ class Set extends Model
         return $this->belongsToMany(User::class, 'favorite_sets')->withTimestamps();
     }
 
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
     // Accessors
 
     public function getAudioUrlAttribute()

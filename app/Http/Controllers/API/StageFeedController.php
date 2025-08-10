@@ -30,8 +30,16 @@ class StageFeedController extends Controller
 
             // SETS
             $sets = Set::select('id', 'user_id', 'name', 'cover_image', 'audio_file', 'description', 'is_premium', 'category_id', 'created_at')
-                ->with(['user:id,name,profile_photo', 'category:id,name,image'])
-                ->withCount('likedByUsers')
+                ->with([
+                    'user:id,name,profile_photo', 
+                    'category:id,name,image',
+                    'comments' => function($q) {
+                        $q->with('user:id,name,profile_photo')
+                          ->latest()
+                          ->limit(3);
+                    }
+                ])
+                ->withCount(['likedByUsers', 'comments'])
                 ->when($user, function($query) use ($user) {
                     return $query->with(['likedByUsers' => function($q) use ($user) {
                         $q->where('user_id', $user->id);
@@ -64,13 +72,35 @@ class StageFeedController extends Controller
                     'time_ago' => $this->formatTimeAgo($set->created_at),
                     'likes_count' => $set->liked_by_users_count + 15,
                     'is_liked' => $user ? $set->likedByUsers->contains($user->id) : false,
+                    'comments_count' => $set->comments_count,
+                    'recent_comments' => $set->comments->map(function($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'content' => $comment->content,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'name' => $comment->user->name,
+                                'profile_photo' => $comment->user->profile_photo_url,
+                            ],
+                            'created_at' => $comment->created_at->toISOString(),
+                            'time_ago' => $this->formatTimeAgo($comment->created_at),
+                        ];
+                    }),
                 ]);
             }
 
             // TRACKS
             $tracks = Track::select('id', 'user_id', 'title', 'image_file', 'audio_file', 'is_premium', 'category_id', 'created_at')
-                ->with(['user:id,name,profile_photo', 'category:id,name,image'])
-                ->withCount('likedByUsers')
+                ->with([
+                    'user:id,name,profile_photo', 
+                    'category:id,name,image',
+                    'comments' => function($q) {
+                        $q->with('user:id,name,profile_photo')
+                          ->latest()
+                          ->limit(3);
+                    }
+                ])
+                ->withCount(['likedByUsers', 'comments'])
                 ->when($user, function($query) use ($user) {
                     return $query->with(['likedByUsers' => function($q) use ($user) {
                         $q->where('user_id', $user->id);
@@ -102,6 +132,20 @@ class StageFeedController extends Controller
                     'time_ago' => $this->formatTimeAgo($track->created_at),
                     'likes_count' => $track->liked_by_users_count + 15,
                     'is_liked' => $user ? $track->likedByUsers->contains($user->id) : false,
+                    'comments_count' => $track->comments_count,
+                    'recent_comments' => $track->comments->map(function($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'content' => $comment->content,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'name' => $comment->user->name,
+                                'profile_photo' => $comment->user->profile_photo_url,
+                            ],
+                            'created_at' => $comment->created_at->toISOString(),
+                            'time_ago' => $this->formatTimeAgo($comment->created_at),
+                        ];
+                    }),
                 ]);
             }
 

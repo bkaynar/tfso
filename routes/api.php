@@ -12,6 +12,7 @@ use App\Http\Controllers\API\AccessLogController;
 use App\Http\Controllers\API\StageFeedController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\PlaceManagerController;
+use App\Http\Controllers\API\CommentController;
 
 Route::post('/mobile-register', [AuthController::class, 'register']);
 Route::post('/mobile-login', [AuthController::class, 'login']);
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // User Profile
     Route::get('/profile', [UserController::class, 'profile']);
     Route::post('/profile/update-photo', [UserController::class, 'updateProfilePhoto']);
+    Route::post('/profile/change-photo', [UserController::class, 'changeProfilePhoto']);
 
     // Favorites
     Route::prefix('favorites')->name('favorites.')->group(function () {
@@ -48,6 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
     // Global Access Logs (Authenticated)
     Route::get('/access-logs/global', [AccessLogController::class, 'globalIndex']);
+    
+    // Comments (Authenticated)
+    Route::apiResource('comments', CommentController::class)->only(['store', 'destroy']);
 });
 
 
@@ -77,6 +82,9 @@ Route::apiResource('tracks', TrackController::class);
 
 // Stage Feed
 Route::get('/stage-feed', [StageFeedController::class, 'index']);
+
+// Comments (Public - for reading)
+Route::get('/comments', [CommentController::class, 'index']);
 
 // Place Manager Routes
 Route::get('/places', [PlaceManagerController::class, 'index']);

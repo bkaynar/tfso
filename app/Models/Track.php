@@ -63,6 +63,11 @@ class Track extends Model
         return $this->belongsToMany(User::class, 'favorite_tracks')->withTimestamps();
     }
 
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
     // Audio URL accessor
     public function getAudioUrlAttribute()
     {
