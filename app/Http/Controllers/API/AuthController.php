@@ -114,7 +114,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'premium' => $user->premium,
-                'profile_photo' => $user->profile_photo,
+                'profile_photo' => $user->profile_photo_url
             ],
 
         ]);
