@@ -41,13 +41,13 @@ const welcomeMessage = computed(() => {
 
     switch (role) {
         case 'admin':
-            return `Hoş geldin ${userName}! Admin paneline tam erişiminiz var.`;
+            return `Welcome ${userName}! You have full access to the admin panel.`;
         case 'dj':
-            return `Hoş geldin ${userName}! DJ olarak içeriklerinizi yönetebilirsiniz.`;
+            return `Welcome ${userName}! As a DJ, you can manage your content.`;
         case 'placeManager':
-            return `Hoş geldin ${userName}! Mekan yöneticisi olarak mekanınızı ve etkinliklerinizi yönetebilirsiniz.`;
+            return `Welcome ${userName}! As a venue manager, you can manage your venue and events.`;
         default:
-            return `Hoş geldin ${userName}! Sisteme hoş geldiniz.`;
+            return `Welcome ${userName}! You can manage your profile and view content.`;
     }
 });
 </script>
@@ -70,7 +70,7 @@ const welcomeMessage = computed(() => {
             </div>
 
             <!-- DJ Application Status Widget -->
-            <div v-if="djApplication" 
+            <div v-if="djApplication"
                 class="rounded-xl border border-sidebar-border/70 bg-white p-6 dark:border-sidebar-border dark:bg-sidebar">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-sidebar-foreground flex items-center">
@@ -79,12 +79,12 @@ const welcomeMessage = computed(() => {
                         </svg>
                         DJ Application Status
                     </h3>
-                    <Link :href="route('dj.application.status')" 
+                    <Link :href="route('dj.application.status')"
                         class="text-sm text-primary hover:text-primary/80 font-medium">
                         View Details →
                     </Link>
                 </div>
-                
+
                 <!-- Status Badge and Message -->
                 <div v-if="djApplication.status === 'pending'" class="flex items-start space-x-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
                     <div class="flex-shrink-0">

@@ -110,6 +110,34 @@
                             class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                     </div>
 
+                    <!-- Location -->
+                    <div class="location-container">
+                        <label for="location"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                        <div class="relative">
+                            <input
+                                v-model="locationQuery"
+                                @input="searchLocations"
+                                @focus="showSuggestions = true"
+                                id="location"
+                                type="text"
+                                placeholder="Search for a location..."
+                                class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+
+                            <!-- Location Suggestions Dropdown -->
+                            <div v-if="showSuggestions && locationSuggestions.length > 0"
+                                class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                <div v-for="suggestion in locationSuggestions" :key="suggestion.id"
+                                    @click="selectLocation(suggestion)"
+                                    class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                                    <div class="font-medium text-gray-900 dark:text-white">{{ suggestion.place_name }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ suggestion.context?.map(c => c.text).join(', ') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="form.errors.location" class="mt-1 text-sm text-red-600">{{ form.errors.location }}</div>
+                    </div>
+
                     <!-- File Uploads -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Profile Photo -->
@@ -237,6 +265,8 @@
                         </div>
                     </div>
 
+
+
                     <!-- Submit Buttons -->
                     <div class="flex items-center justify-center space-x-3">
                         <button type="submit" :disabled="form.processing"
@@ -257,7 +287,7 @@
 
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const props = defineProps({
@@ -281,7 +311,14 @@ const form = useForm({
     soundcloud: props.user?.soundcloud || '',
     iap_product_id: props.user?.iap_product_id || '',
     roles: props.user?.roles?.map((role: any) => role.name) || [] as string[],
+    location: props.user?.location || '',
 })
+
+// Location search functionality
+const locationQuery = ref(props.user?.location || '')
+const locationSuggestions = ref([])
+const showSuggestions = ref(false)
+const searchTimeout = ref(null)
 
 const handleProfilePhotoChange = (event: Event) => {
     const target = event.target as HTMLInputElement
@@ -295,6 +332,55 @@ const handleCoverImageChange = (event: Event) => {
     if (target.files && target.files[0]) {
         form.cover_image = target.files[0]
     }
+}
+
+// Location functions
+const searchLocations = async () => {
+    const query = locationQuery.value.trim()
+
+    if (query.length < 2) {
+        locationSuggestions.value = []
+        showSuggestions.value = false
+        return
+    }
+
+    // Clear existing timeout
+    if (searchTimeout.value) {
+        clearTimeout(searchTimeout.value)
+    }
+
+    // Set new timeout for debounced search
+    searchTimeout.value = setTimeout(async () => {
+        try {
+            const mapboxToken = 'sk.eyJ1IjoiYnVyYWtrYXluYXIiLCJhIjoiY21keXVmNzE1MDUwZTJscXhvczVpdXp0bSJ9.Jxt1o-slW0hL6PaQYIXx6Q'
+            const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,locality,neighborhood,address&limit=5&language=en`
+
+            const response = await fetch(mapboxUrl)
+            const data = await response.json()
+
+            if (data.features) {
+                locationSuggestions.value = data.features
+                showSuggestions.value = true
+            }
+        } catch (error) {
+            console.error('Error fetching location suggestions:', error)
+            locationSuggestions.value = []
+        }
+    }, 300)
+}
+
+const selectLocation = (suggestion: any) => {
+    form.location = suggestion.place_name
+    locationQuery.value = suggestion.place_name
+    locationSuggestions.value = []
+    showSuggestions.value = false
+}
+
+const clearLocation = () => {
+    form.location = ''
+    locationQuery.value = ''
+    locationSuggestions.value = []
+    showSuggestions.value = false
 }
 
 const submit = () => {
@@ -311,5 +397,14 @@ const submit = () => {
 
 onMounted(() => {
     form.clearErrors()
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement
+        const locationContainer = target.closest('.location-container')
+        if (!locationContainer) {
+            showSuggestions.value = false
+        }
+    })
 })
 </script>

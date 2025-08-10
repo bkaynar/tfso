@@ -170,6 +170,7 @@ class UserController extends Controller
             'email' => 'string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'bio' => 'nullable|string|max:5000', // Text alan için 5000 karakter limit
+            'location' => 'nullable|string|max:255',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'instagram' => 'nullable|string|max:255',
             'twitter' => 'nullable|string|max:255',
@@ -186,6 +187,7 @@ class UserController extends Controller
             'name',
             'email',
             'bio',
+            'location',
             'instagram',
             'twitter',
             'facebook',

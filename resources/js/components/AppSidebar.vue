@@ -125,7 +125,7 @@ const userNavItems = computed((): NavItem[] => {
             icon: UserCheck,
         },
         {
-            title: 'Places',
+            title: 'Venues',
             href: '/places',
             icon: Folder,
         },
