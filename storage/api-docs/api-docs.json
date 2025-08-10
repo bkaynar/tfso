@@ -872,6 +872,399 @@
                 }
             }
         },
+        "/api/comments": {
+            "get": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Yorumları listele",
+                "description": "Belirtilen içerik (Set veya Track) için yorumları listeler",
+                "operationId": "529f046f80a683fd05fd9b78f7f25288",
+                "parameters": [
+                    {
+                        "name": "commentable_type",
+                        "in": "query",
+                        "description": "Yorum yapılan içerik tipi",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "App\\Models\\Set",
+                                "App\\Models\\Track"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "commentable_id",
+                        "in": "query",
+                        "description": "Yorum yapılan içeriğin ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Sayfa numarası",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Sayfa başına gösterilecek yorum sayısı",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Başarılı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Comment"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "has_more": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "commentable_type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The commentable type field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Yorum ekle",
+                "description": "Belirtilen içerik (Set veya Track) için yeni yorum ekler",
+                "operationId": "c5026a090c828afeeb788745a32f43e1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content",
+                                    "commentable_type",
+                                    "commentable_id"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Harika bir set! 🔥"
+                                    },
+                                    "commentable_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "App\\Models\\Set",
+                                            "App\\Models\\Track"
+                                        ],
+                                        "example": "App\\Models\\Set"
+                                    },
+                                    "commentable_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Yorum başarıyla eklendi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Comment"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Yorum başarıyla eklendi"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "İçerik bulunamadı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "code": {
+                                                    "type": "string",
+                                                    "example": "NOT_FOUND"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "İçerik bulunamadı"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "content": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The content field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/comments/{id}": {
+            "delete": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Yorum sil",
+                "description": "Belirtilen yorumu siler. Sadece kendi yorumunu silebilir.",
+                "operationId": "746d9385c0a8b30190b506df03b3fafc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Silinecek yorumun ID'si",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Yorum başarıyla silindi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Yorum başarıyla silindi"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Yorum bulunamadı",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "code": {
+                                                    "type": "string",
+                                                    "example": "NOT_FOUND"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Yorum bulunamadı"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Yetkisiz erişim",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "code": {
+                                                    "type": "string",
+                                                    "example": "UNAUTHORIZED"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Bu yorumu silme yetkiniz yok"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/djs": {
             "get": {
                 "tags": [
@@ -2729,6 +3122,69 @@
                 },
                 "type": "object"
             },
+            "Comment": {
+                "title": "Comment",
+                "description": "Yorum modeli",
+                "properties": {
+                    "id": {
+                        "description": "Yorum ID'si",
+                        "type": "integer",
+                        "format": "int64",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "user_id": {
+                        "description": "Yorum yapan kullanıcının ID'si",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "content": {
+                        "description": "Yorum içeriği",
+                        "type": "string",
+                        "maxLength": 1000,
+                        "example": "Harika bir set! 🔥"
+                    },
+                    "commentable_type": {
+                        "description": "Yorum yapılan içerik tipi",
+                        "type": "string",
+                        "example": "App\\\\Models\\\\Set"
+                    },
+                    "commentable_id": {
+                        "description": "Yorum yapılan içeriğin ID'si",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "description": "Yorum oluşturulma tarihi",
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2025-08-10T12:00:00.000000Z"
+                    },
+                    "user": {
+                        "description": "Yorum yapan kullanıcı bilgileri",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Admin Burak"
+                            },
+                            "profile_photo": {
+                                "type": "string",
+                                "example": "https://example.com/storage/users/profiles/user1.jpg",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "Radio": {
                 "title": "Radio",
                 "description": "Radio station model",
@@ -2893,6 +3349,10 @@
         {
             "name": "Access Logs",
             "description": "API Endpoints for managing access logs"
+        },
+        {
+            "name": "Comments",
+            "description": "Yorum yönetimi API endpoints"
         },
         {
             "name": "Place Manager",
