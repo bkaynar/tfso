@@ -1,16 +1,16 @@
 <template>
   <div class="w-full flex justify-center px-4 py-8">
     <!-- Horizontal Feature Cards -->
-    <div class="flex overflow-x-auto pb-8 pt-4 justify-center items-center" :class="isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'" style="scroll-snap-type: x mandatory;">
+    <div class="flex overflow-x-auto pb-8 pt-4 justify-start md:justify-center items-center" :class="isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'" style="scroll-snap-type: x mandatory; padding-left: 1rem; padding-right: 1rem;">
       <div
         v-for="(feature, index) in features"
         :key="index"
         @click="openModal(index + 1)"
-        class="flex-shrink-0 feature-card rounded-lg p-4 cursor-pointer transition-all duration-300 ease-out hover:bg-opacity-20 w-44 h-24 card-hover flex items-center justify-center"
+        class="flex-shrink-0 feature-card rounded-lg p-3 sm:p-4 cursor-pointer transition-all duration-300 ease-out hover:bg-opacity-20 w-36 sm:w-44 h-20 sm:h-24 card-hover flex items-center justify-center"
         style="scroll-snap-align: start;"
       >
         <div class="text-center">
-          <h3 class="text-white font-semibold text-sm leading-tight">
+          <h3 class="text-white font-semibold text-xs sm:text-sm leading-tight">
             {{ index + 1 }}. {{ getFeatureTitle(index + 1) }}
           </h3>
         </div>
@@ -196,10 +196,28 @@ export default {
   display: none; /* Chrome/Safari */
 }
 
-/* Ensure last card is fully visible */
-.flex.overflow-x-scroll::after {
+/* Ensure first and last cards are fully visible */
+.flex.overflow-x-auto {
+  scroll-behavior: smooth;
+}
+
+.flex.overflow-x-auto::before {
   content: '';
   flex-shrink: 0;
-  width: 2rem;
+  width: 0.5rem;
+}
+
+.flex.overflow-x-auto::after {
+  content: '';
+  flex-shrink: 0;
+  width: 0.5rem;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 640px) {
+  .flex.overflow-x-auto {
+    justify-content: flex-start !important;
+    padding-left: 0.5rem !important;
+  }
 }
 </style>
