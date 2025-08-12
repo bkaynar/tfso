@@ -16,7 +16,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Welcome">
+    <Head title="djevoo">
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

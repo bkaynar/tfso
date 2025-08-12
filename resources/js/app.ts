@@ -1,6 +1,5 @@
-import '../css/app.css';
 import '@fortawesome/fontawesome-free/css/all.css';
-
+import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -9,7 +8,7 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'djevoo';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
