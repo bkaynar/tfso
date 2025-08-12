@@ -12,7 +12,7 @@
       <img
         :src="facebookIcon"
         alt="Facebook"
-        class="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+        class="w-10 sm:w-8 sm:h-8 object-contain"
       />
     </a>
 
@@ -24,7 +24,7 @@
       <img
         :src="xIcon"
         alt="X (Twitter)"
-        class="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+        class="w-6 h-6 sm:w-5 sm:h-5 object-contain"
       />
     </a>
 
@@ -36,7 +36,7 @@
       <img
         :src="instagramIcon"
         alt="Instagram"
-        class="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+        class="w-7 h-7 sm:w-8 sm:h-8 object-contain"
       />
     </a>
 
@@ -48,7 +48,7 @@
       <img
         :src="youtubeIcon"
         alt="YouTube"
-        class="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+        class="w-7 h-7 sm:w-8 sm:h-8 object-contain"
       />
     </a>
   </div>
