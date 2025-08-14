@@ -14,6 +14,10 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
+Route::get('privacy-policy', function () {
+    return Inertia::render('privacy/Index');
+})->name('privacy-policy');
+
 // Support routes - accessible to everyone
 Route::get('support', [SupportController::class, 'index'])->name('support.index');
 Route::post('support', [SupportController::class, 'store'])->name('support.store');
