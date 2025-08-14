@@ -332,6 +332,7 @@ class DJController extends Controller
             'name' => $dj->name,
             'bio' => $dj->bio,
             'profile_photo' => $dj->profile_photo ? url($dj->profile_photo) : null,
+            'location' => $dj->location ? $dj->location : null,
             'social_media' => [
                 'instagram' => $dj->instagram ? "https://instagram.com/{$dj->instagram}" : null,
                 'twitter' => $dj->twitter ? "https://twitter.com/{$dj->twitter}" : null,
