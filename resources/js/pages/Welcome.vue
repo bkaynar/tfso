@@ -41,7 +41,7 @@ onMounted(() => {
             <Link
                 v-if="$page.props.auth.user"
                 :href="route('dashboard')"
-                class="btn-hover bg-white bg-opacity-20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-opacity-30 transition-all text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                    class="btn-hover border-2 border-white text-white px-6 py-3 rounded-xl hover:bg-white hover:text-purple-700 transition-all text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
             >
                 Dashboard
             </Link>
@@ -96,5 +96,5 @@ onMounted(() => {
         <!-- Radio Player -->
         <RadioPlayer />
     </div>
-                                   
+
 </template>

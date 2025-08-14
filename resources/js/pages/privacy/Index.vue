@@ -320,7 +320,10 @@ const scrollToSection = (sectionId: string) => {
                 <div class="text-center">
                     <p class="text-purple text-sm">
                         © 2025 djevoo. All rights reserved. |
-                        <Link :href="route('home')" class="hover:text-white transition-colors">Back to Home</Link>
+                        <Link :href="route('home')" class="hover:text-red transition-colors">Back to Home</Link>
+                    </p>
+                    <p class="text-purple-500 text-xs mt-2">
+                        This Privacy Policy is subject to change.
                     </p>
                 </div>
             </div>
