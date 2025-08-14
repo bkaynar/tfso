@@ -22,6 +22,8 @@ Route::get('privacy-policy', function () {
 Route::get('support', [SupportController::class, 'index'])->name('support.index');
 Route::post('support', [SupportController::class, 'store'])->name('support.store');
 
+Route::get('downloads', [App\Http\Controllers\DownloadController::class, 'index'])->name('downloads');
+
 Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
