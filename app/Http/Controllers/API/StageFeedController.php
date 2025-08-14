@@ -190,11 +190,11 @@ class StageFeedController extends Controller
     {
         $diff = Carbon::now()->diff($date);
 
-        if ($diff->y > 0) return $diff->y . ' yıl önce';
-        if ($diff->m > 0) return $diff->m . ' ay önce';
-        if ($diff->d > 0) return $diff->d >= 7 ? floor($diff->d / 7) . ' hafta önce' : $diff->d . ' gün önce';
-        if ($diff->h > 0) return $diff->h . ' saat önce';
-        if ($diff->i > 0) return $diff->i . ' dakika önce';
-        return 'şimdi';
+        if ($diff->y > 0) return $diff->y . ' year_ago';
+        if ($diff->m > 0) return $diff->m . ' month_ago';
+        if ($diff->d > 0) return $diff->d >= 7 ? floor($diff->d / 7) . ' week_ago' : $diff->d . ' day_ago';
+        if ($diff->h > 0) return $diff->h . ' hour_ago';
+        if ($diff->i > 0) return $diff->i . ' minute_ago';
+        return 'now';
     }
 }
