@@ -8,10 +8,15 @@ use App\Http\Controllers\TrackController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\EventsController;
+use App\Http\Controllers\SupportController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+
+// Support routes - accessible to everyone
+Route::get('support', [SupportController::class, 'index'])->name('support.index');
+Route::post('support', [SupportController::class, 'store'])->name('support.store');
 
 Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
