@@ -9,6 +9,10 @@ const isRTL = computed(() => currentLanguage.value === 'HE')
 onMounted(() => {
   initLanguage()
 })
+
+const openPlayStore = () => {
+  window.open('https://play.google.com/store/apps/details?id=com.tfsoisrael.mobile', '_blank')
+}
 </script>
 
 <template>
@@ -97,11 +101,11 @@ onMounted(() => {
 
             <!-- Android Download Button -->
             <div class="mb-8">
-                <a href="https://play.google.com/store/apps/details?id=com.tfsoisrael.mobile" 
-                   class="inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <button @click="openPlayStore" 
+                        class="inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                     <i class="fab fa-google-play text-2xl"></i>
                     <span>Android'de İndir</span>
-                </a>
+                </button>
             </div>
 
             <!-- Newsletter Signup -->
