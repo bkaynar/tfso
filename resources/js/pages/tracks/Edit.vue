@@ -110,6 +110,11 @@ const removeImageFile = () => {
 }
 
 const submitForm = () => {
+    // Check if image is required (if no existing image and no new image uploaded)
+    if (!props.track.image_file && !form.image_file) {
+        return;
+    }
+
     // Debug: Log form data before submission
     console.log('Form data before submission:', {
         title: form.title,
@@ -319,7 +324,7 @@ const currentImageUrl = computed(() => {
                             <!-- Image File Upload -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Track Cover Image
+                                    Track Cover Image *
                                 </label>
                                 <div
                                     class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
@@ -397,7 +402,7 @@ const currentImageUrl = computed(() => {
                             class="inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Cancel
                         </Link>
-                        <button type="submit" :disabled="form.processing"
+                        <button type="submit" :disabled="form.processing || (!props.track.image_file && !form.image_file)"
                             class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
                             <span v-if="form.processing">Updating...</span>
                             <span v-else>Update Track</span>
