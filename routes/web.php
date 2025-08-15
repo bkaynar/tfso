@@ -24,6 +24,10 @@ Route::post('support', [SupportController::class, 'store'])->name('support.store
 
 Route::get('downloads', [App\Http\Controllers\DownloadController::class, 'index'])->name('downloads');
 
+// Delete account routes - accessible to everyone
+Route::get('delete-account', [UserController::class, 'showDeleteAccount'])->name('delete-account.show');
+Route::delete('delete-account', [UserController::class, 'deleteAccount'])->name('delete-account.destroy');
+
 Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {

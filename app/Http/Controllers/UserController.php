@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Intervention\Image\ImageManager;
 
@@ -268,7 +269,7 @@ class UserController extends Controller
      */
     public function editProfile()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $user->load('roles');
 
         return Inertia::render('profile/EditOrCreate', [
@@ -282,7 +283,7 @@ class UserController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Debug için log ekleyelim
         Log::info('Profile update request (UserController):', [
@@ -368,7 +369,7 @@ class UserController extends Controller
      */
     public function updatePassword(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $request->validate([
             'current_password' => 'required',
@@ -386,5 +387,64 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Şifreniz başarıyla güncellendi.');
+    }
+
+    /**
+     * Show delete account page
+     */
+    public function showDeleteAccount()
+    {
+        return Inertia::render('delete-account/Index');
+    }
+
+    /**
+     * Delete user account with email and password verification
+     */
+    public function deleteAccount(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'confirm_deletion' => 'required|boolean|accepted',
+        ], [
+            'email.required' => 'E-posta adresini girmeniz gerekiyor.',
+            'email.email' => 'Geçerli bir e-posta adresi girmeniz gerekiyor.',
+            'password.required' => 'Şifrenizi girmeniz gerekiyor.',
+            'confirm_deletion.accepted' => 'Hesap silme işlemini onaylamanız gerekiyor.',
+        ]);
+
+        // Find user by email
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Bu e-posta adresi ile kayıtlı bir hesap bulunamadı.']);
+        }
+
+        // Verify password
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Şifre yanlış.']);
+        }
+
+        // Delete profile photo if exists
+        if ($user->profile_photo) {
+            Storage::disk('public')->delete($user->profile_photo);
+        }
+
+        // Delete cover image if exists
+        if ($user->cover_image) {
+            Storage::disk('public')->delete($user->cover_image);
+        }
+
+        // If user is currently logged in, log them out
+        if (Auth::check() && Auth::id() === $user->id) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // Delete the user account
+        $user->delete();
+
+        return redirect()->route('home')->with('success', 'Hesap başarıyla silindi.');
     }
 }
