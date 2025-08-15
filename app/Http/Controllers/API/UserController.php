@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -206,6 +207,75 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Profil bilgileri alınırken hata oluştu',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete user account
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $user = auth('sanctum')->user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kullanıcı doğrulanamadı'
+                ], 401);
+            }
+
+            // Validate password
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string'
+            ], [
+                'password.required' => 'Şifre gereklidir'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doğrulama hatası',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Check if password is correct
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Şifre yanlış'
+                ], 400);
+            }
+
+            // Delete profile photo if exists
+            if ($user->profile_photo) {
+                $photoPath = 'public/' . $user->profile_photo;
+                if (Storage::exists($photoPath)) {
+                    Storage::delete($photoPath);
+                }
+            }
+
+            // Revoke all tokens
+            $user->tokens()->delete();
+
+            // Delete user
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Hesap başarıyla silindi'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hesap silinirken hata oluştu',
                 'error' => $e->getMessage()
             ], 500);
         }

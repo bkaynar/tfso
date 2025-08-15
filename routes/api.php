@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::post('/profile/update-photo', [UserController::class, 'updateProfilePhoto']);
     Route::post('/profile/change-photo', [UserController::class, 'changeProfilePhoto']);
+    Route::delete('/account', [UserController::class, 'deleteAccount']);
 
     // Favorites
     Route::prefix('favorites')->name('favorites.')->group(function () {
