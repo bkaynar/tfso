@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class SystemCheckController extends Controller
@@ -78,25 +77,39 @@ class SystemCheckController extends Controller
 
     private function getDiskUsage(): array
     {
-        $rootPath = '/';
-        if (PHP_OS_FAMILY === 'Windows') {
-            $rootPath = 'C:';
+        try {
+            $currentPath = getcwd() ?: base_path();
+            
+            $totalBytes = disk_total_space($currentPath);
+            $freeBytes = disk_free_space($currentPath);
+            
+            if ($totalBytes === false || $freeBytes === false) {
+                return [
+                    'status' => 'unavailable',
+                    'message' => 'Disk usage information not available due to server restrictions',
+                ];
+            }
+            
+            $usedBytes = $totalBytes - $freeBytes;
+            $usagePercent = $totalBytes > 0 ? round(($usedBytes / $totalBytes) * 100, 2) : 0;
+
+            return [
+                'total' => $this->formatBytes($totalBytes),
+                'total_bytes' => $totalBytes,
+                'used' => $this->formatBytes($usedBytes),
+                'used_bytes' => $usedBytes,
+                'free' => $this->formatBytes($freeBytes),
+                'free_bytes' => $freeBytes,
+                'usage_percent' => $usagePercent,
+                'path_checked' => $currentPath,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => 'Unable to retrieve disk usage',
+                'error' => $e->getMessage(),
+            ];
         }
-
-        $totalBytes = disk_total_space($rootPath);
-        $freeBytes = disk_free_space($rootPath);
-        $usedBytes = $totalBytes - $freeBytes;
-        $usagePercent = $totalBytes > 0 ? round(($usedBytes / $totalBytes) * 100, 2) : 0;
-
-        return [
-            'total' => $this->formatBytes($totalBytes),
-            'total_bytes' => $totalBytes,
-            'used' => $this->formatBytes($usedBytes),
-            'used_bytes' => $usedBytes,
-            'free' => $this->formatBytes($freeBytes),
-            'free_bytes' => $freeBytes,
-            'usage_percent' => $usagePercent,
-        ];
     }
 
     private function checkControllers(): array
