@@ -13,6 +13,7 @@ use App\Http\Controllers\API\StageFeedController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\PlaceManagerController;
 use App\Http\Controllers\API\CommentController;
+use App\Http\Controllers\API\SystemCheckController;
 
 Route::post('/mobile-register', [AuthController::class, 'register']);
 Route::post('/mobile-login', [AuthController::class, 'login']);
@@ -93,3 +94,6 @@ Route::get('/places-paginated', [PlaceManagerController::class, 'paginatedIndex'
 Route::get('/places/search', [PlaceManagerController::class, 'search']);
 Route::get('/places/last', [PlaceManagerController::class, 'lastPlace']);
 Route::get('/places/{id}', [PlaceManagerController::class, 'show']);
+
+// System Check Route
+Route::get('/system-check', [SystemCheckController::class, 'check']);
