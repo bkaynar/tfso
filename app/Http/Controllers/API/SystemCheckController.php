@@ -10,69 +10,13 @@ class SystemCheckController extends Controller
     public function check(): JsonResponse
     {
         try {
-            $memoryInfo = $this->getMemoryUsage();
-            $cpuInfo = $this->getCpuUsage();
-            $diskInfo = $this->getDiskUsage();
-            $controllersInfo = $this->checkControllers();
-            
-            // Check for any issues
-            $issues = [];
-            
-            // Check memory usage
-            if (isset($memoryInfo['usage_percent']) && $memoryInfo['usage_percent'] > 90) {
-                $issues[] = "High memory usage: {$memoryInfo['usage_percent']}%";
-            }
-            
-            // Check disk usage
-            if (isset($diskInfo['usage_percent']) && $diskInfo['usage_percent'] > 90) {
-                $issues[] = "High disk usage: {$diskInfo['usage_percent']}%";
-            }
-            
-            // Check disk errors
-            if (isset($diskInfo['status']) && $diskInfo['status'] === 'error') {
-                $issues[] = "Disk check failed: {$diskInfo['message']}";
-            }
-            
-            // Check controller issues
-            if ($controllersInfo['unhealthy'] > 0) {
-                $controllerIssues = [];
-                foreach ($controllersInfo['problematic_controllers'] as $controller) {
-                    $controllerIssues[] = "{$controller['name']}: {$controller['status']}";
-                }
-                $issues[] = "Controller issues: " . implode(', ', $controllerIssues);
-            }
-            
-            // If there are issues, return error response
-            if (!empty($issues)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => implode('; ', $issues),
-                    'timestamp' => now()->toISOString(),
-                ]);
-            }
-            
-            // If everything is OK, return success response
             return response()->json([
-                'status' => true,
-                'message' => 'All systems operational',
-                'timestamp' => now()->toISOString(),
-                'system' => [
-                    'memory' => $memoryInfo,
-                    'cpu' => $cpuInfo,
-                    'disk' => $diskInfo,
-                ],
-                'controllers' => $controllersInfo,
-                'server' => [
-                    'php_version' => PHP_VERSION,
-                    'laravel_version' => app()->version(),
-                    'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
-                ]
+                'status' => 'ok'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'System check failed: ' . $e->getMessage(),
-                'timestamp' => now()->toISOString(),
             ], 500);
         }
     }
