@@ -164,12 +164,14 @@ class SystemCheckController extends Controller
         $totalControllers = count($controllers);
         $healthyControllers = count(array_filter($controllers, fn($c) => $c['status'] === 'ok'));
         
+        $unhealthyControllers = array_filter($controllers, fn($c) => $c['status'] !== 'ok');
+        
         return [
             'total' => $totalControllers,
             'healthy' => $healthyControllers,
             'unhealthy' => $totalControllers - $healthyControllers,
             'health_percentage' => $totalControllers > 0 ? round(($healthyControllers / $totalControllers) * 100, 2) : 100,
-            'controllers' => $controllers,
+            'problematic_controllers' => array_values($unhealthyControllers),
         ];
     }
 
